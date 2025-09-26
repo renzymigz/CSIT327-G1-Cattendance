@@ -1,0 +1,55 @@
+{% extends "cattendance_app/base_auth.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h1 class="font-semibold text-[24px] mb-2">Welcome Back</h1>
+<h1 class="text-[14px] text-[rgb(123,137,157)] mb-6">
+  Sign in as a
+  <span id="role-text" class="font-semibold border-[1px] px-3 rounded-2xl border-[#892728] text-[#892728] bg-white">
+    Student
+  </span>
+</h1>
+
+<form method="post" class="flex flex-col gap-4">
+  {% csrf_token %}
+  
+  <div class="space-y-2 relative">
+  <label class="text-[14px] font-semibold">Email</label>
+  <div class="relative">
+    <input type="email" name="email" placeholder="Enter your email"
+           class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pr-10 py-1 border border-gray-300 rounded-lg 
+                  focus:outline-none focus:ring-2 focus:ring-[#892728] focus:border-[#c9c9c9] transition pl-4">
+    <i class="fa-solid fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 
+             peer-focus:text-[#892728] transition-colors"></i>
+  </div>
+</div>
+
+<div class="space-y-2 relative">
+  <label class="text-[14px] font-semibold">Password</label>
+  <div class="relative">
+    <input type="password" name="password" placeholder="Enter your password"
+           class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pr-10 py-1 border border-gray-300 rounded-lg 
+                  focus:outline-none focus:ring-2 focus:ring-[#892728] focus:border-[#c9c9c9] transition pl-4">
+    <i class="fa-solid fa-lock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 
+             peer-focus:text-[#892728] transition-colors"></i>
+  </div>
+</div>
+
+
+  <div class="mt-4">
+    <button type="submit" 
+        class="w-full py-2 text-[14px] bg-gradient-to-r from-[#892728] to-[#d64648] text-white rounded 
+               flex items-center justify-center gap-2 group">
+  Sign in 
+  <i class="fa-solid fa-arrow-right transition-transform duration-200 group-hover:translate-x-2"></i>
+</button>
+
+  </div>
+</form>
+
+<p class="mt-4 text-[14px] text-center text-gray-600">
+  Don’t have an account? 
+  <a href="{% url 'register' %}" class="text-[#40bad8] hover:underline">Register</a>
+</p>
+{% endblock %}
