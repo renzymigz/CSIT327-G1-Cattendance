@@ -27,39 +27,53 @@
       style="background-image: url({% static 'images/background_auth.png' %}); background-size: 500px 500px;">
   
   
-    <header class="w-full bg-white text-[#9b2c2c] p-4 shadow-[0px_4px_0px_0px_#9b2c2c] z-10 select-none">
-      <div class="flex items-center max-w-[1590px] mx-auto gap-3">
-        <img src="{% static 'images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
-        <h1 class="text-xl font-bold">CATTENDANCE</h1>
-      </div>
-    </header>
+  <header class="w-full bg-white text-[#a2314b] p-4 
+  shadow-[0px_6px_0px_0px_#a2314b,0px_10px_1px_rgba(221,_221,_221,_1),_0_10px_20px_rgba(204,_204,_204,_1)]
+  z-10 select-none">
+  <div class="flex items-center max-w-[1590px] mx-auto gap-3">
+    <img src="{% static 'images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
+    <h1 class="text-xl font-bold">CATTENDANCE</h1>
+  </div>
+</header>
 
   <main class="flex-grow flex items-center justify-center p-6">
     <div class="flex flex-col items-center justify-center gap-6 w-full max-w-md">
       
-      <!-- Roles -->
-      <div class="w-full p-4 border text-[20px] font-semibold border-gray-200 rounded-[18px] bg-white shadow-[4px_4px_0px_0px_#892728] text-center">
-        <div class="grid grid-cols-2 bg-[#eef2f5] p-2 font-normal text-[14px] text-[rgb(123,137,157)] rounded-[8px]">
-          <button onclick="selectRole(this)" class="py-1 hover:bg-[#b84547] hover:text-white transition rounded">
-            <i class="fa-solid fa-graduation-cap pr-2"></i>Student
-          </button>
-          <button onclick="selectRole(this)" class="py-1 hover:bg-[#b84547] hover:text-white transition rounded">
-            <i class="fa-solid fa-school pr-2"></i>Teacher
-          </button>
+        <!-- Roles -->
+      <div class="w-full border border-gray-200 rounded-b-[18px] bg-white relative shadow">
+   
+        <div class="absolute top-0 left-0 right-0 h-2 rounded-t-lg shadow-[0px_-8px_0px_0px_#a2314b] pointer-events-none"></div>
+
+
+        <div class="p-4 text-[20px] font-semibold text-center">
+          <div class="grid grid-cols-2 bg-[#eef2f5] p-2 font-normal text-[14px] text-[rgb(123,137,157)] rounded-b-[18px]  ">
+            <button onclick="selectRole(this)" class="py-1 hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] ">
+              <i class="fa-solid fa-graduation-cap pr-2"></i>Student
+            </button>
+            <button onclick="selectRole(this)" class="py-1 hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] ">
+              <i class="fa-solid fa-school pr-2"></i>Teacher
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Content block AKA the register & login area -->
-      <div class="w-full p-6 border border-gray-200 rounded-[18px] bg-white shadow-[4px_6px_0px_0px_#892728]">
-        {% block content %}{% endblock %}
+      <div class="w-full border border-gray-200 rounded-t-[18px]  bg-white relative shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+        <div class="absolute bottom-0 left-0 right-0 h-2 rounded-b-[18px] shadow-[0px_8px_0px_#a2314b] pointer-events-none"></div>
+
+        <!-- Content -->
+        <div class="p-6">
+          {% block content %}{% endblock %}
+        </div>
       </div>
+
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="w-full bg-[#9b2c2c] py-2 text-center shadow-inner z-10 text-white">
+  {% comment %} <footer class="w-full bg-[#a2314b] py-2 text-center shadow-inner z-10 text-white">
     <p class = "text-[14px] italic">© 2025 Cattendance</p>
-  </footer>
+  </footer> {% endcomment %}
 </body>
 
 

@@ -1,3 +1,4 @@
+
 {% extends "cattendance_app/base_auth.html" %}
 
 {% block title %}Login{% endblock %}
@@ -6,7 +7,7 @@
 <h1 class="font-semibold text-[24px] mb-2 text-center">Welcome Back</h1>
 <h1 class="text-[14px] text-[rgb(123,137,157)] mb-6 text-center">
   Sign in as a
-  <span id="role-text" class="font-semibold border-[1px] px-3 rounded-2xl border-[#892728] text-[#892728] bg-white">
+  <span id="role-text" class="font-semibold border-[1px] px-3 rounded-2xl border-[#a2314b] text-[#a2314b] bg-white">
     Student
   </span>
 </h1>
@@ -14,37 +15,50 @@
 <form method="post" class="flex flex-col gap-4">
   {% csrf_token %}
   
+  <!-- email -->
   <div class="space-y-2 relative">
-  <label class="text-[14px] font-semibold">Email</label>
-  <div class="relative">
-    <input type="email" name="email" placeholder="Enter your email"
-           class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pr-10 py-1 border border-gray-300 rounded-lg 
-                  focus:outline-none focus:ring-2 focus:ring-[#892728] focus:border-[#c9c9c9] transition pl-4">
-    <i class="fa-solid fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 
-             peer-focus:text-[#892728] transition-colors"></i>
+    <label class="text-[14px] font-semibold">Email</label>
+    <div class="relative">
+      <input type="email" name="email" placeholder="Enter your email"
+             class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
+                    focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition">
+                    <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+               peer-focus:text-[#a2314b] transition-colors "></i>
+    </div>
   </div>
-</div>
 
-<div class="space-y-2 relative">
-  <label class="text-[14px] font-semibold">Password</label>
-  <div class="relative">
-    <input type="password" name="password" placeholder="Enter your password"
-           class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pr-10 py-1 border border-gray-300 rounded-lg 
-                  focus:outline-none focus:ring-2 focus:ring-[#892728] focus:border-[#c9c9c9] transition pl-4">
-    <i class="fa-solid fa-lock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 
-             peer-focus:text-[#892728] transition-colors"></i>
+  <!-- pass -->
+  <div class="space-y-2 relative">
+    <label class="text-[14px] font-semibold">Password</label>
+    <div class="relative">
+      
+      <input type="password" id="password" name="password" placeholder="Enter your password"
+             class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 pr-10 py-1 border border-gray-300 rounded-lg 
+                    focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition">
+      <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+               peer-focus:text-[#a2314b] transition-colors"></i>
+      <!-- Eye toggle -->
+      <i id="togglePassword" class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"></i>
+    </div>
   </div>
-</div>
 
+  <!-- Remember me + Forgot -->
+  <div class="flex items-center justify-between text-[14px] mt-1">
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name="remember_me" class="w-4 h-4 text-[#a2314b] border-gray-300 rounded focus:ring-[#a2314b]">
+      <span class="text-gray-600">Remember me</span>
+    </label>
+    <a href="#" class="text-[#40bad8] hover:underline">Forgot password?</a>
+  </div>
 
+  <!-- Submit -->
   <div class="mt-4">
     <button type="submit" 
-        class="w-full py-2 text-[14px] bg-gradient-to-r from-[#892728] to-[#d64648] text-white rounded 
+        class="w-full py-2 text-[14px] bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white rounded 
                flex items-center justify-center gap-2 group">
-  Sign in 
-  <i class="fa-solid fa-arrow-right transition-transform duration-200 group-hover:translate-x-2"></i>
-</button>
-
+      Sign in 
+      <i class="fa-solid fa-arrow-right transition-transform duration-200 group-hover:translate-x-2"></i>
+    </button>
   </div>
 </form>
 
@@ -52,4 +66,18 @@
   Don’t have an account? 
   <a href="{% url 'register' %}" class="text-[#40bad8] hover:underline">Register</a>
 </p>
+
+<!-- JS for eye toggle -->
+<script>
+  const togglePassword = document.querySelector('#togglePassword');
+  const password = document.querySelector('#password');
+
+  togglePassword.addEventListener('click', function () {
+    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+    password.setAttribute('type', type);
+
+    this.classList.toggle('fa-eye');
+    this.classList.toggle('fa-eye-slash');
+  });
+</script>
 {% endblock %}
