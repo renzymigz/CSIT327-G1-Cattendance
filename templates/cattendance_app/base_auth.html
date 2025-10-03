@@ -3,10 +3,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>{% block title %}Cattendance{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kumbh+Sans:wght@100..900&display=swap" rel="stylesheet">
+    <script defer src="{% static '/js/core/navbar.js' %}"></script>
     {% comment %} <link rel = "stylesheet" href={% static 'css/output.css' %}> {% endcomment %}
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,7 +16,7 @@
         theme: {
           extend: {
             fontFamily: {
-              'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+              'sans': ['Kumbh Sans', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
             }
           }
         }
@@ -23,46 +25,38 @@
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css"/>
   </head>
 
-  <body class="font-sans min-h-screen flex flex-col bg-center bg-repeat bg-contain"
-      style="background-image: url({% static 'images/background_auth.png' %}); background-size: 500px 500px;">
+  <body class="font-sans min-h-screen flex flex-col bg-center bg-repeat bg-contain overflow-x-hidden overflow-y-scroll "
+      style="background-image: url({% static 'images/background_auth.png' %}); background-size: 300px 300px;">
   
-  
-  <header class="w-full bg-white text-[#a2314b] p-4 
-  shadow-[0px_6px_0px_0px_#a2314b,0px_10px_1px_rgba(221,_221,_221,_1),_0_10px_20px_rgba(204,_204,_204,_1)]
-  z-10 select-none">
-  <div class="flex items-center max-w-[1590px] mx-auto gap-3">
-    <img src="{% static 'images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
-    <h1 class="text-xl font-bold">CATTENDANCE</h1>
-  </div>
-</header>
-
-  <main class="flex-grow flex items-center justify-center p-6">
-    <div class="flex flex-col items-center justify-center gap-6 w-full max-w-md">
+     
+  {% include "cattendance_app/core/components/navbar.html" %}
+      
+  <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
+    <div class="flex flex-col items-center justify-center gap-4 sm:gap-6 w-full max-w-sm sm:max-w-md px-4 sm:px-0">
       
         <!-- Roles -->
       <div class="w-full border border-gray-200 rounded-b-[18px] bg-white relative shadow">
    
         <div class="absolute top-0 left-0 right-0 h-2 rounded-t-lg shadow-[0px_-8px_0px_0px_#a2314b] pointer-events-none"></div>
 
-
-        <div class="p-4 text-[20px] font-semibold text-center">
-          <div class="grid grid-cols-2 bg-[#eef2f5] p-2 font-normal text-[14px] text-[rgb(123,137,157)] rounded-b-[18px]  ">
-            <button onclick="selectRole(this)" class="py-1 hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] ">
-              <i class="fa-solid fa-graduation-cap pr-2"></i>Student
+        <div class="p-3 sm:p-4 text-lg sm:text-[20px] font-semibold text-center">
+          <div class="grid grid-cols-2 bg-[#eef2f5] p-2 font-normal text-xs sm:text-[14px] text-[rgb(123,137,157)] rounded-b-[18px]">
+            <button onclick="selectRole(this)" class="py-2 sm:py-1 hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] text-xs sm:text-sm">
+              <i class="fa-solid fa-graduation-cap pr-1 sm:pr-2"></i>Student
             </button>
-            <button onclick="selectRole(this)" class="py-1 hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] ">
-              <i class="fa-solid fa-school pr-2"></i>Teacher
+            <button onclick="selectRole(this)" class="py-2 sm:py-1 hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] text-xs sm:text-sm">
+              <i class="fa-solid fa-school pr-1 sm:pr-2"></i>Teacher
             </button>
           </div>
         </div>
       </div>
 
       <!-- Content block AKA the register & login area -->
-      <div class="w-full border border-gray-200 rounded-t-[18px]  bg-white relative shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+      <div class="w-full border border-gray-200 rounded-t-[18px] bg-white relative shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
         <div class="absolute bottom-0 left-0 right-0 h-2 rounded-b-[18px] shadow-[0px_8px_0px_#a2314b] pointer-events-none"></div>
 
         <!-- Content -->
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
           {% block content %}{% endblock %}
         </div>
       </div>

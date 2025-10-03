@@ -1,5 +1,8 @@
 from django.shortcuts import render
 
+def homepage(request):
+    return render(request, "cattendance_app/core/homepage.html")
+
 def login_view(request):
     return render(request, "cattendance_app/auth/login.html")
 
