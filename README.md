@@ -42,14 +42,20 @@ python3 -m venv env
 source env/bin/activate
 ```
 
-### 3. Install Python Dependencies
+### 3. Install Dependencies
 
 ```bash
-pip install django
+pip install -r requirements.txt
 # Add other dependencies as needed
 ```
 
 ### 4. Install Node.js Dependencies (for Tailwind CSS)
+
+```bash
+npm install
+```
+
+### 4.5 Setup environment variables
 
 ```bash
 npm install
@@ -73,7 +79,6 @@ python manage.py createsuperuser
 ### 7. Build Tailwind CSS
 
 Start the Tailwind CSS build process:
-
 ```bash
 npm run dev
 ```
