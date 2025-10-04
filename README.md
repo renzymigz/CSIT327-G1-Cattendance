@@ -58,7 +58,7 @@ npm install
 ### 4.5 Setup environment variables
 
 ```bash
-npm install
+pip install -r requirements.txt
 ```
 
 ### 5. Database Setup
