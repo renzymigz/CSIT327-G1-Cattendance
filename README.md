@@ -55,12 +55,6 @@ pip install -r requirements.txt
 npm install
 ```
 
-### 4.5 Setup environment variables
-
-```bash
-pip install -r requirements.txt
-```
-
 ### 5. Database Setup
 
 Run migrations to set up the database:
