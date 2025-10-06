@@ -17,7 +17,7 @@ Cattedance is a QR code–based attendance system designed to replace paper logs
 | Name | Role | Email |
 |------|------|-------|
 | James Andrew J. Magdales | Product Owner | jamesandrew.magdales@cit.edu |
-| Johanne Gabriel P. Lumauag | Business Analyst | zander.aligato@cit.edu |
+| Johanne Gabriel P. Lumauag | Business Analyst | johannegabriel.lumauag@cit.edu |
 | Carlos Rogel Lofranco | Scrum Master | carlosrogel.lofranco@cit.edu |
 | Florence Azriel R. Migallos | Lead Developer | florenceazriel.migallos@cit.edu |
 | Frances Aailyah S. Maturan | Backend Developer | francesaaliyah.maturan@cit.edu |
