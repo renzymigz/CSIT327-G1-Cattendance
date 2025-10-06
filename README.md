@@ -153,7 +153,27 @@ Cattendance/
 └── manage.py                   # Django management script
 ```
 
-## Available Commands
+## Branch Naming Format
+```
+type/scope/snake_case_description
+```
+
+**Examples:**
+```bash
+feature/accounts/user_authentication
+fix/listings/filter_bug_fix  
+chore/project/update_dependencies
+docs/readme/improve_setup_guide
+```
+
+### Branch Types
+| Type | When to Use | Examples |
+|------|-------------|----------|
+| `feature/` | New functionality, apps, views, models | `feature/accounts/login_system` |
+| `fix/` | Bug fixes, broken functionality | `fix/listings/broken_search` |
+| `chore/` | Dependencies, configs, maintenance | `chore/project/add_requirements` |
+| `docs/` | Documentation, README, comments | `docs/readme/update_workflow` |
+| `refactor/` | Code cleanup without behavior change | `refactor/models/simplify_user_model` |
 
 ### Django Commands
 - `python manage.py runserver` - Start development server
