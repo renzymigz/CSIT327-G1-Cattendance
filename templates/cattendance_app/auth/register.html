@@ -1,86 +1,78 @@
-
 {% extends "cattendance_app/base_auth.html" %}
 
 {% block title %}Register | Cattendance{% endblock %}
 
 {% block content %}
-  <h1 class="font-semibold text-[24px] mb-2 text-center">Create Account</h1>
-  <p class="text-[14px] text-[rgb(123,137,157)] mb-6 text-center">
-    Create your 
-    <span id="role-text" class="font-semibold border-[1px] px-3 rounded-2xl border-[#a2314b] text-[#a2314b] bg-white mr-1">
-       Student </span> account
-  </p>
+<h1 class="font-semibold text-[24px] mb-2 text-center">Create Account</h1>
+<p class="text-[14px] text-[rgb(123,137,157)] mb-6 text-center">
+  Create your 
+  <span id="role-text" class="font-semibold border-[1px] px-3 rounded-2xl border-[#a2314b] text-[#a2314b] bg-white mr-1">
+     Student </span> account
+</p>
 
-  <form method="post" class="flex flex-col gap-4">
-    {% csrf_token %}
+<form id="registerForm" class="flex flex-col gap-4">
+  {% csrf_token %}
 
-    <div class="grid grid-cols-2 gap-4">
-  
+  <div class="grid grid-cols-2 gap-4">
+    <div class="space-y-2 relative">
+      <label class="text-[14px] font-semibold">First Name</label>
+      <div class="relative">
+        <input type="text" id="first_name" name="first_name" placeholder="Enter your first name"
+               class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
+                      focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
+        <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                 peer-focus:text-[#a2314b] transition-colors"></i>
+      </div>
+    </div>
 
-  <div class="space-y-2 relative">
-    <label class="text-[14px] font-semibold">First Name</label>
-    <div class="relative">
-      <input type="text" name="first_name" placeholder="Enter your first name"
-             class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
-                    focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
-      <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
-               peer-focus:text-[#a2314b] transition-colors"></i>
+    <div class="space-y-2 relative">
+      <label class="text-[14px] font-semibold">Last Name</label>
+      <div class="relative">
+        <input type="text" id="last_name" name="last_name" placeholder="Enter your last name"
+               class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
+                      focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
+        <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                 peer-focus:text-[#a2314b] transition-colors"></i>
+      </div>
     </div>
   </div>
 
-
   <div class="space-y-2 relative">
-    <label class="text-[14px] font-semibold">Last Name</label>
+    <label class="text-[14px] font-semibold">Email</label>
     <div class="relative">
-      <input type="text" name="last_name" placeholder="Enter your last name"
+      <input type="email" id="email" name="email" placeholder="Enter your email"
              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
                     focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
-      <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
-               peer-focus:text-[#a2314b] transition-colors"></i>
+      <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                peer-focus:text-[#a2314b] transition-colors"></i>
     </div>
   </div>
 
-</div>
-
-<div class="space-y-2 relative">
-  <label class="text-[14px] font-semibold">Email</label>
-  <div class="relative">
-   
-    <input type="email" name="email" placeholder="Enter your email"
-           class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
-                  focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
-     <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
-              peer-focus:text-[#a2314b] transition-colors"></i>
+  <div class="space-y-2 relative">
+    <label class="text-[14px] font-semibold">Password</label>
+    <div class="relative">
+      <input type="password" id="password" name="password" placeholder="Enter your password"
+             class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 pr-10 py-1 border border-gray-300 rounded-lg 
+                    focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
+      <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                peer-focus:text-[#a2314b] transition-colors"></i>
+      <i class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" 
+         onclick="togglePassword('password', this)"></i>
+    </div>
   </div>
-</div>
 
-<div class="space-y-2 relative">
-  <label class="text-[14px] font-semibold">Password</label>
-  <div class="relative">
-   
-    <input type="password" id="password1" name="password1" placeholder="Enter your password"
-           class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 pr-10 py-1 border border-gray-300 rounded-lg 
-                  focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
-                   <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
-              peer-focus:text-[#a2314b] transition-colors"></i>
-    <i class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" 
-       onclick="togglePassword('password1', this)"></i>
+  <div class="space-y-2 relative">
+    <label class="text-[14px] font-semibold">Confirm Password</label>
+    <div class="relative">
+      <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password"
+             class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 pr-10 py-1 border border-gray-300 rounded-lg 
+                    focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
+      <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                peer-focus:text-[#a2314b] transition-colors"></i>
+      <i class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" 
+         onclick="togglePassword('confirm_password', this)"></i>
+    </div>
   </div>
-</div>
-
-<div class="space-y-2 relative">
-  <label class="text-[14px] font-semibold">Confirm Password</label>
-  <div class="relative">
-   
-    <input type="password" id="password2" name="password2" placeholder="Confirm your password"
-           class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 pr-10 py-1 border border-gray-300 rounded-lg 
-                  focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
-     <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
-              peer-focus:text-[#a2314b] transition-colors"></i>
-    <i class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" 
-       onclick="togglePassword('password2', this)"></i>
-  </div>
-</div>
 
   <div class="mt-4">
     <button type="submit" 
@@ -90,26 +82,58 @@
       <i class="fa-solid fa-arrow-right transition-transform duration-200 group-hover:translate-x-2"></i>
     </button>
   </div>
+</form>
 
-  </form>
+<p class="mt-4 text-[14px] text-center text-gray-600">
+  Already have an account? 
+  <a href="{% url 'login' %}" class="text-[#a2314b] hover:underline">Login</a>
+</p>
 
-  <p class="mt-4 text-[14px] text-center text-gray-600">
-    Already have an account? 
-    <a href="{% url 'login' %}" class="text-[#a2314b] hover:underline">Login</a>
-  </p>
-
-  <script>
-  function togglePassword(fieldId, icon) {
-    const input = document.getElementById(fieldId);
-    if (input.type === "password") {
-      input.type = "text";
-      icon.classList.remove("fa-eye");
-      icon.classList.add("fa-eye-slash");
-    } else {
-      input.type = "password";
-      icon.classList.remove("fa-eye-slash");
-      icon.classList.add("fa-eye");
-    }
+<script>
+function togglePassword(fieldId, icon) {
+  const input = document.getElementById(fieldId);
+  if (input.type === "password") {
+    input.type = "text";
+    icon.classList.remove("fa-eye");
+    icon.classList.add("fa-eye-slash");
+  } else {
+    input.type = "password";
+    icon.classList.remove("fa-eye-slash");
+    icon.classList.add("fa-eye");
   }
+}
+
+document.getElementById("registerForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const fname = document.getElementById("first_name").value;
+  const lname = document.getElementById("last_name").value;
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+  const confirm = document.getElementById("confirm_password").value;
+
+  const response = await fetch("/api/register/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      first_name: fname,
+      last_name: lname,
+      email: email,
+      password: pass,
+      confirm_password: confirm,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (response.ok) {
+    alert("✅ " + data.message);
+    window.location.href = "/login/";
+  } else {
+    alert("❌ " + (data.error || "Something went wrong"));
+  }
+});
 </script>
 {% endblock %}
