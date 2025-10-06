@@ -1,4 +1,9 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
+
+def logout_view(request):
+    request.session.flush()  # clears all session data
+    return redirect('login')
 
 def homepage(request):
     return render(request, "cattendance_app/core/homepage.html")

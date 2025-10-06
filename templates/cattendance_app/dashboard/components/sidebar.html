@@ -49,12 +49,32 @@
             </a>
         </div>
 
-        <div class="px-6 py-3">
-             <a href="{% url 'login' %}" class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg">
-                <i class="fas fa-sign-out-alt mr-3"></i>
-                Logout
-            </a>
-        </div>
+        <!-- Logout button -->
+    <div class="px-6 py-3">
+      <button onclick="logoutUser()" 
+        class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg w-full text-left">
+        <i class="fas fa-sign-out-alt mr-3"></i>
+        Logout
+      </button>
+    </div>
     </nav>
-    
+
 </div>
+
+<!-- Supabase logout script -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = "https://jbsfkipzulstrwvugrec.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impic2ZraXB6dWxzdHJ3dnVncmVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NTY1NjEsImV4cCI6MjA3NTEzMjU2MX0.Cu-QSqBnJFlQ61LWldtxRFElt2OKHGxbL_prDRoGA1AeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impic2ZraXB6dWxzdHJ3dnVncmVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NTY1NjEsImV4cCI6MjA3NTEzMjU2MX0.Cu-QSqBnJFlQ61LWldtxRFElt2OKHGxbL_prDRoGA1A";
+
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function logoutUser() {
+    const { error } = await supabase.auth.signOut()
+    if (!error) {
+      window.location.href = "{% url 'login' %}"
+    } else {
+      console.error('Logout failed:', error.message)
+    }
+  }
+</script>
