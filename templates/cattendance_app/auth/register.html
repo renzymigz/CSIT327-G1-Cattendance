@@ -123,11 +123,9 @@ function updateSelectedRole(role) {
   const hiddenRoleField = document.getElementById('selected-role');
   if (hiddenRoleField) {
     hiddenRoleField.value = role;
-    console.log('Role updated to:', role); // For debugging
   }
 }
 
-//  DJANGO FORM HANDLING - No more API calls, let Django handle it naturally
 // The form will now submit to Ralph's register_view with proper CSRF protection
 // and all the field names that match his backend expectations
 </script>

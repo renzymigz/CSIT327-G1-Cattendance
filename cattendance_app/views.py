@@ -1,17 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import User  #  legacy API compatibility
+from django.contrib.auth import authenticate  #  legacy API compatibility
 from .supabase_client import supabase
 
 
-#  BASIC PAGE VIEWS 
-
+# Page Views 
 def homepage(request):
     return render(request, "cattendance_app/core/homepage.html")
 
@@ -26,14 +25,9 @@ def dashboard_teacher(request):
     return render(request, "cattendance_app/dashboard/teacher_dashboard.html", context)
 
 
-#  SUPABASE REGISTRATION 
-#  Matches Supabase profiles table structure:
-# - id: integer (Django user ID)
-# - email: text
-# - role: text  
-# - first_name: text
-# - last_name: text
-# - created_at: timestamptz (auto-generated)
+#  SUPABASE GAMING!!!!
+#  auth.users (built-in): Handles authentication with UUIDs
+#  profiles (custom): Stores role and user details with UUIDs
 
 @csrf_exempt
 def register_view(request):
@@ -68,38 +62,32 @@ def register_view(request):
             pass  # If check fails, continue with registration
 
         try:
-            #  Step 1: Create in Django local DB first (to get integer ID)
-            user = User.objects.create_user(
-                username=email,
-                email=email,
-                password=password,
-                first_name=first_name,
-                last_name=last_name
-            )
-            user.save()
+            #  Step 1: gets auth.users ID(UUID)
+            auth_response = supabase.auth.sign_up({
+                "email": email,
+                "password": password
+            })
 
-            #  Step 2: Insert into 'profiles' table in Supabase with Django user ID
-            supabase.table('profiles').insert({
-                'id': user.id,  # Use Django user's integer ID instead of Supabase UUID
-                'email': email,
-                'role': role.lower(),
-                'first_name': first_name,
-                'last_name': last_name
-                # created_at will be automatically set by Supabase
-            }).execute()
+            user_id = None
+            if hasattr(auth_response, "user") and auth_response.user:
+                user_id = auth_response.user.id
+            elif isinstance(auth_response, dict) and "user" in auth_response:
+                user_id = auth_response["user"]["id"]
 
-            #  Step 3: Also register in Supabase Auth (for additional security)
-            try:
-                supabase.auth.sign_up({
-                    "email": email,
-                    "password": password
-                })
-            except Exception as auth_error:
-                # If Supabase auth fails, we still have the local user and profile
-                print(f"Supabase auth registration failed: {auth_error}")
+            if user_id:
+                #  Step 2: Insert into 'profiles' table with Supabase ID UUID
+                supabase.table('profiles').insert({
+                    'id': user_id,  # Use Supabase auth UUID (since foreign key man ang kato auth)
+                    'email': email,
+                    'role': role.lower(),
+                    'first_name': first_name,
+                    'last_name': last_name
+                }).execute()
 
-            messages.success(request, "Account created successfully!")
-            return redirect('login')
+                messages.success(request, "Account created successfully!")
+                return redirect('login')
+            else:
+                messages.error(request, "Registration failed. Please try again.")
 
         except Exception as e:
             messages.error(request, f"Error: {str(e)}")
@@ -107,66 +95,64 @@ def register_view(request):
     return render(request, 'cattendance_app/auth/register.html')
 
 
-# SUPABASE LOGIN 
-#  Uses Django user ID to query Supabase profiles table
+#  SUPABASE GAMING!!! NO MORE LOCAL!!! 🚀
+#  Uses Supabase auth.users UUIDs directly  
+#  No Django dependency - works on ANY device!
+#  ROLE-BASED AUTHENTICATION: Users must select correct role
 
 @csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        selected_role = request.POST.get('selected_role') or 'student'  #  Get selected role
 
         try:
-            #  Authenticate via Django first (since we're using Django user IDs)
-            try:
-                django_user = User.objects.get(email=email)
-                user = authenticate(username=django_user.username, password=password)
+            #  Authenticate via Supabase
+            auth_response = supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": password
+            })
+
+            user_id = None
+            if hasattr(auth_response, "user") and auth_response.user:
+                user_id = auth_response.user.id
+            elif isinstance(auth_response, dict) and "user" in auth_response:
+                user_id = auth_response["user"]["id"]
+
+            if user_id:
+                #  Get role from Supabase profiles table using Supabase UUID
+                profile = supabase.table('profiles').select('role').eq('id', user_id).execute()
                 
-                if user is not None:
-                    #  Get role from Supabase profiles table using Django user ID
-                    profile = supabase.table('profiles').select('role').eq('id', user.id).execute()
-
-                    if profile.data and len(profile.data) > 0:
-                        role = profile.data[0]['role']
-                        if role == 'student':
-                            return redirect('dashboard_student')
-                        elif role == 'teacher':
-                            return redirect('dashboard_teacher')
-                        else:
-                            messages.warning(request, "Role not found. Contact admin.")
-                    else:
-                        messages.warning(request, "Profile not found. Please re-register.")
-                else:
-                    messages.error(request, "Invalid email or password. Try again.")
+                if profile.data and len(profile.data) > 0:
+                    actual_role = profile.data[0]['role']
                     
-            except User.DoesNotExist:
-                # Fallback: try Supabase auth for legacy users
-                auth_response = supabase.auth.sign_in_with_password({
-                    "email": email,
-                    "password": password
-                })
-
-                user_id = None
-                if hasattr(auth_response, "user") and auth_response.user:
-                    user_id = auth_response.user.id
-                elif isinstance(auth_response, dict) and "user" in auth_response:
-                    user_id = auth_response["user"]["id"]
-
-                if user_id:
-                    profile = supabase.table('profiles').select('role').eq('id', user_id).execute()
-                    if profile.data and len(profile.data) > 0:
-                        role = profile.data[0]['role']
-                        if role == 'student':
-                            return redirect('dashboard_student')
-                        elif role == 'teacher':
-                            return redirect('dashboard_teacher')
+                    #  ROLE-BASED AUTHENTICATION: Check if selected role matches account role
+                    if actual_role.lower() != selected_role.lower():
+                        messages.error(request, f"This account is registered as a {actual_role.title()}, not a {selected_role.title()}.")
+                        return render(request, "cattendance_app/auth/login.html")
+                    
+                    #  Role matches, proceed with login
+                    if actual_role == 'student':
+                        return redirect('dashboard_student')
+                    elif actual_role == 'teacher':
+                        return redirect('dashboard_teacher')
                     else:
-                        messages.warning(request, "Profile not found. Please re-register.")
+                        messages.warning(request, "Role not found. Contact admin.")
                 else:
-                    messages.error(request, "Invalid email or password. Try again.")
+                    messages.warning(request, "Profile not found. Please re-register.")
+            else:
+                messages.error(request, "Invalid email or password. Try again.")
 
         except Exception as e:
-            messages.error(request, f"Login error: {str(e)}")
+            error_message = str(e).lower()
+            #  Handle email confirmation error specifically (mao pani before ko naka findout pwede ra diay ma turn off ang email activation thing sa supabase)
+            if "email not confirmed" in error_message or "email_not_confirmed" in error_message:
+                messages.error(request, "Please check your email and click the confirmation link before logging in. Check your spam folder if you don't see the email.")
+            elif "invalid" in error_message:
+                messages.error(request, "Invalid email or password. Please try again.")
+            else:
+                messages.error(request, f"Login error: {str(e)}")
 
     return render(request, "cattendance_app/auth/login.html")
 
