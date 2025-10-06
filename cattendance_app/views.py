@@ -219,3 +219,14 @@ def api_register(request):
     user.save()
 
     return Response({'message': 'Account created successfully!'}, status=status.HTTP_201_CREATED)
+
+@csrf_exempt
+def logout_view(request):
+    if request.method == "POST":
+         # Delete Supabase auth cookies
+            response = redirect('login')
+            response.delete_cookie('sb-access-token')
+            response.delete_cookie('sb-refresh-token')
+    return response
+    return redirect('login')
+
