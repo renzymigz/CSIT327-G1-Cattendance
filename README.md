@@ -7,6 +7,25 @@
 ## About
 Cattedance is a QR code–based attendance system designed to replace paper logs and Excel sheets with a faster, more secure process.
 
+## Tech Stack
+- **Backend:** Django (Python web framework)
+- **Database:** Supabase (PostgreSQL)
+- **Frontend:** Tailwind CSS
+- **Hosting:** Vercel
+
+## Team Members
+| Name | Role | Email |
+|------|------|-------|
+| James Andrew J. Magdales | Product Owner | jamesandrew.magdales@cit.edu |
+| Johanne Gabriel P. Lumauag | Business Analyst | zander.aligato@cit.edu |
+| Carlos Rogel Lofranco | Scrum Master | carlosrogel.lofranco@cit.edu |
+| Florence Azriel R. Migallos | Lead Developer | florenceazriel.migallos@cit.edu |
+| Frances Aailyah S. Maturan | Backend Developer | francesaaliyah.maturan@cit.edu |
+| Ralph Keane A. Maestrado | Frontend Developer | ralphkeane.maestrado@cit.edu |
+
+## Deployable Link
+**Live Demo:** [Cattendance on Vercel - Coming Soon]
+
 ## Prerequisites
 Before setting up this project, ensure you have:
 
@@ -55,7 +74,11 @@ pip install -r requirements.txt
 npm install
 ```
 
-### 5. Database Setup
+### 5. Set Up Environment Variables
+
+Add a .env file (ask the maintainer for the SECRET_KEY). The project reads configuration from a repo-level .env located in the repository root. Ask the project author or lead for the SECRET_KEY value.
+
+### 6. Database Setup
 
 Run migrations to set up the database:
 
@@ -64,13 +87,13 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 6. Create Superuser (Optional)
+### 7. Create Superuser (Optional)
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 7. Build Tailwind CSS
+### 8. Build Tailwind CSS
 
 Start the Tailwind CSS build process:
 ```bash
@@ -79,7 +102,7 @@ npm run dev
 
 Keep this running in a separate terminal during development to watch for changes.
 
-### 8. Run Development Server
+### 9. Run Development Server
 
 In another terminal (with virtual environment activated):
 
