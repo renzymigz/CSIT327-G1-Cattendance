@@ -10,8 +10,13 @@
      Student </span> account
 </p>
 
-<form id="registerForm" class="flex flex-col gap-4">
+<!--  FORM SUBMITS TO DJANGO BACKEND -->
+<form method="post" action="{% url 'register' %}" class="flex flex-col gap-4">
   {% csrf_token %}
+
+
+  <!--  Hidden field to match the role from the base_auth.html role selector -->
+  <input type="hidden" name="selected_role" id="selected-role" value="student">
 
   <div class="grid grid-cols-2 gap-4">
     <div class="space-y-2 relative">
@@ -51,26 +56,26 @@
   <div class="space-y-2 relative">
     <label class="text-[14px] font-semibold">Password</label>
     <div class="relative">
-      <input type="password" id="password" name="password" placeholder="Enter your password"
+      <input type="password" id="password1" name="password1" placeholder="Enter your password"
              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 pr-10 py-1 border border-gray-300 rounded-lg 
                     focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
       <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
                 peer-focus:text-[#a2314b] transition-colors"></i>
       <i class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" 
-         onclick="togglePassword('password', this)"></i>
+         onclick="togglePassword('password1', this)"></i>
     </div>
   </div>
 
   <div class="space-y-2 relative">
     <label class="text-[14px] font-semibold">Confirm Password</label>
     <div class="relative">
-      <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password"
+      <input type="password" id="password2" name="password2" placeholder="Confirm your password"
              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 pr-10 py-1 border border-gray-300 rounded-lg 
                     focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
       <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
                 peer-focus:text-[#a2314b] transition-colors"></i>
       <i class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" 
-         onclick="togglePassword('confirm_password', this)"></i>
+         onclick="togglePassword('password2', this)"></i>
     </div>
   </div>
 
@@ -89,7 +94,17 @@
   <a href="{% url 'login' %}" class="text-[#a2314b] hover:underline">Login</a>
 </p>
 
+<!--  DISPLAY DJANGO MESSAGES (SUCCESS/ERROR) -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="mt-4 p-3 text-center items-center rounded-lg text-sm font-medium {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-300{% elif message.tags == 'success' %}bg-green-100 text-green-700 border border-green-300{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-300{% else %}bg-blue-100 text-blue-700 border border-blue-300{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
 <script>
+  
 function togglePassword(fieldId, icon) {
   const input = document.getElementById(fieldId);
   if (input.type === "password") {
@@ -103,37 +118,18 @@ function togglePassword(fieldId, icon) {
   }
 }
 
-document.getElementById("registerForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-
-  const fname = document.getElementById("first_name").value;
-  const lname = document.getElementById("last_name").value;
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
-  const confirm = document.getElementById("confirm_password").value;
-
-  const response = await fetch("/api/register/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      first_name: fname,
-      last_name: lname,
-      email: email,
-      password: pass,
-      confirm_password: confirm,
-    }),
-  });
-
-  const data = await response.json();
-
-  if (response.ok) {
-    alert("✅ " + data.message);
-    window.location.href = "/login/";
-  } else {
-    alert("❌ " + (data.error || "Something went wrong"));
+//  CONNECT ROLE SELECTOR TO FORM - This gets called from base_auth.html
+function updateSelectedRole(role) {
+  const hiddenRoleField = document.getElementById('selected-role');
+  if (hiddenRoleField) {
+    hiddenRoleField.value = role;
+    console.log('Role updated to:', role); // For debugging
   }
-});
+}
+
+//  DJANGO FORM HANDLING - No more API calls, let Django handle it naturally
+// The form will now submit to Ralph's register_view with proper CSRF protection
+// and all the field names that match his backend expectations
+</script>
 </script>
 {% endblock %}

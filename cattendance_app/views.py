@@ -27,6 +27,13 @@ def dashboard_teacher(request):
 
 
 #  SUPABASE REGISTRATION 
+#  Matches Supabase profiles table structure:
+# - id: integer (Django user ID)
+# - email: text
+# - role: text  
+# - first_name: text
+# - last_name: text
+# - created_at: timestamptz (auto-generated)
 
 @csrf_exempt
 def register_view(request):
@@ -46,20 +53,22 @@ def register_view(request):
             messages.error(request, "Passwords do not match!")
             return render(request, 'cattendance_app/auth/register.html')
 
+        #  Check if email already exists in Django or Supabase
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already registered! Please use a different email.")
+            return render(request, 'cattendance_app/auth/register.html')
+
+        #  Also check in Supabase profiles table
         try:
-            # ✅ Step 1: Register user in Supabase Auth
-            auth_response = supabase.auth.sign_up({
-                "email": email,
-                "password": password
-            })
+            existing_profile = supabase.table('profiles').select('email').eq('email', email).execute()
+            if existing_profile.data and len(existing_profile.data) > 0:
+                messages.error(request, "Email already registered! Please use a different email.")
+                return render(request, 'cattendance_app/auth/register.html')
+        except Exception:
+            pass  # If check fails, continue with registration
 
-            user_id = None
-            if hasattr(auth_response, "user") and auth_response.user:
-                user_id = auth_response.user.id
-            elif isinstance(auth_response, dict) and "user" in auth_response:
-                user_id = auth_response["user"]["id"]
-
-            # ✅ Step 2: Also create in Django local DB (for backup or local login)
+        try:
+            #  Step 1: Create in Django local DB first (to get integer ID)
             user = User.objects.create_user(
                 username=email,
                 email=email,
@@ -69,17 +78,25 @@ def register_view(request):
             )
             user.save()
 
-            # ✅ Step 3: Insert into 'profiles' table in Supabase
-            if user_id:
-                supabase.table('profiles').insert({
-                    'id': user_id,
-                    'email': email,
-                    'role': role.lower(),
-                    'first_name': first_name,
-                    'last_name': last_name
-                }).execute()
-            else:
-                messages.warning(request, "User created, but Supabase profile ID not retrieved.")
+            #  Step 2: Insert into 'profiles' table in Supabase with Django user ID
+            supabase.table('profiles').insert({
+                'id': user.id,  # Use Django user's integer ID instead of Supabase UUID
+                'email': email,
+                'role': role.lower(),
+                'first_name': first_name,
+                'last_name': last_name
+                # created_at will be automatically set by Supabase
+            }).execute()
+
+            #  Step 3: Also register in Supabase Auth (for additional security)
+            try:
+                supabase.auth.sign_up({
+                    "email": email,
+                    "password": password
+                })
+            except Exception as auth_error:
+                # If Supabase auth fails, we still have the local user and profile
+                print(f"Supabase auth registration failed: {auth_error}")
 
             messages.success(request, "Account created successfully!")
             return redirect('login')
@@ -91,6 +108,7 @@ def register_view(request):
 
 
 # SUPABASE LOGIN 
+#  Uses Django user ID to query Supabase profiles table
 
 @csrf_exempt
 def login_view(request):
@@ -99,33 +117,53 @@ def login_view(request):
         password = request.POST.get('password')
 
         try:
-            # Authenticate via Supabase
-            auth_response = supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
+            #  Authenticate via Django first (since we're using Django user IDs)
+            try:
+                django_user = User.objects.get(email=email)
+                user = authenticate(username=django_user.username, password=password)
+                
+                if user is not None:
+                    #  Get role from Supabase profiles table using Django user ID
+                    profile = supabase.table('profiles').select('role').eq('id', user.id).execute()
 
-            user_id = None
-            if hasattr(auth_response, "user") and auth_response.user:
-                user_id = auth_response.user.id
-            elif isinstance(auth_response, dict) and "user" in auth_response:
-                user_id = auth_response["user"]["id"]
-
-            if user_id:
-                profile = supabase.table('profiles').select('role').eq('id', user_id).execute()
-
-                if profile.data and len(profile.data) > 0:
-                    role = profile.data[0]['role']
-                    if role == 'student':
-                        return redirect('dashboard-student')
-                    elif role == 'teacher':
-                        return redirect('dashboard-teacher')
+                    if profile.data and len(profile.data) > 0:
+                        role = profile.data[0]['role']
+                        if role == 'student':
+                            return redirect('dashboard_student')
+                        elif role == 'teacher':
+                            return redirect('dashboard_teacher')
+                        else:
+                            messages.warning(request, "Role not found. Contact admin.")
                     else:
-                        messages.warning(request, "Role not found. Contact admin.")
+                        messages.warning(request, "Profile not found. Please re-register.")
                 else:
-                    messages.warning(request, "Profile not found. Please re-register.")
-            else:
-                messages.error(request, "Invalid email or password. Try again.")
+                    messages.error(request, "Invalid email or password. Try again.")
+                    
+            except User.DoesNotExist:
+                # Fallback: try Supabase auth for legacy users
+                auth_response = supabase.auth.sign_in_with_password({
+                    "email": email,
+                    "password": password
+                })
+
+                user_id = None
+                if hasattr(auth_response, "user") and auth_response.user:
+                    user_id = auth_response.user.id
+                elif isinstance(auth_response, dict) and "user" in auth_response:
+                    user_id = auth_response["user"]["id"]
+
+                if user_id:
+                    profile = supabase.table('profiles').select('role').eq('id', user_id).execute()
+                    if profile.data and len(profile.data) > 0:
+                        role = profile.data[0]['role']
+                        if role == 'student':
+                            return redirect('dashboard_student')
+                        elif role == 'teacher':
+                            return redirect('dashboard_teacher')
+                    else:
+                        messages.warning(request, "Profile not found. Please re-register.")
+                else:
+                    messages.error(request, "Invalid email or password. Try again.")
 
         except Exception as e:
             messages.error(request, f"Login error: {str(e)}")
