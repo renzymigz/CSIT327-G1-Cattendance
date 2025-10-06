@@ -7,6 +7,8 @@ cryptography==46.0.2
 deprecation==2.1.0
 dj-database-url==3.0.1
 Django==5.2.6
+djangorestframework==3.16.1
+djangorestframework_simplejwt==5.5.1
 h11==0.16.0
 h2==4.3.0
 hpack==4.1.0
