@@ -219,3 +219,24 @@ def api_register(request):
     user.save()
 
     return Response({'message': 'Account created successfully!'}, status=status.HTTP_201_CREATED)
+
+@csrf_exempt
+def logout_view(request):
+    try:
+        supabase.auth.sign_out()
+        messages.success(request, "You have been logged out successfully!")
+    except Exception:
+        messages.info(request, "You have been logged out (local session cleared).")
+
+    # Clear Django session data (local).. P much like a double exit 
+    if hasattr(request, 'session'):
+        request.session.flush()
+
+    # clear cookies
+    response = redirect('login')
+    for cookie in ['sb-access-token', 'sb-refresh-token', 'supabase-auth-token']:
+        response.delete_cookie(cookie)
+
+    return response
+
+

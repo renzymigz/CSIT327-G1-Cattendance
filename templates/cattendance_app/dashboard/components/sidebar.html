@@ -49,12 +49,17 @@
             </a>
         </div>
 
-        <div class="px-6 py-3">
-             <a href="{% url 'login' %}" class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg">
-                <i class="fas fa-sign-out-alt mr-3"></i>
-                Logout
-            </a>
-        </div>
-    </nav>
-    
+        <!-- Logout button -->
+    <div class="px-6 py-3">
+  <form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg w-full">
+      <i class="fas fa-sign-out-alt mr-3"></i>
+      Logout
+    </button>
+  </form>
 </div>
+    </nav>
+
+</div>
+
