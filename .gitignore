@@ -7,6 +7,13 @@ __pycache__/
 venv/
 env/
 .venv/
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 # Django-specific files
 *.log
 *.pot
@@ -66,3 +73,4 @@ dmypy.json
 .ipynb_checkpoints
 # Local settings
 local_settings.py"node_modules/" 
+
