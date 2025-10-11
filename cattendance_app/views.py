@@ -16,11 +16,15 @@ def homepage(request):
 
 
 def dashboard_student(request):
+    if not request.session.get('is_authenticated') or request.session.get('role') != 'student':
+        return redirect('login')
     context = {'user_type': 'student'}
     return render(request, "cattendance_app/dashboard/student_dashboard.html", context)
 
 
 def dashboard_teacher(request):
+    if not request.session.get('is_authenticated') or request.session.get('role') != 'teacher':
+        return redirect('login')
     context = {'user_type': 'teacher'}
     return render(request, "cattendance_app/dashboard/teacher_dashboard.html", context)
 
@@ -95,9 +99,9 @@ def register_view(request):
     return render(request, 'cattendance_app/auth/register.html')
 
 
-#  SUPABASE GAMING!!! NO MORE LOCAL!!! 🚀
+#  SUPABASE GAMING!!! NO MORE LOCAL!!! 
 #  Uses Supabase auth.users UUIDs directly  
-#  No Django dependency - works on ANY device!
+#  would works on ANY device i think
 #  ROLE-BASED AUTHENTICATION: Users must select correct role
 
 @csrf_exempt
@@ -132,6 +136,11 @@ def login_view(request):
                         messages.error(request, f"This account is registered as a {actual_role.title()}, not a {selected_role.title()}.")
                         return render(request, "cattendance_app/auth/login.html")
                     
+                    request.session['user_id'] = user_id
+                    request.session['email'] = email
+                    request.session['role'] = actual_role.lower()
+                    request.session['is_authenticated'] = True
+
                     #  Role matches, proceed with login
                     if actual_role == 'student':
                         return redirect('dashboard_student')
@@ -238,5 +247,3 @@ def logout_view(request):
         response.delete_cookie(cookie)
 
     return response
-
-
