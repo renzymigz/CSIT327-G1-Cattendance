@@ -65,4 +65,4 @@ dmypy.json
 # Jupyter Notebook
 .ipynb_checkpoints
 # Local settings
-local_settings.py
+local_settings.py"node_modules/" 
