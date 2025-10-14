@@ -1,0 +1,64 @@
+{% load static %}
+<!-- Sidebar -->
+<div class="bg-white shadow-lg w-72 fixed h-full">
+     <div class="flex items-center mx-auto gap-3 p-6 text-[#a2314b]">
+        <img src="{% static 'images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
+        <h1 class="text-xl font-bold">CATTENDANCE</h1>
+    </div>
+    
+    <nav class="">
+        <!-- Common menu items for both -->
+        <div class="px-6 py-3">
+            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+                <i class="fas fa-home mr-3"></i>
+                Dashboard
+            </a>
+        </div>
+        
+        <!-- Conditional menu items based on user type -->
+        {% if user_type == 'teacher' %}
+            <!-- Teacher-specific menu items -->
+            <div class="px-6 py-3">
+                <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+                    <i class="fas fa-users mr-3"></i>
+                    Manage Classes
+                </a>
+            </div>
+        {% else %}
+            <!-- Student-specific menu items -->
+            <div class="px-6 py-3">
+                <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+                    <i class="fas fa-calendar-check mr-3"></i>
+                    My Attendance
+                </a>
+            </div>
+
+        {% endif %}
+        
+        <!-- Common menu items -->
+        <div class="px-6 py-3">
+            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+                <i class="fas fa-user mr-3"></i>
+                Profile
+            </a>
+        </div>
+        <div class="px-6 py-3">
+            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+                <i class="fas fa-cog mr-3"></i>
+                Settings
+            </a>
+        </div>
+
+        <!-- Logout button -->
+    <div class="px-6 py-3">
+  <form action="{% url 'auth:logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg w-full">
+      <i class="fas fa-sign-out-alt mr-3"></i>
+      Logout
+    </button>
+  </form>
+</div>
+    </nav>
+
+</div>
