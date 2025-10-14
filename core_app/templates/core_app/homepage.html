@@ -1,0 +1,276 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cattendance | QR-based attendance system</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kumbh+Sans:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'core_app/navbar.css' %}?v=1.2">
+    <script defer src="{% static '/core_app/navbar.js' %}"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'sans': ['Kumbh Sans', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    
+</style>
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css"/>
+</head>
+
+<body class="font-sans bg-gray-50">
+    {% include "core_app/components/navbar.html" %}
+
+    {% comment %} Hero Section {% endcomment %}
+    <section class="relative h-[calc(100vh-4rem)] flex items-center justify-center">
+    {% comment %} Icons {% endcomment %}
+    <div class="hidden lg:block">
+        <div class="absolute top-1/2 left-1/2 -translate-x-[450px] -translate-y-[250px] z-10">
+            <div class="h-16 w-16 rounded-2xl bg-white shadow-lg flex items-center justify-center rotate-6">
+                <i class="fa-solid fa-qrcode text-2xl text-[#a2314b]"></i> 
+            </div>
+        </div>
+
+        <div class="absolute top-1/2 left-1/2 -translate-x-[530px] -translate-y-[70px] z-10">
+            <div class="h-14 w-14 rounded-2xl bg-white shadow-lg flex items-center justify-center -rotate-6">
+                <i class="fa-regular fa-clock text-xl text-[#f2b819]"></i>
+            </div>
+        </div>
+
+        <div class="absolute top-1/2 left-1/2 -translate-x-[420px] translate-y-[80px] z-10">
+            <div class="h-14 w-14 rounded-2xl bg-white shadow-lg flex items-center justify-center rotate-12">
+                <i class="fa-regular fa-calendar text-xl text-[#f2b819]"></i>
+            </div>
+        </div>
+
+        <div class="absolute top-1/2 left-1/2 translate-x-[400px] -translate-y-[280px] z-10">
+            <div class="h-16 w-16 rounded-2xl bg-white shadow-lg flex items-center justify-center -rotate-6">
+                <i class="fa-solid fa-chart-bar text-2xl text-[#f2b819]"></i>
+            </div>
+        </div>
+
+        <div class="absolute top-1/2 left-1/2 translate-x-[500px] -translate-y-[30px] z-10">
+            <div class="h-14 w-14 rounded-2xl bg-white shadow-lg flex items-center justify-center rotate-6">
+                <i class="fa-regular fa-users text-xl text-[#a2314b]"></i>
+            </div>
+        </div>
+
+        <div class="absolute top-1/2 left-1/2 translate-x-[400px] translate-y-[75px] z-10">
+            <div class="h-14 w-14 rounded-2xl bg-white shadow-lg flex items-center justify-center -rotate-6">
+                <i class="fa-regular fa-users text-xl text-[#a2314b]"></i>
+            </div>
+        </div>
+
+        {% comment %} Sparkles FX {% endcomment %}
+        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 translate-x-[200px] -translate-y-[120px] text-xl text-[#f2b819] animate-pulse z-0"></i>
+        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 -translate-x-[250px] translate-y-[100px] text-xl text-[#f2b819] animate-pulse animation-delay-200 z-0"></i>
+        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 translate-x-[280px] translate-y-[80px] text-xl text-[#f2b819] animate-pulse animation-delay-100 z-0"></i>
+    </div>
+    
+    {% comment %} Hero Content {% endcomment %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-10 relative z-20">
+        {% comment %} Badge {% endcomment %}
+        <div class="text-center m-5 mx-auto absolute -top-24 inset-x-0 border-[1.5px] border-[#743030] rounded-full w-fit px-4 py-1 text-[#743030] font-medium text-[12px] bg-white/10">
+            <i class="fa-light fa-shield-virus mr-2"></i>
+            Powered by CIT-U Innovation
+        </div>
+        
+        <div class="text-center">
+            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                Attendance Tracking <br>
+                <span class="relative inline-block m-5 px-20 py-2 text-[#743030] font-bold">
+                    <span class="absolute inset-0 bg-gradient-to-r from-transparent via-[#f2b819] to-transparent"></span>
+                    <span class="relative">Made Simple</span>
+                </span>
+            </h1>
+
+            <p class="text-xl md:text-2xl text-gray-900 mb-12 max-w-3xl mx-auto">
+                QR-based attendance system for modern classrooms. <br> Fast, accurate, and paperless
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'auth_app:register' %}" class="bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white px-8 py-2 rounded-full text-lg font-semibold hover:bg-[#892728] transition shadow-lg">
+                    <i class="fa-regular fa-bullseye pr-2"></i> Get Started
+                </a>
+                <a href="{% url 'auth_app:login' %}" class="border-2 border-[#a2314b] bg-white text-[#a2314b] px-8 py-2 rounded-full text-lg font-semibold hover:bg-gray-100 transition shadow-lg">
+                    <i class="fa-regular fa-user pr-3"></i>Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+    {% comment %} Features Section {% endcomment %}
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center m-5 mx-auto  border-[1.5px] border-[#743030] rounded-full w-fit px-4 py-1 text-[#743030] font-medium text-[12px] bg-white/10">
+                <i class="fa-regular fa-bolt mr-2"></i>
+                Platform Features
+            </div>
+            
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Why Choose Cattendance?</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Built for modern educational institutions that value efficiency and accuracy.
+                </p>
+            </div>
+
+            
+
+        
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="text-center p-6 shadow-lg bg-white rounded-2xl border border-gray-200 transform transition duration-300 hover:scale-105" >
+                    <div class="w-16 h-16 bg-gradient-to-b from-[#a2314b] to-[#d64648] rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-qrcode text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl text-shadow-cyan-600 font-semibold text-gray-900 mb-2">Smart QR Scanning</h3>
+                    <p class="text-gray-600">
+                        Quick and accurate attendance marking with QR code technology. No more manual roll calls.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="text-center p-6 shadow-lg bg-white rounded-2xl border border-gray-200 transform transition duration-300 hover:scale-105">
+                    <div class="w-16 h-16 bg-gradient-to-b from-[#a2314b] to-[#d64648] rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-chart-line text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Real-time Analytics</h3>
+                    <p class="text-gray-600">
+                        Track attendance patterns and generate detailed reports for better insights.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="text-center p-6 shadow-lg bg-white rounded-2xl border border-gray-200 transform transition duration-300 hover:scale-105">
+                    <div class="w-16 h-16 bg-gradient-to-b from-[#a2314b] to-[#d64648] rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-briefcase text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Automated Reports</h3>
+                    <p class="text-gray-600">
+                        Generate insightful attendance summaries and export them for academic or administrative use.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% comment %} ABOUT section bruh {% endcomment %}
+    <section id="about" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center m-5 mx-auto border-[1.5px] border-[#743030] rounded-full w-fit px-4 py-1 text-[#743030] font-medium text-[12px] bg-white/10">
+            <i class="fa-regular fa-book mr-2"></i>
+            Platform Features
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center lg:flex ">
+            
+         
+            <div>
+                <p class="text-gray-400 font-semibold uppercase mb-4 text-sm">WHAT IS CATTENDANCE?</p>
+                <h2 class="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
+                    An <span class="text-[#a2314b] bg-[#f3e9ec]">efficient<br> attendance</span> 
+                    <br> <span class="text-[#a2314b] bg-[#f3e9ec]">management system</span> 
+                    <br> for modern classrooms.
+                </h2>
+                
+            </div>
+
+            <ul class="space-y-8 pt-4">
+                    <li class="flex items-center text-lg text-gray-700">
+                        <i class="fas fa-check-circle text-[#a2314b] mr-3"></i>
+                        <span>Seamless QR Code Scanning</span>
+                    </li>
+                    <li class="flex items-center text-lg text-gray-700">
+                        <i class="fas fa-check-circle text-[#a2314b] mr-3"></i>
+                        <span>Automatic Real-time Report Generation</span>
+                    </li>
+                    <li class="flex items-center text-lg text-gray-700">
+                        <i class="fas fa-check-circle text-[#a2314b] mr-3"></i>
+                        <span>Easy Setup and Integration with existing systems</span>
+                    </li>
+                    <li class="flex items-center text-lg text-gray-700">
+                        <i class="fas fa-check-circle text-[#a2314b] mr-3"></i>
+                        <span>Accessible Via Any Device(mobile or desktop)</span>
+                    </li>
+                    <li class="flex items-center text-lg text-gray-700">
+                        <i class="fas fa-check-circle text-[#a2314b] mr-3"></i>
+                        <span>Secure and Reliable data handling</span>
+                    </li>
+                </ul>
+            
+            
+
+        </div>
+    </div>
+</section>
+
+    {% comment %} CTA Section  {% endcomment %}
+    <section class="py-20 bg-gradient-to-br from-[#a2314b] to-[#d64648]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="text-center mb-5  mx-auto border-[1.5px] border-[#f1c4ce] rounded-full w-fit px-4 py-1 text-[#f1c4ce] font-medium text-[12px] bg-white/20">
+                <i class="fa-regular fa-rocket-launch mr-2"></i>
+                Get Started
+            </div>
+            <h2 class="text-4xl font-bold text-white mb-6">
+                Ready to Get Started?
+            </h2>
+            <p class="text-xl text-white mb-8 max-w-2xl mx-auto">
+                Join thousands of educators and students who are already using Cattendance to streamline their attendance management.
+            </p>
+            <a href="{% url 'auth_app:register' %}" class="bg-white text-[#a2314b] px-8 py-2 rounded-full text-lg font-semibold hover:bg-gray-100 transition shadow-lg inline-block">
+                <i class="fa-solid fa-vial-circle-check mr-2"></i> Start Your Free Trial
+            </a>
+        </div>
+    </section>
+
+    {% comment %} Footer {% endcomment %}
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="{% static 'images/logo.png' %}" class="w-8 h-8" alt="Logo">
+                        <h3 class="text-xl text-[#a2314b] font-bold">CATTENDANCE</h3>
+                    </div>
+                    <p class="text-gray-400">
+                        Making attendance management <span class = "text-[#a2314b] font-bold">simple and efficient</span> for everyone.
+                    </p>
+                </div>
+                
+                <div class ="md:border-l md:border-gray-700 md:pl-8">
+                    <h4 class="text-[16px] font-semibold mb-4">Get in touch</h4>
+                    <ul class="space-y-2 text-gray-400 text-[14px]">
+                        <li><i class="fa-solid fa-location-dot mr-2"></i>N. Bacalso Avenue, Cebu City, Philippines</li>
+                        <li><i class="fa-solid fa-phone mr-2"></i>+639939507921</li>
+                        <li><i class="fa-solid fa-envelope mr-2"></i>info@cattendance.com</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-[16px] font-semibold mb-4">Other links</h4>
+                    <ul class="space-y-2 text-gray-400 text-[14px]">
+                        <li><a href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ" target="_blank" class ="underline"><i class="fa-solid fa-link mr-2"></i></i>Secret Info</a></li>
+                    </ul>
+                </div>
+                
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Cattendance. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

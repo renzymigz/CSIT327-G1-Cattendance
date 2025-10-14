@@ -43,9 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'cattendance_app',
+    'auth_app',
+    'core_app',
+    'dashboard_app'
 ]
 
-AUTH_USER_MODEL = 'cattendance_app.User'
+AUTH_USER_MODEL = 'auth_app.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -123,8 +126,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / "static/cattendance_app"] 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [] 
 STATIC_ROOT = BASE_DIR / "staticfiles" 
 
 # Default primary key field type
