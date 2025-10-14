@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'cattendance_app',
 ]
 
+AUTH_USER_MODEL = 'cattendance_app.User'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
