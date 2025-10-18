@@ -40,14 +40,28 @@
         <div class="absolute top-0 left-0 right-0 h-2 rounded-t-lg shadow-[0px_-8px_0px_0px_#a2314b] pointer-events-none"></div>
 
         <div class="p-3 sm:p-4 text-lg sm:text-[20px] font-semibold text-center">
-          <div class="grid grid-cols-2 bg-[#eef2f5] p-2 font-normal text-xs sm:text-[14px] text-[rgb(123,137,157)] rounded-b-[18px]">
-            <button onclick="selectRole(this)" id="studentButton" class="py-2 sm:py-1 bg-[#892728] text-white font-semibold hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] text-xs sm:text-sm">
-              <i class="fa-solid fa-graduation-cap pr-1 sm:pr-2"></i>Student
-            </button>
-            <button onclick="selectRole(this)" class="py-2 sm:py-1 hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] text-xs sm:text-sm">
-              <i class="fa-solid fa-school pr-1 sm:pr-2"></i>Teacher
-            </button>
-          </div>
+          {% if "login" in request.path %}
+            <div class="grid grid-cols-2 bg-[#eef2f5] p-2 font-normal text-xs sm:text-[14px] text-[rgb(123,137,157)] rounded-b-[18px]">
+              <button onclick="selectRole(this)" id="studentButton" class="py-2 sm:py-1 bg-[#892728] text-white font-semibold hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] text-xs sm:text-sm">
+                <i class="fa-solid fa-graduation-cap pr-1 sm:pr-2"></i>Student
+              </button>
+              <button onclick="selectRole(this)" class="py-2 sm:py-1 hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] text-xs sm:text-sm">
+                <i class="fa-solid fa-school pr-1 sm:pr-2"></i>Teacher
+              </button>
+            </div>
+          {% elif "register" in request.path %}
+              <div class="grid grid-cols-1 bg-[#eef2f5] p-2 font-normal text-xs sm:text-[14px] text-[rgb(123,137,157)] rounded-b-[18px]">
+                <button onclick="selectRole(this)" id="studentButton" class="py-2 sm:py-1 bg-[#892728] text-white font-semibold hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] text-xs sm:text-sm">
+                  <i class="fa-solid fa-graduation-cap pr-1 sm:pr-2"></i>Student
+                </button>
+            </div>
+          {% else %}
+              <div class="grid grid-cols-1 bg-[#eef2f5] p-2 font-normal text-xs sm:text-[14px] text-[rgb(123,137,157)] rounded-b-[18px]">
+                <button onclick="selectRole(this)" id="teacherButton" class="py-2 sm:py-1 bg-[#892728] text-white font-semibold hover:bg-[#b84547] hover:text-white transition rounded-b-[9px] text-xs sm:text-sm">
+                  <i class="fa-solid fa-school pr-1 sm:pr-2"></i>Teacher
+                </button>
+            </div>
+          {% endif %}
         </div>
       </div>
 

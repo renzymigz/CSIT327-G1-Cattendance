@@ -11,6 +11,7 @@ class User(AbstractUser):
     USER_TYPE_CHOICES = (
         ('student', 'Student'),
         ('teacher', 'Teacher'),
+        ('admin', 'Admin'),
     )
 
     user_type = models.CharField(
@@ -19,6 +20,7 @@ class User(AbstractUser):
         default='student',
         verbose_name='User Type'
     )
+    must_change_password = models.BooleanField(default=False)
 
     # Fix for related_name clashes with auth.User
     groups = models.ManyToManyField(
