@@ -22,5 +22,6 @@ urlpatterns = [
     path('', include('core_app.urls')),
     path('auth/', include(('auth_app.urls', 'auth_app'), namespace='auth')),
     path('dashboard/', include(('dashboard_app.urls', 'dashboard'), namespace='dashboard')),
+    path('admin-panel/', include('admin_app.urls')),
 ]
 

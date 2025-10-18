@@ -1,0 +1,120 @@
+{% extends "admin_app/base_dashboard.html" %}
+{% block title %}Admin Dashboard | Cattendance{% endblock %}
+{% block content %}
+<div class="p-8 space-y-8">
+  <h1 class="text-3xl font-bold text-gray-800 mb-4">Admin Dashboard</h1>
+
+  <!-- Create Teacher Form -->
+
+  <div
+    class="max-w-[500px] border border-gray-200 rounded-b-[18px] bg-white relative shadow-[0_8px_30px_rgb(0,0,0,0.12)] "
+  >
+    <div class="absolute top-1 left-0 right-0 h-[6px] rounded-t-lg shadow-[0px_-8px_0px_0px_#a2314b] pointer-events-none"></div>
+    <!-- Content -->
+    <div class="p-4 sm:p-6">
+      <form
+        method="POST"
+        action="{% url 'add_teacher' %}"
+        class="bg-white flex flex-col gap-2"
+      >
+        {% csrf_token %}
+        <h2 class="text-xl font-semibold">Create Teacher Account</h2>
+        <p class = "text-[#555555]">Add a new teacher to the system</p>
+        <div class="space-y-2 relative">
+          <label class="text-[14px] font-semibold">First Name</label>
+          <div class="relative">
+            <input
+              type="text"
+              id="first_name"
+              name="first_name"
+              placeholder="Enter first name"
+              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]"
+            />
+            <i
+              class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+            ></i>
+          </div>
+        </div>
+
+        <div class="space-y-2 relative">
+          <label class="text-[14px] font-semibold">Last Name</label>
+          <div class="relative">
+            <input
+              type="text"
+              id="last_name"
+              name="last_name"
+              placeholder="Enter last name"
+              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]"
+            />
+            <i
+              class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+            ></i>
+          </div>
+        </div>
+
+        <div class="space-y-2 relative">
+          <label class="text-[14px] font-semibold">Email</label>
+          <div class="relative">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="teacher@school.edu"
+              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]"
+            />
+            <i
+              class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+            ></i>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <button
+            type="submit"
+            class="bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white px-4 py-2 rounded w-full justify-center flex items-center gap-2 font-semibold"
+          >
+            <i class="fa-solid fa-plus"></i>Create Teacher Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!--  DISPLAY DJANGO MESSAGES (SUCCESS/ERROR) -->
+  {% if messages %} {% for message in messages %}
+  <div
+    class="mt-4 p-3 text-center max-w-[500px] items-center rounded-lg text-sm font-medium {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-300{% elif message.tags == 'success' %}bg-green-100 text-green-700 border border-green-300{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-300{% else %}bg-blue-100 text-blue-700 border border-blue-300{% endif %}"
+  >
+    {{ message }}
+  </div>
+  {% endfor %} {% endif %}
+
+  <!-- Recently Added Teachers -->
+  <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 max-w-7xl">
+    <h2 class="text-xl font-semibold mb-4">Recently Added Teachers</h2>
+    
+    {% if recent_teachers %}
+    <table class="w-full border-collapse border border-gray-300">
+      <thead>
+        <tr class="bg-[#eaeaeb] text-[#545455]">
+          <th class="py-2 px-3 text-left">Name</th>
+          <th class="py-2 px-3 text-left">Email</th>
+          <th class="py-2 px-3 text-left">Date Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for teacher in recent_teachers %}
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-2 px-3 font-semibold">{{ teacher.get_full_name }}</td>
+          <td class="py-2 px-3 ">{{ teacher.email }}</td>
+          <td class="py-2 px-3">{{ teacher.date_joined|date:"M d, Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-gray-500">No teachers added yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

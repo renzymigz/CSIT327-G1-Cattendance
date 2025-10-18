@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Log In{% endblock %} | Cattendance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css"/>
+</head>
+<body class="font-sans min-h-screen flex flex-col bg-center bg-repeat bg-contain overflow-x-hidden overflow-y-scroll "
+      style="background-image: url({% static 'images/background_auth.png' %}); background-size: 300px 300px;">
+  
+
+  <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
+    <div class="flex flex-col items-center justify-center gap-4 sm:gap-6 w-full max-w-sm sm:max-w-md px-4 sm:px-0">
+
+      <!-- Content block AKA the register & login area -->
+      <div class="w-full border border-gray-200 rounded-b-[18px] bg-white relative shadow-[0_8px_30px_rgb(0,0,0,0.12)] ">
+        <div class="absolute top-0 left-0 right-0 h-2 rounded-t-lg shadow-[0px_-8px_0px_0px_#a2314b] pointer-events-none"></div>
+
+        <!-- Content -->
+        <div class="p-4 sm:p-6">
+            <h1 class="font-semibold text-[24px] mb-2 text-center">Welcome Back</h1>
+            <h1 class="text-[14px] text-[rgb(123,137,157)] mb-6 text-center">
+            Sign in as 
+            <span id="role-text" class="font-semibold border-[1px] px-3 rounded-2xl border-[#a2314b] text-[#a2314b] bg-white">
+                Admin
+            </span>
+            </h1>
+            <form method="POST" class = "flex flex-col gap-4">
+                {% csrf_token %}
+                <div class="space-y-2 relative">
+                    <label class="text-[14px] font-semibold">Username</label>
+                    <div class="relative">
+                    <input type="text" name="username" placeholder="Enter your username"
+                            class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
+                                    focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition">
+                                    <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                            peer-focus:text-[#a2314b] transition-colors "></i>
+                    </div>
+                </div>
+
+                  <div class="space-y-2 relative">
+                    <label class="text-[14px] font-semibold">Password</label>
+                    <div class="relative">
+                    
+                    <input type="password" id="password" name="password" placeholder="Enter your password"
+                            class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 pr-10 py-1 border border-gray-300 rounded-lg 
+                                    focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition">
+                    <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                            peer-focus:text-[#a2314b] transition-colors"></i>
+                    <!-- Eye toggle -->
+                    <i id="togglePassword" class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"></i>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" 
+                        class="w-full py-2 text-[14px] bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white rounded 
+                            flex items-center justify-center gap-2 group">
+                    Sign in 
+                    <i class="fa-solid fa-arrow-right transition-transform duration-200 group-hover:translate-x-2"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!--  DISPLAY DJANGO MESSAGES (SUCCESS/ERROR) -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="mt-4 p-3 text-center items-center rounded-lg text-sm font-medium {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-300{% elif message.tags == 'success' %}bg-green-100 text-green-700 border border-green-300{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-300{% else %}bg-blue-100 text-blue-700 border border-blue-300{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </main>
+<script>
+  const togglePassword = document.querySelector('#togglePassword');
+  const password = document.querySelector('#password');
+
+  togglePassword.addEventListener('click', function () {
+    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+    password.setAttribute('type', type);
+
+    this.classList.toggle('fa-eye');
+    this.classList.toggle('fa-eye-slash');
+  });
+</script>
+
+</body>
+
+
+
+</html>

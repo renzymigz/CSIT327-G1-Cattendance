@@ -1,0 +1,53 @@
+{% extends "admin_app/base_dashboard.html" %}
+{% block title %}Admin - Teacher Dashboard | Cattendance{% endblock %}
+
+{% block content %}
+<div class="p-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Teacher Management</h1>
+        
+    </div>
+
+    <table class="min-w-7xl border-collapse border border-gray-300 bg-white">
+        <thead class="bg-gray-100">
+            <tr class = "bg-[#eaeaeb] text-[#545455]">
+                <th class="text-left py-3 px-4">Name</th>
+                <th class="text-left py-3 px-4">Email</th>
+                <th class="text-left py-3 px-4">Date Joined</th>
+                <th class="text-left py-3 px-4">First Login?</th>
+                <th class="text-left py-3 px-4">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for teacher in teachers %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4 font-semibold">
+                    {{ teacher.first_name }} {{ teacher.last_name }}
+                </td>
+                <td class="py-3 px-4">{{ teacher.email }}</td>
+                <td class="py-3 px-4">{{ teacher.date_joined|date:"M d, Y" }}</td>
+                <td class="py-3 px-4">
+                    {% if teacher.must_change_password %}
+                        <span class="">Yes</span>
+                    {% else %}
+                        <span class="">No</span>
+                    {% endif %}
+                </td>
+                <td class="py-3 px-4">
+                    <form action="#" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="py-1 border font-semibold border-gray-300 rounded-lg px-3 hover:text-red-600 hover:border-red-600 hover:bg-red-100 transition">
+                            Deactivate
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center py-4 text-gray-500">No teachers found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

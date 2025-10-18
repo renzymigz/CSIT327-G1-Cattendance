@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'cattendance_app',
     'auth_app',
     'core_app',
-    'dashboard_app'
+    'dashboard_app',
+    'admin_app',
 ]
 
 AUTH_USER_MODEL = 'auth_app.User'
@@ -61,6 +62,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'cattendance_project.urls'
+
+# Default session for student/teacher (auth_app)
+SESSION_COOKIE_NAME = "cattendance_session"
+
+# For admin views only
+ADMIN_SESSION_COOKIE_NAME = "cattendance_admin_session"
 
 TEMPLATES = [
     {
@@ -126,8 +133,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [] 
+STATIC_URL = '/static/'  
+STATICFILES_DIRS = [     
+    BASE_DIR / "static",
+]
 STATIC_ROOT = BASE_DIR / "staticfiles" 
 
 # Default primary key field type

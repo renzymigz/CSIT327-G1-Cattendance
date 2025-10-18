@@ -1,0 +1,44 @@
+{% load static %}
+<!-- Sidebar -->
+<div class="bg-[#f2f2f2] shadow-lg w-72 fixed h-full z-[51] border border-r-[#d6d6d6]">
+     <div class="flex items-center mx-auto gap-3 p-6 text-[#a2314b]">
+        <img src="{% static 'images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
+        <h1 class="text-xl font-bold">CATTENDANCE</h1>
+    </div>
+    <h1 class="pl-6 text-xl font-bold">Admin Portal</h1>
+    
+    <nav class="">
+        <div class="px-6 py-3">
+            <a href="{% url 'admin_dashboard' %}" class="flex items-center text-gray-700 hover:bg-[#d7d7d6] px-4 py-2 rounded-lg">
+                <i class="fa-regular fa-grid-2 mr-3"></i>
+                Dashboard
+            </a>
+        </div>
+        
+        <div class="px-6 py-3">
+            <a href="{% url 'student_dashboard' %}" class="flex items-center text-gray-700 hover:bg-[#d7d7d6] px-4 py-2 rounded-lg">
+                <i class="fa-regular fa-graduation-cap mr-3"></i>
+                Students
+            </a>
+        </div>
+
+        <div class="px-6 py-3">
+            <a href="{% url 'teacher_dashboard' %}" class="flex items-center text-gray-700 hover:bg-[#d7d7d6] px-4 py-2 rounded-lg">
+                <i class="fa-regular fa-school mr-3"></i>
+                Teachers
+            </a>
+        </div>
+
+        <!-- Logout button -->
+    <div class="px-6 py-3">
+  <form action="{% url 'admin_logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg w-full">
+      <i class="fas fa-sign-out-alt mr-3"></i>
+      Logout
+    </button>
+  </form>
+</div>
+    </nav>
+
+</div>

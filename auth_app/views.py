@@ -1,14 +1,20 @@
 import re
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from .models import User, StudentProfile, TeacherProfile
+from .utils import validate_password_strength
 
 # ------------------ Registration ------------------
 @csrf_exempt
 def register_view(request):
     if request.user.is_authenticated:
+        if request.user.must_change_password:
+                return redirect('auth:change_temp_password')
+        
         if request.user.user_type == 'student':
             return redirect('dashboard:student_dashboard')
         else:
@@ -25,29 +31,8 @@ def register_view(request):
         if not all([email, password, confirm_password, first_name, last_name]):
             messages.error(request, "All fields are required!")
             return render(request, 'auth_app/register.html')
-
-        if password != confirm_password:
-            messages.error(request, "Passwords do not match!")
-            return render(request, 'auth_app/register.html')
-
-        if not re.search(r'[A-Z]', password):
-            messages.error(request, "Password must contain at least one uppercase letter!")
-            return render(request, 'auth_app/register.html')
-
-        if not re.search(r'[a-z]', password):
-            messages.error(request, "Password must contain at least one lowercase letter!")
-            return render(request, 'auth_app/register.html')
-
-        if not re.search(r'\d', password):
-            messages.error(request, "Password must contain at least one number!")
-            return render(request, 'auth_app/register.html')
-
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-            messages.error(request, "Password must contain at least one special character!")
-            return render(request, 'auth_app/register.html')
-
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Email already registered!")
+        
+        if not validate_password_strength(request, password, confirm_password):
             return render(request, 'auth_app/register.html')
 
         # Create User
@@ -81,6 +66,8 @@ def login_view(request):
         else:
             return redirect('dashboard:teacher_dashboard')
 
+    
+            
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -96,15 +83,44 @@ def login_view(request):
                 return render(request, 'auth_app/login.html')
 
             auth_login(request, user)
+            
+            if request.user.must_change_password:
+                return redirect('auth:change_temp_password')
+    
             if user.user_type == 'student':
                 return redirect('dashboard:student_dashboard')
             else:
                 return redirect('dashboard:teacher_dashboard')
         else:
             messages.error(request, "Invalid email or password!")
-
+    
+    
     return render(request, 'auth_app/login.html')
 
+@csrf_exempt
+def change_temp_password(request):
+    if not request.user.is_authenticated or not request.user.must_change_password:
+        return redirect('auth:login')
+    
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not all([new_password, confirm_password]):
+            messages.error(request, "All fields are required!")
+            return render(request, 'auth_app/change_temp_password.html')
+        
+        if not validate_password_strength(request, new_password, confirm_password):
+            return render(request, 'auth_app/change_temp_password.html')
+        
+        user = request.user
+        user.set_password(new_password)
+        user.must_change_password = False
+        user.save()
+        update_session_auth_hash(request, user) 
+        return redirect('dashboard:teacher_dashboard' if user.user_type == 'teacher' else 'dashboard:student_dashboard')
+
+    return render(request, 'auth_app/change_temp_password.html')
 
 # ------------------ Logout ------------------
 def logout_view(request):
