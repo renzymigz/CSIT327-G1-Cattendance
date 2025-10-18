@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cattendance_app',
     'auth_app',
     'core_app',
     'dashboard_app',
