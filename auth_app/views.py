@@ -16,9 +16,9 @@ def register_view(request):
                 return redirect('auth:change_temp_password')
         
         if request.user.user_type == 'student':
-            return redirect('dashboard:student_dashboard')
+            return redirect('dashboard_student:dashboard')
         else:
-            return redirect('dashboard:teacher_dashboard')
+            return redirect('dashboard_teacher:dashboard')
 
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -62,9 +62,9 @@ def register_view(request):
 def login_view(request):
     if request.user.is_authenticated:
         if request.user.user_type == 'student':
-            return redirect('dashboard:student_dashboard')
+            return redirect('dashboard_student:dashboard')
         else:
-            return redirect('dashboard:teacher_dashboard')
+            return redirect('dashboard_teacher:dashboard')
 
     
             
@@ -88,9 +88,9 @@ def login_view(request):
                 return redirect('auth:change_temp_password')
     
             if user.user_type == 'student':
-                return redirect('dashboard:student_dashboard')
+                return redirect('dashboard_student:dashboard')
             else:
-                return redirect('dashboard:teacher_dashboard')
+                return redirect('dashboard_teacher:dashboard')
         else:
             messages.error(request, "Invalid email or password!")
     
@@ -118,7 +118,7 @@ def change_temp_password(request):
         user.must_change_password = False
         user.save()
         update_session_auth_hash(request, user) 
-        return redirect('dashboard:teacher_dashboard' if user.user_type == 'teacher' else 'dashboard:student_dashboard')
+        return redirect('dashboard_teacher:dashboard' if user.user_type == 'teacher' else 'dashboard_student:dashboard')
 
     return render(request, 'auth_app/change_temp_password.html')
 
