@@ -9,7 +9,7 @@
     <nav class="">
         <!-- Common menu items for both -->
         <div class="px-6 py-3">
-            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+            <a href="{% url 'dashboard_teacher:dashboard'%}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
                 <i class="fas fa-home mr-3"></i>
                 Dashboard
             </a>
@@ -19,7 +19,7 @@
         {% if user_type == 'teacher' %}
             <!-- Teacher-specific menu items -->
             <div class="px-6 py-3">
-                <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+                <a href="{% url 'dashboard_teacher:manage_classes' %}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
                     <i class="fas fa-users mr-3"></i>
                     Manage Classes
                 </a>
