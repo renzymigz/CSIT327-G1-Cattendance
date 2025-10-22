@@ -4,86 +4,106 @@
 
 {% block content %}
 <div class="p-8 max-w-[1500px] mx-auto">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Teacher Dashboard</h1>
-    
-    <div class = "bg-gradient-to-r from-[#a2314b] to-[#c9545e] text-white rounded-2xl p-6 mb-8 text-2xl">
-        <p class = "font-semibold">Good Morning, {{ user.first_name }}!</p>
-        <p class = "mt-2 text-lg">Here's an overview of your classes and students today.</p>
+  <!-- Header -->
+  <div class="justify-between mb-6 flex items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Manage Classes</h1>
+      <p>View and manage all your classes</p>
     </div>
+    <button
+      id="openAddClassModal"
+      class="bg-gradient-to-r font-semibold from-[#a2314b] to-[#d64648] text-white px-4 py-2 rounded-lg hover:bg-[#892728] transition flex items-center"
+    >
+      <i class="fa-solid fa-plus mr-2"></i>Add Class
+    </button>
+  </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white rounded-2xl h-28 p-5 border border-gray-300 md:grid-cols-2 grid items-center ">
-            <div>
-                <h2 class="text-lg font-semibold text-gray-700">Total Classes</h2>
-                <p class="text-3xl font-bold mt-2">8</p>
-            </div>
-            <div class = "text-4xl flex justify-end">
-                <i class="fa-solid fa-screen-users"></i>
-            </div>
+  <!-- Classes Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for cls in classes %}
+    <div class="border border-gray-300 rounded-2xl bg-white p-5 mt-6">
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex gap-4 items-center">
+          <div class="w-12 h-12 bg-[#f0f0f0] rounded flex items-center justify-center font-bold">
+            {{ cls.code|slice:":3" }}
+          </div>
+          <div class="flex flex-col space-y-1">
+            <h2 class="text-xl font-semibold text-gray-700">{{ cls.code }}</h2>
+            <p>{{ cls.title }}</p>
+          </div>
         </div>
-
-        <div class="bg-white rounded-2xl h-28  p-5 border border-gray-300 md:grid-cols-2 grid items-center ">
-            <div>
-                <h2 class="text-lg font-semibold text-gray-700">Total Students</h2>
-                <p class="text-3xl font-bold mt-2">120</p>
-            </div>
-            <div class = "text-4xl flex justify-end">
-                <i class="fa-regular fa-graduation-cap"></i>
-            </div>
+        <div class="text-gray-600 transition gap-4 flex">
+          <button class="hover:text-[#a2314b] text-[20px]">
+            <i class="fa-regular fa-trash"></i>
+          </button>
+          <button class="hover:text-[#a2314b] text-[20px]">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
         </div>
-
-        <div class="bg-white rounded-2xl h-28  p-5 border border-gray-300 md:grid-cols-2 grid items-center ">
-            <div>
-                <h2 class="text-lg font-semibold text-gray-700">Attendance Rate</h2>
-                <p class="text-3xl font-bold mt-2">91%</p>
-            </div>
-            <div class = "text-4xl flex justify-end">
-                <i class="fa-regular fa-chart-simple"></i>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl h-28  p-5 border border-gray-300 md:grid-cols-2 grid items-center ">
-            <div>
-                <h2 class="text-lg font-semibold text-gray-700">Today's Classes</h2>
-                <p class="text-3xl font-bold mt-2">2</p>
-            </div>
-            <div class = "text-4xl flex justify-end">
-                <i class="fa-solid fa-screen-users"></i>
-            </div>
-        </div>
+      </div>
+      <p class="text-gray-600 mb-4">
+        <i class="fa-regular fa-clock"></i> {{ cls.schedule_days }} - {{ cls.schedule_time }}
+      </p>
+      <p class="text-gray-600 mb-2">
+        <i class="fa-regular fa-users pr-2"></i>{{ cls.student_count }} Students
+      </p>
+      <hr class="my-4">
+      <button class="bg-[#a2314b] w-full text-center font-semibold justify-center text-white px-4 py-2 rounded-lg hover:bg-[#892728] transition flex items-center">
+        <i class="fa-solid fa-magnifying-glass pr-2"></i>View Class
+      </button>
     </div>
-
-     <div class="mt-10 bg-white p-5 border border-gray-300 rounded-2xl ">
-        <div class="">
-            <h2 class="text-2xl text-gray-700 font-semibold"><i class="fa-regular fa-calendar pr-2 "></i>Today's Classes</h2>
-            <p class="mt-3">Manage attendance for your classes</p>
-        </div>
-
-        <div class="bg-white border border-gray-200 rounded-lg p-4 mt-6  flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="bg-[#f0f0f0] w-[70px] h-[70px] flex items-center justify-center rounded-lg text-xl font-bold text-[#555555]">
-                CS1
-                </div>
-                <div>
-                <p class="font-semibold ">CS101 - Introduction to Programming</p>
-                <p class="text-sm text-gray-500 ">10:00 AM - 11:30 AM</p>
-                <p class="text-sm text-gray-500 ">
-                    <i class="fa-solid fa-users pr-2"></i>45 Students
-                </p>
-                </div>
-            </div>
-            <div class = "flex flex-col w-48 items-end gap-2">
-                <p class="bg-green-600 text-white font-semibold flex items-center  justify-end rounded-full px-3 py-1 text-sm">
-                    <i class="fa-solid fa-check pr-2"></i> Completed 
-                </p>
-                <button class="bg-[#fafbfb] px-4 py-1 rounded-lg font-semibold border border-gray-300 flex items-center hover:bg-gray-100 transition">
-                    <i class="fa-regular fa-users pr-2 text-gray-600"></i>
-                    View Students
-                </button>
-            </div>
-        </div>
-
-    </div>
-
+    {% empty %}
+    <p class="text-gray-500">No classes available.</p>
+    {% endfor %}
+  </div>
 </div>
+
+<!-- MODAL: Add Class -->
+<div id="addClassModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+    <button id="closeAddClassModal" class="absolute top-3 right-3 text-gray-500 hover:text-[#a2314b]">
+      <i class="fa-solid fa-xmark text-xl"></i>
+    </button>
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Add New Class</h2>
+
+    <form method="POST" action="{% url 'dashboard_teacher:add_class' %}" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Class Code</label>
+        <input type="text" name="code" required class="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-[#a2314b]">
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Class Title</label>
+        <input type="text" name="title" required class="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-[#a2314b]">
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Schedule Days</label>
+        <input type="text" name="schedule_days" placeholder="e.g. MWF" required class="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-[#a2314b]">
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Schedule Time</label>
+        <input type="text" name="schedule_time" placeholder="e.g. 8:00AM - 10:00AM" required class="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-[#a2314b]">
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" class="bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white px-4 py-2 rounded-lg font-semibold w-full hover:bg-[#892728] transition">
+          Add Class
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- JS for Modal -->
+<script>
+  const modal = document.getElementById("addClassModal");
+  const openBtn = document.getElementById("openAddClassModal");
+  const closeBtn = document.getElementById("closeAddClassModal");
+
+  openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+  closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
+</script>
 {% endblock %}

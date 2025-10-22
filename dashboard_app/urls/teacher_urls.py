@@ -6,4 +6,5 @@ app_name = 'dashboard_teacher'
 urlpatterns = [
     path('', teacher_views.dashboard_teacher, name='dashboard'),
     path('manage-classes/', teacher_views.manage_classes, name='manage_classes'),
+    path('manage-classes/add/', teacher_views.add_class, name='add_class'),
 ]
