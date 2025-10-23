@@ -1,8 +1,5 @@
-{% extends "dashboard_app/base_dashboard.html" %}
-
-{% block title %}Manage Classes | Cattendance{% endblock %}
-
-{% block content %}
+{% extends "dashboard_app/base_dashboard.html" %} {% block title %}Manage
+Classes | Cattendance{% endblock %} {% block content %}
 <div class="p-8 max-w-[1500px] mx-auto">
   <!-- Header -->
   <div class="justify-between mb-6 flex items-center">
@@ -24,7 +21,9 @@
     <div class="border border-gray-300 rounded-2xl bg-white p-5 mt-6">
       <div class="flex justify-between items-center mb-4">
         <div class="flex gap-4 items-center">
-          <div class="w-12 h-12 bg-[#f0f0f0] rounded flex items-center justify-center font-bold">
+          <div
+            class="w-12 h-12 bg-[#f0f0f0] rounded flex items-center justify-center font-bold"
+          >
             {{ cls.code|slice:":3" }}
           </div>
           <div class="flex flex-col space-y-1">
@@ -42,13 +41,16 @@
         </div>
       </div>
       <p class="text-gray-600 mb-4">
-        <i class="fa-regular fa-clock"></i> {{ cls.schedule_days }} - {{ cls.schedule_time }}
+        <i class="fa-regular fa-clock"></i>
+        {{ cls.meeting_days }} — {{ cls.start_time|time:"g:i A" }} to {{cls.end_time|time:"g:i A" }}
       </p>
       <p class="text-gray-600 mb-2">
-        <i class="fa-regular fa-users pr-2"></i>{{ cls.student_count }} Students
+        <i class="fa-regular fa-users pr-2"></i>0 Students
       </p>
-      <hr class="my-4">
-      <button class="bg-[#a2314b] w-full text-center font-semibold justify-center text-white px-4 py-2 rounded-lg hover:bg-[#892728] transition flex items-center">
+      <hr class="my-4" />
+      <button
+        class="bg-[#a2314b] w-full text-center font-semibold justify-center text-white px-4 py-2 rounded-lg hover:bg-[#892728] transition flex items-center"
+      >
         <i class="fa-solid fa-magnifying-glass pr-2"></i>View Class
       </button>
     </div>
@@ -59,39 +61,203 @@
 </div>
 
 <!-- MODAL: Add Class -->
-<div id="addClassModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
-  <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
-    <button id="closeAddClassModal" class="absolute top-3 right-3 text-gray-500 hover:text-[#a2314b]">
-      <i class="fa-solid fa-xmark text-xl"></i>
-    </button>
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Add New Class</h2>
+<div
+  id="addClassModal"
+  class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4 px-5"
+>
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl relative border border-gray-300">
+    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+      <h2 class="text-2xl font-bold text-gray-800">Add New Class</h2>
+      <button
+        id="closeAddClassModal"
+        class="text-gray-500 hover:text-gray-700 p-1"
+      >
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
 
-    <form method="POST" action="{% url 'dashboard_teacher:add_class' %}" class="space-y-4">
+   
+    <form
+      method="POST"
+      action="{% url 'dashboard_teacher:add_class' %}"
+      class="md:max-h-[500px] h-auto overflow-y-auto p-6"
+      id="addClassForm"
+    >
+      
       {% csrf_token %}
-      <div>
-        <label class="block text-gray-700 font-semibold mb-1">Class Code</label>
-        <input type="text" name="code" required class="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-[#a2314b]">
-      </div>
-      <div>
-        <label class="block text-gray-700 font-semibold mb-1">Class Title</label>
-        <input type="text" name="title" required class="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-[#a2314b]">
-      </div>
-      <div>
-        <label class="block text-gray-700 font-semibold mb-1">Schedule Days</label>
-        <input type="text" name="schedule_days" placeholder="e.g. MWF" required class="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-[#a2314b]">
-      </div>
-      <div>
-        <label class="block text-gray-700 font-semibold mb-1">Schedule Time</label>
-        <input type="text" name="schedule_time" placeholder="e.g. 8:00AM - 10:00AM" required class="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-[#a2314b]">
-      </div>
+      <div class="space-y-6">
+        <div class="relative">
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Course Name</label
+          >
+          <i
+            class="fa-solid fa-graduation-cap absolute left-3 top-1/2 translate-y-[5px] text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+          ></i>
+          <input
+            type="text"
+            name="title"
+            class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition"
+            placeholder="e.g. Introduction to Programming"
+            required
+          />
+        </div>
 
-      <div class="pt-2">
-        <button type="submit" class="bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white px-4 py-2 rounded-lg font-semibold w-full hover:bg-[#892728] transition">
-          Add Class
-        </button>
+        <div class="relative">
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Subject Code</label
+          >
+          <i
+            class="fa-solid fa-hashtag absolute left-3 top-1/2 translate-y-[5px] text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+          ></i>
+          <input
+            type="text"
+            name="code"
+            class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition"
+            placeholder="e.g. CS101"
+            required
+          />
+        </div>
+
+        <div class="relative">
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Instructor</label
+          >
+          <i
+            class="fa-solid fa-user absolute left-3 top-1/2 translate-y-[5px] text-gray-400"
+          ></i>
+          <input
+            type="text"
+            value="{{ request.user.get_full_name }}"
+            class="peer w-full text-gray-600 placeholder:text-[14px] cursor-not-allowed bg-gray-100 pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300"
+            readonly
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="relative">
+            <label class="block text-sm font-semibold text-gray-700 mb-1"
+              >Academic Year</label
+            >
+            <i
+              class="fa-regular fa-calendar-days absolute left-3 top-1/2 translate-y-[5px] text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+            ></i>
+            <input
+              type="text"
+              name="academic_year"
+              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition"
+              placeholder="e.g. 2025–2026"
+              required
+            />
+          </div>
+          <div class="relative">
+            <label class="block text-sm font-semibold text-gray-700 mb-1"
+              >Semester</label
+            >
+            <i
+              class="fa-solid fa-list-check absolute left-3 top-1/2 translate-y-[5px] text-gray-400 peer-focus:text-[#a2314b] transition-colors pointer-events-none"
+            ></i>
+            <select
+              name="semester"
+              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition"
+              required
+            >
+              <option value="" disabled selected>Select</option>
+              <option value="1st Semester">1st Semester</option>
+              <option value="2nd Semester">2nd Semester</option>
+              <option value="Summer">Summer</option>
+            </select>
+            <i
+              class="fa-solid fa-chevron-down absolute right-3 top-1/2 translate-y-[5px] text-gray-400 pointer-events-none"
+            ></i>
+          </div>
+        </div>
+
+        <div class="relative">
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Section</label
+          >
+          <i
+            class="fa-solid fa-section absolute left-3 top-1/2 translate-y-[5px] text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+          ></i>
+          <input
+            type="text"
+            name="section"
+            class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition"
+            placeholder="e.g. BSIT G1"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Meeting Days</label
+          >
+          <div class="grid grid-cols-3 gap-3">
+            {% for day in meeting_days %}
+            <label class="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="meeting_days"
+                value="{{ day }}"
+                class="text-[#a2314b] rounded focus:ring-[#a2314b]"
+              />
+              <span class="text-sm text-gray-700">{{ day }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="relative">
+            <label class="block text-sm font-semibold text-gray-700 mb-1"
+              >Start Time</label
+            >
+            <i
+              class="fa-regular fa-clock absolute left-3 top-1/2 translate-y-[5px] text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+            ></i>
+            <input
+              type="time"
+              name="start_time"
+              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition"
+              required
+            />
+          </div>
+          <div class="relative">
+            <label class="block text-sm font-semibold text-gray-700 mb-1"
+              >End Time</label
+            >
+            <i
+              class="fa-regular fa-clock absolute left-3 top-1/2 translate-y-[5px] text-gray-400 peer-focus:text-[#a2314b] transition-colors"
+            ></i>
+            <input
+              type="time"
+              name="end_time"
+              class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition"
+              required
+            />
+          </div>
+        </div>
       </div>
     </form>
+
+    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+      <button
+        type="button"
+        id="cancelAddClass"
+        class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="addClassForm"
+        class="px-5 py-2 bg-[#a2314b] text-white font-semibold rounded-lg hover:bg-[#892728] transition"
+      >
+        Save Class
+      </button>
+    </div>
   </div>
+</div>
 </div>
 
 <!-- JS for Modal -->
@@ -99,9 +265,11 @@
   const modal = document.getElementById("addClassModal");
   const openBtn = document.getElementById("openAddClassModal");
   const closeBtn = document.getElementById("closeAddClassModal");
+  const cancelBtn = document.getElementById("cancelAddClass");
 
   openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
   closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+  cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.classList.add("hidden");
   });

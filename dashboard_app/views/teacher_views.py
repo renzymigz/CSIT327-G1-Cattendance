@@ -20,13 +20,16 @@ def manage_classes(request):
     if request.user.user_type != 'teacher':
         return redirect('dashboard_student:dashboard')
 
-    # Filter classes for the logged-in teacher
     teacher_profile = request.user.teacherprofile
     classes = Class.objects.filter(teacher=teacher_profile)
 
+    # Pass meeting days list to the template
+    meeting_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
     context = {
         'user_type': 'teacher',
-        'classes': classes
+        'classes': classes,
+        'meeting_days': meeting_days,
     }
     return render(request, 'dashboard_app/teacher/manage_classes.html', context)
 
@@ -40,14 +43,17 @@ def add_class(request):
     if request.method == "POST":
         code = request.POST.get("code", "").strip()
         title = request.POST.get("title", "").strip()
-        schedule_days = request.POST.get("schedule_days", "").strip()
-        schedule_time = request.POST.get("schedule_time", "").strip()
+        academic_year = request.POST.get("academic_year", "").strip()
+        semester = request.POST.get("semester", "").strip()
+        section = request.POST.get("section", "").strip()
+        meeting_days = request.POST.getlist("meeting_days")
+        start_time = request.POST.get("start_time", "").strip()
+        end_time = request.POST.get("end_time", "").strip()
 
-        if not all([code, title, schedule_days, schedule_time]):
+        if not all([code, title, academic_year, semester, section, meeting_days, start_time, end_time]):
             messages.error(request, "All fields are required.")
             return redirect('dashboard_teacher:manage_classes')
 
-        # optional duplicate check
         if Class.objects.filter(code=code).exists():
             messages.error(request, "Class code already exists.")
             return redirect('dashboard_teacher:manage_classes')
@@ -56,8 +62,12 @@ def add_class(request):
             teacher=teacher_profile,
             code=code,
             title=title,
-            schedule_days=schedule_days,
-            schedule_time=schedule_time,
+            academic_year=academic_year,
+            semester=semester,
+            section=section,
+            meeting_days=", ".join(meeting_days),
+            start_time=start_time,
+            end_time=end_time,
         )
 
         messages.success(request, f"Class '{code}' created successfully.")
