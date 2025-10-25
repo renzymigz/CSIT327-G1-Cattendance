@@ -63,6 +63,6 @@ class TeacherProfile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         if instance.user_type == 'student':
-            StudentProfile.objects.create(user=instance)
+            StudentProfile.objects.get_or_create(user=instance)
         elif instance.user_type == 'teacher':
-            TeacherProfile.objects.create(user=instance)
+            TeacherProfile.objects.get_or_create(user=instance)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Class
+from .models import Class, ClassSchedule
 
 @admin.register(Class)
 class ClassAdmin(admin.ModelAdmin):
@@ -10,10 +10,18 @@ class ClassAdmin(admin.ModelAdmin):
         "academic_year",
         "semester",
         "section",
-        "meeting_days",
-        "start_time",
-        "end_time",
         "created_at",
     )
     search_fields = ("code", "title", "teacher__user__email")
-    list_filter = ("academic_year", "semester", "meeting_days")
+    list_filter = ("academic_year", "semester")
+
+# manage schedules easily from the admin panel
+@admin.register(ClassSchedule)
+class ClassScheduleAdmin(admin.ModelAdmin):
+    list_display = (
+        "class_obj",
+        "day_of_week",
+        "start_time",
+        "end_time",
+    )
+    list_filter = ("day_of_week",)
