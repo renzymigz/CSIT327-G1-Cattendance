@@ -1,0 +1,232 @@
+{% extends "dashboard_app/base_dashboard.html" %} 
+{% block title %}Manage Classes | Cattendance{% endblock %} 
+{% block content %}
+<div class="p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-[#6a1e1e]">Manage Classes</h1>
+    <button
+      id="openAddClassModal"
+      class="bg-[#a2314b] hover:bg-[#8f2b43] text-white px-4 py-2 rounded-lg shadow-md transition"
+    >
+      + Add Class
+    </button>
+  </div>
+
+  <!-- Class list -->
+  {% if classes %}
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for cls in classes %}
+    <a
+      href="{% url 'dashboard_teacher:view_class' cls.id %}"
+      class="block bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition p-5"
+    >
+      <h2 class="text-xl font-semibold text-[#6a1e1e] mb-1">{{ cls.title }}</h2>
+      <p class="text-sm text-gray-600 font-medium mb-2">
+        {{ cls.code }} — {{ cls.section }}
+      </p>
+      <p class="text-sm text-gray-600 mb-2">
+        <strong>Semester:</strong> {{ cls.semester }}
+      </p>
+      <p class="text-sm text-gray-600 mb-2">
+        <strong>Year:</strong> {{ cls.academic_year }}
+      </p>
+
+      {% if cls.schedules.all %}
+      <div class="mt-2">
+        <p class="text-sm font-semibold text-gray-700">Schedule:</p>
+        <ul class="list-disc list-inside text-sm text-gray-600">
+          {% for sched in cls.schedules.all %}
+          <li>
+            {{ sched.day_of_week }} — {{ sched.start_time|time:"h:i A" }} to {{ sched.end_time|time:"h:i A" }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-gray-600">No classes created yet.</p>
+  {% endif %}
+</div>
+
+<!-- Add Class Modal -->
+<div
+  id="addClassModal"
+  class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+>
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-[#6a1e1e]">Add New Class</h2>
+      <button id="closeAddClassModal" class="text-gray-500 hover:text-gray-700">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form method="POST" action="{% url 'dashboard_teacher:add_class' %}">
+      {% csrf_token %}
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Class Code</label
+          >
+          <input
+            type="text"
+            name="code"
+            class="w-full bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Class Title</label
+          >
+          <input
+            type="text"
+            name="title"
+            class="w-full bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Section</label
+          >
+          <input
+            type="text"
+            name="section"
+            class="w-full bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
+            required
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1"
+              >Semester</label
+            >
+            <input
+              type="text"
+              name="semester"
+              class="w-full bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1"
+              >Academic Year</label
+            >
+            <input
+              type="text"
+              name="academic_year"
+              placeholder="e.g. 2025–2026"
+              class="w-full bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- 🆕 Dynamic Schedules -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1"
+            >Class Schedule</label
+          >
+          <div id="scheduleContainer" class="space-y-3">
+            <div class="schedule-item flex gap-3 items-center">
+              <select
+                name="days[]"
+                class="w-1/3 bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-[#a2314b]"
+                required
+              >
+                <option value="" disabled selected>Select Day</option>
+                {% for day in meeting_days %}
+                <option value="{{ day }}">{{ day }}</option>
+                {% endfor %}
+              </select>
+              <input
+                type="time"
+                name="start_times[]"
+                class="w-1/3 bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-[#a2314b]"
+                required
+              />
+              <input
+                type="time"
+                name="end_times[]"
+                class="w-1/3 bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-[#a2314b]"
+                required
+              />
+              <button
+                type="button"
+                class="remove-schedule text-red-600 hover:text-red-800"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            id="addSchedule"
+            class="mt-2 text-sm text-[#a2314b] font-semibold hover:underline"
+          >
+            + Add another day
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          type="button"
+          id="cancelAddClass"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43] shadow-md"
+        >
+          Create Class
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Modal logic
+  const modal = document.getElementById("addClassModal");
+  const openBtn = document.getElementById("openAddClassModal");
+  const closeBtn = document.getElementById("closeAddClassModal");
+  const cancelBtn = document.getElementById("cancelAddClass");
+
+  openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+  closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+  cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
+
+  // Add/remove schedule rows
+  document.getElementById("addSchedule").addEventListener("click", () => {
+    const container = document.getElementById("scheduleContainer");
+    const newRow = container.firstElementChild.cloneNode(true);
+    newRow.querySelectorAll("input, select").forEach((el) => (el.value = ""));
+    container.appendChild(newRow);
+  });
+
+  document
+    .getElementById("scheduleContainer")
+    .addEventListener("click", (e) => {
+      if (e.target.closest(".remove-schedule")) {
+        const row = e.target.closest(".schedule-item");
+        const container = document.getElementById("scheduleContainer");
+        if (container.children.length > 1) row.remove();
+      }
+    });
+</script>
+{% endblock %}
