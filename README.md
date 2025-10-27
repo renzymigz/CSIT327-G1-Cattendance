@@ -5,28 +5,27 @@
 ![Python](https://img.shields.io/badge/python-%2314354C.svg?style=for-the-badge&logo=python&logoColor=white)
 
 ## About
-Cattedance is a QR code–based attendance system designed to replace paper logs and Excel sheets with a faster, more secure process.
+Cattendance is a QR code–based attendance system designed to replace paper logs and Excel sheets with a faster, more secure process.
 
 ## Tech Stack
 - **Backend:** Django (Python web framework)
 - **Database:** Supabase (PostgreSQL)
 - **Frontend:** Tailwind CSS
-- **Hosting:** Vercel
+- **Hosting:** Render
 
 ## Team Members
 | Name | Role | Email |
 |------|------|-------|
-| James Andrew J. Magdales | Product Owner | jamesandrew.magdales@cit.edu |
-| Johanne Gabriel P. Lumauag | Business Analyst | johannegabriel.lumauag@cit.edu |
-| Carlos Rogel Lofranco | Scrum Master | carlosrogel.lofranco@cit.edu |
 | Florence Azriel R. Migallos | Lead Developer | florenceazriel.migallos@cit.edu |
 | Frances Aailyah S. Maturan | Backend Developer | francesaaliyah.maturan@cit.edu |
 | Ralph Keane A. Maestrado | Frontend Developer | ralphkeane.maestrado@cit.edu |
 
 ## Deployable Link
-**Live Demo:** [Cattendance on Vercel - Coming Soon]
+**Live Demo:** [Cattendance on Render - Coming Soon]
 
-## Prerequisites
+## Getting Started
+
+### Prerequisites
 Before setting up this project, ensure you have:
 
 - Python 3.8+ installed
@@ -34,176 +33,78 @@ Before setting up this project, ensure you have:
 - Node.js 16+ and npm (for Tailwind CSS)
 - Git
 
-## Setup Instructions
-### 1. Clone the Repository
+### Setup Instructions
 
-```bash
-git clone https://github.com/renzymigz/Cattendance.git
-cd Cattendance
-```
+1.  **Clone the Repository**
+    ```bash
+    git clone [https://github.com/renzymigz/Cattendance.git](https://github.com/renzymigz/Cattendance.git)
+    cd Cattendance
+    ```
 
-### 2. Create and Activate Virtual Environment
+2.  **Create and Activate Virtual Environment**
 
-**Windows:**
-```bash
-python -m venv env
-env\Scripts\activate
-```
-or
-```bash
-py -m venv env
-env\Scripts\activate
-```
+    **Windows:**
+    ```bash
+    python -m venv env
+    env\Scripts\activate
+    ```
+    or
+    ```bash
+    py -m venv env
+    env\Scripts\activate
+    ```
 
-**macOS/Linux:**
-```bash
-python3 -m venv env
-source env/bin/activate
-```
+    **macOS/Linux:**
+    ```bash
+    python3 -m venv env
+    source env/bin/activate
+    ```
 
-### 3. Install Dependencies
+3.  **Install Dependencies**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-```bash
-pip install -r requirements.txt
-# Add other dependencies as needed
-```
+4.  **Install Node.js Dependencies (for Tailwind CSS)**
+    ```bash
+    npm install
+    ```
 
-### 4. Install Node.js Dependencies (for Tailwind CSS)
+5.  **Set Up Environment Variables**
+    Create a `.env` file in the project root for sensitive settings. Ask the project author or lead for the `SECRET_KEY` value.
+    ```env
+    SECRET_KEY=your-secret-key-here
+    DEBUG=True
+    DATABASE_URL=sqlite:///db.sqlite3
+    ```
 
-```bash
-npm install
-```
+6.  **Database Setup**
+    Run migrations to set up the database:
+    ```bash
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
 
-### 5. Set Up Environment Variables
+7.  **Create Superuser (Optional)**
+    ```bash
+    python manage.py createsuperuser
+    ```
 
-Add a .env file (ask the maintainer for the SECRET_KEY). The project reads configuration from a repo-level .env located in the repository root. Ask the project author or lead for the SECRET_KEY value.
+8.  **Build Tailwind CSS**
+    Start the Tailwind CSS build process. Keep this running in a separate terminal during development.
+    ```bash
+    npm run dev
+    ```
 
-### 6. Database Setup
-
-Run migrations to set up the database:
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-### 7. Create Superuser (Optional)
-
-```bash
-python manage.py createsuperuser
-```
-
-### 8. Build Tailwind CSS
-
-Start the Tailwind CSS build process:
-```bash
-npm run dev
-```
-
-Keep this running in a separate terminal during development to watch for changes.
-
-### 9. Run Development Server
-
-In another terminal (with virtual environment activated):
-
-```bash
-python manage.py runserver
-```
-
-Visit `http://127.0.0.1:8000` to view the application.
-
-## Development Workflow
-
-### Working with Tailwind CSS
-
-- Edit your HTML templates with Tailwind classes
-- The CSS will automatically rebuild when you save changes
-- The compiled CSS is output to `static/cattendance_app/css/output.css`
-
-### Making Database Changes
-
-1. Modify models in `cattendance_app/models.py`
-2. Create migrations: `python manage.py makemigrations`
-3. Apply migrations: `python manage.py migrate`
-
-### Static Files
-
-- Place custom CSS/JS in `static/cattendance_app/`
-- Templates go in `templates/cattendance_app/`
-- Run `python manage.py collectstatic` for production
-
-## Project Structure
-
-```
-Cattendance/
-├── cattendance_project/         # Django project settings
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── cattendance_app/             # Main Django app
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   └── static/cattendance_app/
-├── templates/cattendance_app/   # HTML templates
-├── static/                      # Static files (CSS, JS, images)
-├── env/                         # Virtual environment
-├── package.json                 # Node.js dependencies
-├── tailwind.config.js          # Tailwind configuration
-└── manage.py                   # Django management script
-```
-
-## Branch Naming Format
-```
-type/scope/snake_case_description
-```
-
-**Examples:**
-```bash
-feature/accounts/user_authentication
-fix/listings/filter_bug_fix  
-chore/project/update_dependencies
-docs/readme/improve_setup_guide
-```
-
-### Branch Types
-| Type | When to Use | Examples |
-|------|-------------|----------|
-| `feature/` | New functionality, apps, views, models | `feature/accounts/login_system` |
-| `fix/` | Bug fixes, broken functionality | `fix/listings/broken_search` |
-| `chore/` | Dependencies, configs, maintenance | `chore/project/add_requirements` |
-| `docs/` | Documentation, README, comments | `docs/readme/update_workflow` |
-| `refactor/` | Code cleanup without behavior change | `refactor/models/simplify_user_model` |
-
-### Django Commands
-- `python manage.py runserver` - Start development server
-- `python manage.py makemigrations` - Create database migrations
-- `python manage.py migrate` - Apply database migrations
-- `python manage.py createsuperuser` - Create admin user
-- `python manage.py collectstatic` - Collect static files for production
-
-### Node.js Commands
-- `npm run dev` - Start Tailwind CSS watcher (development)
-- `npm run build` - Build optimized CSS for production
-
-## Environment Variables
-
-Create a `.env` file in the project root for sensitive settings:
-
-```env
-SECRET_KEY=your-secret-key-here
-DEBUG=True
-DATABASE_URL=sqlite:///db.sqlite3
-```
+9.  **Run Development Server**
+    In another terminal (with virtual environment activated):
+    ```bash
+    python manage.py runserver
+    ```
+    Visit `http://127.0.0.1:8000` to view the application.
 
 ## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! For development workflows, branch naming conventions, and pull request guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
-
-This project is licensed under the MIT License - see the LICENSE file for details." 
+This project is licensed under the MIT License - see the LICENSE file for details.
