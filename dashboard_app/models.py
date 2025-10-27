@@ -1,5 +1,8 @@
 from django.db import models
 from auth_app.models import TeacherProfile, StudentProfile
+import csv
+from django.http import HttpResponse
+
 
 
 class Class(models.Model):
@@ -71,3 +74,21 @@ class ClassSession(models.Model):
 
     def __str__(self):
         return f"{self.class_obj.code} - {self.schedule_day.day_of_week} ({self.date})"
+
+def export_enrolled_students(request, class_id):
+    class_obj = Class.objects.get(id=class_id)
+    enrollments = Enrollment.objects.filter(class_obj=class_obj)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{class_obj.code}_enrolled_students.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Username', 'Email'])
+
+    for enrollment in enrollments:
+        writer.writerow([
+            enrollment.student.user.username,
+            enrollment.student.user.email
+        ])
+
+    return response

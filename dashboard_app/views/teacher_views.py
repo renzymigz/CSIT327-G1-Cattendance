@@ -6,6 +6,8 @@ from auth_app.models import StudentProfile
 from django.utils import timezone
 from dashboard_app.models import Class, Enrollment, AttendanceRecord, ClassSchedule, ClassSession
 from dashboard_app.forms import ClassSessionForm
+import csv
+from django.http import HttpResponse
 
 @login_required
 def dashboard_teacher(request):
@@ -158,3 +160,24 @@ def view_class(request, class_id):
         'session_form': session_form,
     }
     return render(request, 'dashboard_app/teacher/view_class.html', context)
+
+@login_required
+def export_enrolled_students(request, class_id):
+    from dashboard_app import models  # ensure imports stay clean
+    class_obj = Class.objects.get(id=class_id)
+    enrollments = Enrollment.objects.filter(class_obj=class_obj)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{class_obj.code}_enrolled_students.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Full Name', 'Email'])
+
+    for enrollment in enrollments:
+        user = enrollment.student.user
+        full_name = f"{user.first_name} {user.last_name}".strip()
+        if not full_name:  # if no name is provided
+            full_name = user.username or user.email
+        writer.writerow([full_name, user.email])
+
+    return response

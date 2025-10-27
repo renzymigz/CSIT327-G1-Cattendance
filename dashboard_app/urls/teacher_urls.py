@@ -8,4 +8,5 @@ urlpatterns = [
     path('manage-classes/', teacher_views.manage_classes, name='manage_classes'),
     path('manage-classes/add/', teacher_views.add_class, name='add_class'),
     path('class/<int:class_id>/', teacher_views.view_class, name='view_class'),
+    path('class/<int:class_id>/export/', teacher_views.export_enrolled_students, name='export_enrolled_students_csv'),
 ]
