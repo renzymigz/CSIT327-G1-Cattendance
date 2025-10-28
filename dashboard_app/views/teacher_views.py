@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.conf import settings
 
 from auth_app.models import StudentProfile
 from dashboard_app.models import (
@@ -9,6 +10,15 @@ from dashboard_app.models import (
     ClassSchedule, ClassSession, SessionAttendance
 )
 from dashboard_app.forms import ClassSessionForm
+from supabase import create_client
+import datetime
+import logging
+
+
+# ==============================
+# SUPABASE CLIENT
+# ==============================
+supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 
 # ==============================
@@ -18,12 +28,10 @@ from dashboard_app.forms import ClassSessionForm
 def dashboard_teacher(request):
     if not request.user.is_authenticated:
         return redirect('auth:login')
-
     if request.user.user_type != 'teacher':
         return redirect('dashboard_student:dashboard')
 
-    context = {'user_type': 'teacher'}
-    return render(request, "dashboard_app/teacher/dashboard.html", context)
+    return render(request, "dashboard_app/teacher/dashboard.html", {'user_type': 'teacher'})
 
 
 # ==============================
@@ -33,7 +41,6 @@ def dashboard_teacher(request):
 def manage_classes(request):
     if not request.user.is_authenticated:
         return redirect('auth:login')
-
     if request.user.user_type != 'teacher':
         return redirect('dashboard_student:dashboard')
 
@@ -46,12 +53,11 @@ def manage_classes(request):
 
     meeting_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-    context = {
+    return render(request, 'dashboard_app/teacher/manage_classes.html', {
         'user_type': 'teacher',
         'classes': classes,
         'meeting_days': meeting_days,
-    }
-    return render(request, 'dashboard_app/teacher/manage_classes.html', context)
+    })
 
 
 # ==============================
@@ -160,36 +166,36 @@ def view_class(request, class_id):
             new_session.status = "ongoing"
             new_session.save()
 
-            # ✅ Create attendance entries automatically
             enrollments = Enrollment.objects.filter(class_obj=class_obj)
-            for enrollment in enrollments:
-                SessionAttendance.objects.get_or_create(session=new_session, student=enrollment.student)
+            for e in enrollments:
+                SessionAttendance.objects.get_or_create(session=new_session, student=e.student)
 
             messages.success(request, "Class session created successfully.")
             return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
         else:
             messages.error(request, "Failed to create session. Please check the form.")
 
-    context = {
+    return render(request, 'dashboard_app/teacher/view_class.html', {
         'user_type': 'teacher',
         'class_obj': class_obj,
         'enrollments': enrollments,
         'sessions': sessions,
         'session_form': session_form,
-    }
-    return render(request, 'dashboard_app/teacher/view_class.html', context)
+    })
 
+# ==============================
+# CREATE SESSION
+# ==============================
 @login_required
 def create_session(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id)
-
     if request.method == 'POST':
         schedule_day_id = request.POST.get('schedule_day')
         if not schedule_day_id:
             messages.error(request, "Please select a schedule day.")
             return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-        # Create a new session
+        # ✅ Create the session
         session = ClassSession.objects.create(
             class_obj=class_obj,
             schedule_day_id=schedule_day_id,
@@ -197,17 +203,15 @@ def create_session(request, class_id):
             status="ongoing"
         )
 
-        # ✅ Automatically add all enrolled students to SessionAttendance
+        # ✅ Auto-add all enrolled students to SessionAttendance
         enrollments = Enrollment.objects.filter(class_obj=class_obj)
-        for enrollment in enrollments:
-            SessionAttendance.objects.get_or_create(
-                session=session,
-                student=enrollment.student
-            )
+        for e in enrollments:
+            SessionAttendance.objects.get_or_create(session=session, student=e.student)
 
         messages.success(request, "Session created successfully!")
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
+    # If GET request — redirect back
     return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
 
@@ -217,44 +221,77 @@ def create_session(request, class_id):
 @login_required
 def delete_session(request, session_id):
     session = get_object_or_404(ClassSession, id=session_id)
-    class_id = session.class_obj.id
+    cid = session.class_obj.id
     session.delete()
     messages.success(request, "Session deleted successfully!")
-    return redirect('dashboard_teacher:view_class', class_id=class_id)
+    return redirect('dashboard_teacher:view_class', class_id=cid)
 
 
 # ==============================
-# VIEW SESSION (ATTENDANCE)
+# VIEW SESSION (ATTENDANCE + SUPABASE SYNC)
 # ==============================
 @login_required
 def view_session(request, class_id, session_id):
     session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
-    class_obj = session.class_obj  # ✅ make class_obj available to the template
+    class_obj = session.class_obj
     enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
 
+    # Ensure every enrolled student has a SessionAttendance record
     for enrollment in enrollments:
-        SessionAttendance.objects.get_or_create(
-            session=session,
-            student=enrollment.student
-        )
+        SessionAttendance.objects.get_or_create(session=session, student=enrollment.student)
 
     attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
 
     if request.method == 'POST':
+        today = datetime.date.today().isoformat()
+        success_count = 0
+        error_count = 0
+
         for attendance in attendances:
-            status = request.POST.get(f'status_{attendance.student.id}')
-            if status in ['present', 'absent']:
+            student_id = attendance.student.user.id
+            full_name = f"{attendance.student.user.first_name} {attendance.student.user.last_name}"
+            status = request.POST.get(f'status_{attendance.student.pk}')
+
+            if status not in ['present', 'absent']:
+                continue
+
+            try:
+                # ✅ Save to local database
                 attendance.is_present = (status == 'present')
                 attendance.save()
-        messages.success(request, "Attendance saved successfully!")
+
+                # ✅ Sync to Supabase using UPSERT
+                response = supabase.table("dashboard_app_attendance_records").upsert({
+                    "id": attendance.id,  # uses local record ID for conflict handling
+                    "date": today,
+                    "student_name": full_name,
+                    "status": status,
+                }).execute()
+
+                if response.data:
+                    success_count += 1
+                else:
+                    error_count += 1
+
+            except Exception as e:
+                logging.error(f"Supabase sync failed: {e}")
+                error_count += 1
+
+        # ✅ Inline message inside the attendance screen
+        if success_count > 0:
+            messages.success(request, f"✅ {success_count} attendance record(s) synced to Supabase successfully!")
+        elif error_count > 0:
+            messages.warning(request, f"⚠️ Attendance saved locally, but {error_count} record(s) failed to sync.")
+        else:
+            messages.info(request, "ℹ️ No attendance changes detected.")
+
         return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
 
+    # Render page
     return render(request, 'dashboard_app/teacher/view_session.html', {
         'session': session,
-        'class_obj': class_obj,   # ✅ added
-        'class_id': class_id,     # ✅ added
+        'class_obj': class_obj,
+        'class_id': class_id,
         'enrollments': enrollments,
         'attendances': attendances,
     })
-
-

@@ -2,32 +2,6 @@
 {% block title %}Mark Attendance | Cattendance{% endblock %}
 {% block content %}
 
-<style>
-.attn-radio { display: none; }
-.attn-label {
-  display: inline-block;
-  padding: 6px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #fff;
-  color: #374151;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-}
-.attn-label:hover { background: #f3f4f6; }
-.attn-radio.present:checked + .attn-label {
-  background: #ecfdf5;
-  color: #065f46;
-  border-color: #10b981;
-}
-.attn-radio.absent:checked + .attn-label {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: #ef4444;
-}
-</style>
-
 <div class="p-6">
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
@@ -42,28 +16,28 @@
 
   <!-- Counters -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-    <div class="rounded-xl border border-green-200 bg-green-50 p-5">
+    <div class="rounded-xl border border-green-200 bg-green-50 p-5 text-center">
       <p class="text-green-700 font-semibold">Present</p>
       <p id="count-present" class="text-4xl font-bold text-green-700 mt-1">0</p>
     </div>
-    <div class="rounded-xl border border-red-200 bg-red-50 p-5">
+    <div class="rounded-xl border border-red-200 bg-red-50 p-5 text-center">
       <p class="text-red-700 font-semibold">Absent</p>
       <p id="count-absent" class="text-4xl font-bold text-red-700 mt-1">0</p>
     </div>
-    <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
+    <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 text-center">
       <p class="text-gray-700 font-semibold">Not Marked</p>
       <p id="count-unmarked" class="text-4xl font-bold text-gray-700 mt-1">0</p>
     </div>
   </div>
 
-  <!-- Buttons -->
+  <!-- Bulk Buttons -->
   <div class="flex gap-3 mb-6">
-    <button type="button" id="btn-mark-all-present"
-      class="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
+    <button id="btn-mark-all-present" type="button"
+            class="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
       Mark All Present
     </button>
-    <button type="button" id="btn-clear-all"
-      class="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
+    <button id="btn-clear-all" type="button"
+            class="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
       Clear All
     </button>
   </div>
@@ -77,51 +51,50 @@
           <tr>
             <th class="px-5 py-3">Student Name</th>
             <th class="px-5 py-3">Student ID</th>
-            <th class="px-5 py-3">Attendance Status</th>
+            <th class="px-5 py-3 text-center">Attendance Status</th>
             <th class="px-5 py-3 text-right">QR Scan</th>
           </tr>
         </thead>
-        <tbody id="attendance-body" class="divide-y divide-gray-100 text-sm">
+
+        <tbody id="attn-tbody" class="divide-y divide-gray-100 text-sm">
           {% for a in attendances %}
           {% with s=a.student user=a.student.user %}
-          <tr class="student-row" data-student="{{ s.pk }}">
-            <td class="px-5 py-4 font-medium text-gray-800">{{ user.first_name }} {{ user.last_name }}</td>
+          <tr class="attn-row" data-student="{{ s.pk }}">
+            <td class="px-5 py-4 font-medium text-gray-800">
+              {{ user.first_name }} {{ user.last_name }}
+            </td>
             <td class="px-5 py-4 text-gray-600">
               {% if s.student_id %}{{ s.student_id }}{% else %}—{% endif %}
             </td>
 
-            <!-- Attendance Buttons -->
-            <td class="px-5 py-3">
-              <div class="flex items-center gap-3">
-                {% with group_name="attendance_"|add:s.pk|stringformat:"s" %}
-                  <input type="radio"
-                         id="present-{{ s.pk }}"
-                         class="attn-radio present"
-                         name="{{ group_name }}"
-                         value="present">
-                  <label for="present-{{ s.pk }}" class="attn-label">Present</label>
-
-                  <input type="radio"
-                         id="absent-{{ s.pk }}"
-                         class="attn-radio absent"
-                         name="{{ group_name }}"
-                         value="absent">
-                  <label for="absent-{{ s.pk }}" class="attn-label">Absent</label>
-                {% endwith %}
+            <td class="px-5 py-4 text-center">
+              <div class="inline-flex gap-2">
+                <button type="button"
+                        class="btn-present px-4 py-1.5 rounded-md border border-gray-300 bg-white text-gray-700 transition">
+                  Present
+                </button>
+                <button type="button"
+                        class="btn-absent px-4 py-1.5 rounded-md border border-gray-300 bg-white text-gray-700 transition">
+                  Absent
+                </button>
               </div>
+
+              <!-- ✅ Correct hidden input naming using student.pk -->
+              <input type="hidden"
+                     id="status-{{ s.pk }}"
+                     name="status_{{ s.pk }}"
+                     value="{% if a.is_present is True %}present{% elif a.is_present is False %}absent{% else %}{% endif %}">
             </td>
 
-            <!-- QR Button -->
-            <td class="px-5 py-3 text-right">
-              <button type="button"
-                      class="px-3 py-2 rounded-md bg-[#a2314b] text-white hover:bg-[#8f2b43]">
+            <td class="px-5 py-4 text-right">
+              <button type="button" class="px-3 py-2 rounded-md bg-[#a2314b] text-white">
                 <i class="fa-solid fa-qrcode"></i>
               </button>
             </td>
           </tr>
           {% endwith %}
           {% empty %}
-          <tr><td colspan="4" class="px-5 py-6 text-center text-gray-600">No students enrolled.</td></tr>
+          <tr><td colspan="4" class="px-5 py-6 text-gray-600 text-center">No students enrolled.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -138,38 +111,73 @@
   </form>
 </div>
 
-<!-- JS Logic -->
+<!-- ✅ FINAL RELIABLE SCRIPT -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const tbody = document.getElementById("attendance-body");
+  const tbody = document.getElementById("attn-tbody");
+  const base = ["bg-white","text-gray-700","border-gray-300"];
+  const present = ["bg-green-50","text-green-700","border-green-500"];
+  const absent = ["bg-red-50","text-red-700","border-red-500"];
 
-  function recompute() {
-    let present = 0, absent = 0, unmarked = 0;
-    tbody.querySelectorAll("tr.student-row").forEach(row => {
-      const checked = row.querySelector("input.attn-radio:checked");
-      if (!checked) unmarked++;
-      else if (checked.value === "present") present++;
-      else if (checked.value === "absent") absent++;
+  function paintRow(row, value) {
+    const btnP = row.querySelector(".btn-present");
+    const btnA = row.querySelector(".btn-absent");
+    [btnP, btnA].forEach(b => {
+      b.classList.remove(...present, ...absent);
+      b.classList.add(...base);
     });
-    document.getElementById("count-present").textContent = present;
-    document.getElementById("count-absent").textContent = absent;
-    document.getElementById("count-unmarked").textContent = unmarked;
+    if (value === "present") {
+      btnP.classList.remove(...base);
+      btnP.classList.add(...present);
+    } else if (value === "absent") {
+      btnA.classList.remove(...base);
+      btnA.classList.add(...absent);
+    }
   }
 
-  tbody.addEventListener("change", e => {
-    if (e.target.classList.contains("attn-radio")) recompute();
+  function setRowState(row, value) {
+    const input = row.querySelector("input[type='hidden']");
+    input.value = value;
+    paintRow(row, value);
+  }
+
+  function recompute() {
+    let p = 0, a = 0, n = 0;
+    document.querySelectorAll("tbody input[type='hidden']").forEach(inp => {
+      if (inp.value === "present") p++;
+      else if (inp.value === "absent") a++;
+      else n++;
+    });
+    document.getElementById("count-present").textContent = p;
+    document.getElementById("count-absent").textContent = a;
+    document.getElementById("count-unmarked").textContent = n;
+  }
+
+  tbody.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-present, .btn-absent");
+    if (!btn) return;
+    const row = btn.closest("tr.attn-row");
+    const input = row.querySelector("input[type='hidden']");
+    const newVal = btn.classList.contains("btn-present") ? "present" : "absent";
+    setRowState(row, input.value === newVal ? "" : newVal);
+    recompute();
   });
 
   document.getElementById("btn-mark-all-present").addEventListener("click", () => {
-    tbody.querySelectorAll(".attn-radio.present").forEach(r => r.checked = true);
+    document.querySelectorAll("tr.attn-row").forEach(r => setRowState(r, "present"));
     recompute();
   });
 
   document.getElementById("btn-clear-all").addEventListener("click", () => {
-    tbody.querySelectorAll(".attn-radio").forEach(r => r.checked = false);
+    document.querySelectorAll("tr.attn-row").forEach(r => setRowState(r, ""));
     recompute();
   });
 
+  // Initialize on page load
+  document.querySelectorAll("tr.attn-row").forEach(r => {
+    const val = r.querySelector("input[type='hidden']").value || "";
+    paintRow(r, val);
+  });
   recompute();
 });
 </script>
