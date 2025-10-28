@@ -59,6 +59,7 @@ class AttendanceRecord(models.Model):
     def __str__(self):
         return f"{self.enrollment.student.user.email} - {self.date} ({self.status})"
 
+
 class ClassSession(models.Model):
     class_obj = models.ForeignKey(Class, on_delete=models.CASCADE, related_name="sessions")
     schedule_day = models.ForeignKey(ClassSchedule, on_delete=models.CASCADE)
@@ -71,3 +72,15 @@ class ClassSession(models.Model):
 
     def __str__(self):
         return f"{self.class_obj.code} - {self.schedule_day.day_of_week} ({self.date})"
+
+
+class SessionAttendance(models.Model):
+    session = models.ForeignKey('ClassSession', on_delete=models.CASCADE, related_name='attendances')
+    student = models.ForeignKey('auth_app.StudentProfile', on_delete=models.CASCADE)
+    is_present = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('session', 'student')
+
+    def __str__(self):
+        return f"{self.student.user.get_full_name()} - {self.session.class_obj.code} ({'Present' if self.is_present else 'Absent'})"

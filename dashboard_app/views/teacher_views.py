@@ -1,12 +1,19 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from auth_app.models import StudentProfile
 from django.utils import timezone
-from dashboard_app.models import Class, Enrollment, AttendanceRecord, ClassSchedule, ClassSession
+
+from auth_app.models import StudentProfile
+from dashboard_app.models import (
+    Class, Enrollment, AttendanceRecord,
+    ClassSchedule, ClassSession, SessionAttendance
+)
 from dashboard_app.forms import ClassSessionForm
 
+
+# ==============================
+# DASHBOARD
+# ==============================
 @login_required
 def dashboard_teacher(request):
     if not request.user.is_authenticated:
@@ -18,6 +25,10 @@ def dashboard_teacher(request):
     context = {'user_type': 'teacher'}
     return render(request, "dashboard_app/teacher/dashboard.html", context)
 
+
+# ==============================
+# MANAGE CLASSES
+# ==============================
 @login_required
 def manage_classes(request):
     if not request.user.is_authenticated:
@@ -29,11 +40,10 @@ def manage_classes(request):
     teacher_profile = request.user.teacherprofile
     classes = (
         Class.objects.filter(teacher=teacher_profile)
-        .prefetch_related('schedules')  
-        .order_by('-created_at')
+        .prefetch_related('schedules')
+        .order_by('-id')
     )
 
-    # Pass meeting days list to the template
     meeting_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
     context = {
@@ -43,6 +53,10 @@ def manage_classes(request):
     }
     return render(request, 'dashboard_app/teacher/manage_classes.html', context)
 
+
+# ==============================
+# ADD CLASS
+# ==============================
 @login_required
 def add_class(request):
     if request.user.user_type != 'teacher':
@@ -73,7 +87,6 @@ def add_class(request):
             messages.error(request, "Class code already exists.")
             return redirect('dashboard_teacher:manage_classes')
 
-        # Create the main class first
         new_class = Class.objects.create(
             teacher=teacher_profile,
             code=code,
@@ -83,7 +96,6 @@ def add_class(request):
             section=section,
         )
 
-        # Then create the schedules linked to it
         for day, start, end in zip(days, start_times, end_times):
             ClassSchedule.objects.create(
                 class_obj=new_class,
@@ -92,12 +104,15 @@ def add_class(request):
                 end_time=end
             )
 
-
         messages.success(request, f"Class '{code}' created successfully.")
         return redirect('dashboard_teacher:manage_classes')
 
     return redirect('dashboard_teacher:manage_classes')
 
+
+# ==============================
+# VIEW CLASS DETAILS
+# ==============================
 @login_required
 def view_class(request, class_id):
     if request.user.user_type != 'teacher':
@@ -107,11 +122,10 @@ def view_class(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id, teacher=teacher_profile)
     enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
     sessions = ClassSession.objects.filter(class_obj=class_obj).order_by('-date')
-    
-    # Initialize the session creation form
+
     session_form = ClassSessionForm()
     session_form.fields["schedule_day"].queryset = ClassSchedule.objects.filter(class_obj=class_obj)
-    
+
     # Add student to class
     if request.method == "POST" and "add_student" in request.POST:
         student_email = request.POST.get("student_email", "").strip().lower()
@@ -126,7 +140,7 @@ def view_class(request, class_id):
             messages.error(request, f"No student found with email '{student_email}'.")
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-     # Remove student from class
+    # Remove student
     if request.method == "POST" and "remove_student" in request.POST:
         enrollment_id = request.POST.get("remove_student")
         try:
@@ -136,20 +150,26 @@ def view_class(request, class_id):
         except Enrollment.DoesNotExist:
             messages.error(request, "Student not found or already removed.")
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
-    
-    # Create a new class session
+
+    # Create session
     if request.method == "POST" and "create_session" in request.POST:
         session_form = ClassSessionForm(request.POST)
         if session_form.is_valid():
             new_session = session_form.save(commit=False)
             new_session.class_obj = class_obj
-            new_session.status = "ongoing"  # default status when created
+            new_session.status = "ongoing"
             new_session.save()
+
+            # ✅ Create attendance entries automatically
+            enrollments = Enrollment.objects.filter(class_obj=class_obj)
+            for enrollment in enrollments:
+                SessionAttendance.objects.get_or_create(session=new_session, student=enrollment.student)
+
             messages.success(request, "Class session created successfully.")
             return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
         else:
             messages.error(request, "Failed to create session. Please check the form.")
-    
+
     context = {
         'user_type': 'teacher',
         'class_obj': class_obj,
@@ -158,3 +178,83 @@ def view_class(request, class_id):
         'session_form': session_form,
     }
     return render(request, 'dashboard_app/teacher/view_class.html', context)
+
+@login_required
+def create_session(request, class_id):
+    class_obj = get_object_or_404(Class, id=class_id)
+
+    if request.method == 'POST':
+        schedule_day_id = request.POST.get('schedule_day')
+        if not schedule_day_id:
+            messages.error(request, "Please select a schedule day.")
+            return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+        # Create a new session
+        session = ClassSession.objects.create(
+            class_obj=class_obj,
+            schedule_day_id=schedule_day_id,
+            date=timezone.now().date(),
+            status="ongoing"
+        )
+
+        # ✅ Automatically add all enrolled students to SessionAttendance
+        enrollments = Enrollment.objects.filter(class_obj=class_obj)
+        for enrollment in enrollments:
+            SessionAttendance.objects.get_or_create(
+                session=session,
+                student=enrollment.student
+            )
+
+        messages.success(request, "Session created successfully!")
+        return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+    return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+
+# ==============================
+# DELETE SESSION
+# ==============================
+@login_required
+def delete_session(request, session_id):
+    session = get_object_or_404(ClassSession, id=session_id)
+    class_id = session.class_obj.id
+    session.delete()
+    messages.success(request, "Session deleted successfully!")
+    return redirect('dashboard_teacher:view_class', class_id=class_id)
+
+
+# ==============================
+# VIEW SESSION (ATTENDANCE)
+# ==============================
+@login_required
+def view_session(request, class_id, session_id):
+    session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
+    class_obj = session.class_obj  # ✅ make class_obj available to the template
+    enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
+
+    for enrollment in enrollments:
+        SessionAttendance.objects.get_or_create(
+            session=session,
+            student=enrollment.student
+        )
+
+    attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
+
+    if request.method == 'POST':
+        for attendance in attendances:
+            status = request.POST.get(f'status_{attendance.student.id}')
+            if status in ['present', 'absent']:
+                attendance.is_present = (status == 'present')
+                attendance.save()
+        messages.success(request, "Attendance saved successfully!")
+        return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
+
+    return render(request, 'dashboard_app/teacher/view_session.html', {
+        'session': session,
+        'class_obj': class_obj,   # ✅ added
+        'class_id': class_id,     # ✅ added
+        'enrollments': enrollments,
+        'attendances': attendances,
+    })
+
+
