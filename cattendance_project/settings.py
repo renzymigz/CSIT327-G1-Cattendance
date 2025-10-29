@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
-
+CRSF_TRUSTED_ORIGINS = ['https://*.onrender.com']
 
 
 # Application definition
