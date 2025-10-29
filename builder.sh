@@ -1,6 +1,6 @@
 set -o errexit
 
-pip install --requirements.txt
+pip install -r requirements.txt
 npm ci
 npm run build
 python manage.py collectstatic --noinput
