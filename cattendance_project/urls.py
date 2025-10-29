@@ -27,6 +27,3 @@ urlpatterns = [
     path('dashboard/student/', include(('dashboard_app.urls.student_urls', 'dashboard_student'), namespace='dashboard_student')),
     path('admin-panel/', include('admin_app.urls')),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
