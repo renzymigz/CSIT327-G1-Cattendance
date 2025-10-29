@@ -30,8 +30,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', 'csit327-g1-cattendance.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://csit327-g1-cattendance.onrender.com']
 
 
 # Application definition
@@ -95,10 +95,10 @@ WSGI_APPLICATION = 'cattendance_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-        "default": dj_database_url.config(
+    "default": dj_database_url.config(
         default="sqlite:///db.sqlite3",
-        conn_max_age=600, # persistent connections
-        ssl_require=True # enforce SSL
+        conn_max_age=600,  # persistent connections
+        ssl_require=False  # Try without SSL requirement first
     )
 }
 
@@ -151,3 +151,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY') 
 SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
+
+# Logging configuration for better debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
