@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kumbh+Sans:wght@100..900&display=swap" rel="stylesheet">
-    <script defer src="{% static '/core_app/navbar.js' %}"></script>
+    <script defer src="{% static 'core_app/js/navbar.js' %}"></script>
     {% comment %} <link rel = "stylesheet" href={% static 'css/output.css' %}> {% endcomment %}
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -26,7 +26,7 @@
   </head>
 
   <body class="font-sans min-h-screen flex flex-col bg-center bg-repeat bg-contain overflow-x-hidden overflow-y-scroll "
-      style="background-image: url({% static 'images/background_auth.png' %}); background-size: 300px 300px;">
+      style="background-image: url('{% static 'core_app/images/background_auth.png' %}'); background-size: 300px 300px;">
   
      
   {% include "core_app/components/navbar.html" %}
