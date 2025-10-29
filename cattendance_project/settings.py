@@ -106,7 +106,7 @@ DATABASES = {
     "default": dj_database_url.config(
         default="sqlite:///db.sqlite3",
         conn_max_age=600,
-        ssl_require=False
+        ssl_require=True
     )
 }
 
@@ -145,16 +145,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# ===============================================
-# SUPABASE CONFIGURATION
-# ===============================================
-# You can either load from .env or directly define here
-
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://jbsfkipzulstrwvugrec.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impic2ZraXB6dWxzdHJ3dnVncmVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NTY1NjEsImV4cCI6MjA3NTEzMjU2MX0.Cu-QSqBnJFlQ61LWldtxRFElt2OKHGxbL_prDRoGA1A")
-
-# If you want to store in .env instead (recommended for production):
-# .env file example:
-# SUPABASE_URL=https://jbsfkipzulstrwvugrec.supabase.co
-# SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY') 
+SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
