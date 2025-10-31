@@ -1,16 +1,24 @@
 {% load static %}
 <!-- Sidebar -->
-<div class="bg-white shadow-lg w-72 fixed h-full">
-     <div class="flex items-center mx-auto gap-3 p-6 text-[#a2314b]">
-        <img src="{% static 'core_app/images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
-        <h1 class="text-xl font-bold">CATTENDANCE</h1>
+<div class="bg-white w-72 fixed h-full border-r border-gray-200">
+     <div class="flex items-center mx-auto p-4 text-[#a2314b] ml-1">
+        <img src="{% static 'core_app/images/logo.png' %}" class="w-[50px] h-[50px] mr-3" alt="Logo">
+        <div class = "grid grid-col">
+            <h1 class="text-2xl font-bold">Cattendance</h1>
+            {% if user_type == 'student' %}
+                <p class = "text-sm text-gray-700">Student Portal</p>
+            {% else %}
+                <p class = "text-sm text-gray-700">Teacher Portal</p>
+            {% endif %}
+        </div>
     </div>
     
-    <nav class="">
+    <hr class =  "mb-5">
+    <nav class="flex flex-col gap-y-2">
         <!-- Common menu items for both -->
-        <div class="px-6 py-3">
-            <a href="{% url 'dashboard_teacher:dashboard'%}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
-                <i class="fas fa-home mr-3"></i>
+        <div class="px-5 ">
+            <a href="{% url 'dashboard_teacher:dashboard'%}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                <i class="fa-regular fa-grid-2 mr-3"></i>
                 Dashboard
             </a>
         </div>
@@ -18,17 +26,17 @@
         <!-- Conditional menu items based on user type -->
         {% if user_type == 'teacher' %}
             <!-- Teacher-specific menu items -->
-            <div class="px-6 py-3">
-                <a href="{% url 'dashboard_teacher:manage_classes' %}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
-                    <i class="fas fa-users mr-3"></i>
+            <div class="px-5 ">
+                <a href="{% url 'dashboard_teacher:manage_classes' %}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                    <i class="fa-regular fa-users mr-3"></i>
                     Manage Classes
                 </a>
             </div>
         {% else %}
             <!-- Student-specific menu items -->
-            <div class="px-6 py-3">
-                <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
-                    <i class="fas fa-calendar-check mr-3"></i>
+            <div class="px-5">
+                <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                    <i class="fa-regular fa-calendar mr-3"></i>
                     My Attendance
                 </a>
             </div>
@@ -36,24 +44,24 @@
         {% endif %}
         
         <!-- Common menu items -->
-        <div class="px-6 py-3">
-            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
-                <i class="fas fa-user mr-3"></i>
+        <div class="px-5 ">
+            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                <i class="fa-regular fa-user mr-3"></i>
                 Profile
             </a>
         </div>
-        <div class="px-6 py-3">
-            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
-                <i class="fas fa-cog mr-3"></i>
+        <div class="px-5">
+            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                <i class="fa-regular fa-gear mr-3"></i>
                 Settings
             </a>
         </div>
 
         <!-- Logout button -->
-    <div class="px-6 py-3">
+    <div class="px-5 ">
   <form action="{% url 'auth:logout' %}" method="post">
     {% csrf_token %}
-    <button type="submit" class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg w-full">
+    <button type="submit" class="flex items-center text-red-600 hover:bg-red-50 px-4 py-3 rounded-lg w-full">
       <i class="fas fa-sign-out-alt mr-3"></i>
       Logout
     </button>
