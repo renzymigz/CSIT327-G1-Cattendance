@@ -32,9 +32,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', 'csit327-g1-cattendance.onrender.com']
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://csit327-g1-cattendance.onrender.com']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 
 
 # ===============================================
@@ -114,7 +113,7 @@ DATABASES = {
     "default": dj_database_url.config(
         default="sqlite:///db.sqlite3",
         conn_max_age=600,  # persistent connections
-        ssl_require=False  # Try without SSL requirement first
+        ssl_require=os.getenv('DJANGO_SECURE_SSL_REDIRECT','True') == 'True' 
     )
 }
 
