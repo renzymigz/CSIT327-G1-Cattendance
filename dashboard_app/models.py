@@ -63,7 +63,6 @@ class ClassSession(models.Model):
     def __str__(self):
         return f"{self.class_obj.code} - {self.schedule_day.day_of_week} ({self.date})"
 
-
 class SessionAttendance(models.Model):
     session = models.ForeignKey('ClassSession', on_delete=models.CASCADE, related_name='attendances')
     student = models.ForeignKey('auth_app.StudentProfile', on_delete=models.CASCADE)
