@@ -1,0 +1,331 @@
+{% extends "dashboard_app/base_dashboard.html" %}
+{% block title %}Mark Attendance | Cattendance{% endblock %}
+{% block content %}
+
+<div class="p-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <a href="{% url 'dashboard_teacher:view_class' session.class_obj.id %}"
+       class="text-[#a2314b] hover:underline flex items-center">
+      <i class="fa-solid fa-arrow-left mr-2"></i> Back
+    </a>
+    <p class="text-sm text-gray-500">
+      {{ session.date|date:"F j, Y" }} at {{ session.schedule_day.start_time|time:"h:i A" }}
+    </p>
+  </div>
+
+  <!-- Counters -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+    <div class="rounded-xl border border-green-200 bg-green-50 p-5 text-center">
+      <p class="text-green-700 font-semibold">Present</p>
+      <p id="count-present" class="text-4xl font-bold text-green-700 mt-1">0</p>
+    </div>
+    <div class="rounded-xl border border-red-200 bg-red-50 p-5 text-center">
+      <p class="text-red-700 font-semibold">Absent</p>
+      <p id="count-absent" class="text-4xl font-bold text-red-700 mt-1">0</p>
+    </div>
+    <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 text-center">
+      <p class="text-gray-700 font-semibold">Not Marked</p>
+      <p id="count-unmarked" class="text-4xl font-bold text-gray-700 mt-1">0</p>
+    </div>
+  </div>
+
+  <!-- Bulk Buttons -->
+  <div class="flex justify-between items-center mb-6">
+  <!-- Left group of buttons -->
+  <div class="flex gap-3">
+    <button id="btn-generate-qr" type="button"
+            class="px-4 py-2 rounded-lg border border-gray-300 font-semibold bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white hover:from-[#892728] hover:to-[#b84547]">
+      <i class="fa-solid fa-qrcode mr-2"></i>Generate QR Code
+    </button>
+
+    <button id="btn-mark-all-present" type="button"
+            class="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
+      Mark All Present
+    </button>
+
+    <button id="btn-clear-all" type="button"
+            class="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
+      Clear All
+    </button>
+  </div>
+
+  <!-- Export button (far right) -->
+  <a href="{% url 'dashboard_teacher:export_session_attendance' class_obj.id session.id %}"
+     class="inline-flex items-center px-4 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white text-sm rounded-md shadow"
+     role="button">
+    Export to CSV
+  </a>
+</div>
+  
+
+
+  {% if messages %}
+    {% for message in messages %}
+      <div
+        class="my-4 p-3 text-center rounded-lg text-sm font-medium
+        {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-300
+        {% elif message.tags == 'success' %}bg-green-100 text-green-700 border border-green-300
+        {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-300
+        {% else %}bg-blue-100 text-blue-700 border border-blue-300{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Attendance Table -->
+  <form method="POST">
+    {% csrf_token %}
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <table class="min-w-full">
+  <thead class="bg-gray-50 text-left text-sm text-gray-600">
+    <tr>
+      <th class="px-5 py-3">Full Name</th>
+      <th class="px-5 py-3">Student ID</th>
+      <th class="px-5 py-3 text-center">Action</th>
+      <th class="px-5 py-3 text-center">Status</th>
+    </tr>
+  </thead>
+
+  <tbody id="attn-tbody" class="divide-y divide-gray-100 text-sm">
+    {% for a in attendances %}
+    {% with s=a.student user=a.student.user %}
+    <tr class="attn-row" data-student="{{ s.pk }}">
+      <td class="px-5 py-4 font-medium text-gray-800">
+        {{ user.first_name }} {{ user.last_name }}
+      </td>
+      <td class="px-5 py-4 text-gray-600">
+        {% if s.student_id %}{{ s.student_id }}{% else %}—{% endif %}
+      </td>
+
+      <!-- ACTION buttons -->
+      <td class="px-5 py-4 text-center">
+        <div class="inline-flex gap-2">
+          <button type="button"
+                  class="btn-present px-4 py-1.5 rounded-md border border-gray-300 bg-white text-gray-700 transition">
+            Present
+          </button>
+          <button type="button"
+                  class="btn-absent px-4 py-1.5 rounded-md border border-gray-300 bg-white text-gray-700 transition">
+            Absent
+          </button>
+        </div>
+      </td>
+
+      <!-- STATUS column -->
+      <td class="px-5 py-4 text-center">
+        <div id="display-status-{{ s.pk }}">
+          {% if a.is_present is True %}
+            <span class="text-green-700 font-medium">Present</span>
+          {% elif a.is_present is False %}
+            <span class="text-red-700 font-medium">Absent</span>
+          {% else %}
+            <span class="text-gray-500">Not Marked</span>
+          {% endif %}
+          {% if a.marked_via_qr %}
+            <i class="fa-solid fa-qrcode text-green-600 ml-1" title="Marked via QR"></i>
+          {% endif %}
+        </div>
+
+        <input type="hidden"
+               id="status-{{ s.pk }}"
+               name="status_{{ s.pk }}"
+               value="{% if a.is_present is True %}present{% elif a.is_present is False %}absent{% else %}{% endif %}">
+      </td>
+    </tr>
+    {% endwith %}
+    {% empty %}
+    <tr>
+      <td colspan="4" class="px-5 py-6 text-gray-600 text-center">
+        No students enrolled.
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+    </div>
+
+    <div class="flex justify-end gap-3 mt-6">
+      <a href="{% url 'dashboard_teacher:view_class' session.class_obj.id %}"
+         class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">Cancel</a>
+      <button type="submit"
+              class="px-5 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43]">
+        Save Attendance
+      </button>
+    </div>
+    
+    <div id="qr-modal"
+     class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+      <div class="bg-white rounded-2xl p-5 min-w-[550px] max-w-sm relative shadow-xl">
+        <button id="close-qr-modal"
+                class="absolute top-3 right-4 border border-gray-300 rounded w-8 text-gray-500  hover:text-gray-700 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h2 class="text-lg font-semibold mb-3">Session QR Code</h2>
+        <p class="text-gray-600 text-sm">
+          Students can scan this QR code to mark attendance.
+        </p>
+
+        <div id="qr-container" class="flex justify-center">
+          <!-- QR render -->
+          <img id="qr-image"  alt="Session QR Code" class="w-[500px] h-[500px] p-2 my-8 rounded-lg">
+        </div>
+
+        <p class="text-gray-600 text-lg mb-1 text-center font-semibold ">
+          Time Remaining
+        </p>
+
+        <p id="qr-timer" class="font-bold font-mono text-[#a2314b] text-center text-2xl">
+          05:00
+        </p>
+
+        <p class="text-gray-600 text-sm text-center mb-5">
+          Will automatically regenerate when expired
+        </p>
+  </div>
+</div>
+  </form>
+</div>
+
+<!-- Script -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tbody = document.getElementById("attn-tbody");
+  const base = ["bg-white","text-gray-700","border-gray-300"];
+  const present = ["bg-green-50","text-green-700","border-green-500"];
+  const absent = ["bg-red-50","text-red-700","border-red-500"];
+  const qrBtn = document.getElementById("btn-generate-qr");
+  const qrModal = document.getElementById("qr-modal");
+  const qrClose = document.getElementById("close-qr-modal");
+  const qrImage = document.getElementById("qr-image");
+  const qrTimer = document.getElementById("qr-timer");
+
+  let qrInterval = null;
+
+  async function fetchAndShowQR() {
+    // Call server to generate QR
+    try {
+      const resp = await fetch(window.location.pathname + 'generate-qr/', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value } });
+      if (!resp.ok) throw new Error('Failed to generate QR');
+      const data = await resp.json();
+
+      // set image
+      if (data.qr_image) {
+        qrImage.src = data.qr_image;
+      } else {
+        // fallback: show scan_url as text if no image
+        qrImage.alt = data.scan_url;
+      }
+
+      // start countdown
+      const expiresAt = new Date(data.expires_at);
+      startCountdown(expiresAt);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate QR code.');
+    }
+  }
+
+  qrBtn.addEventListener("click", () => {
+    qrModal.classList.remove("hidden");
+    fetchAndShowQR();
+  });
+
+  qrClose.addEventListener("click", () => {
+    qrModal.classList.add("hidden");
+    if (qrInterval) { clearInterval(qrInterval); qrInterval = null; }
+  });
+
+  qrModal.addEventListener("click", (e) => {
+    if (e.target === qrModal) {
+      qrModal.classList.add("hidden");
+      if (qrInterval) { clearInterval(qrInterval); qrInterval = null; }
+    }
+  });
+
+  function startCountdown(expiresAt) {
+    if (qrInterval) clearInterval(qrInterval);
+    function update() {
+      const now = new Date();
+      let diff = Math.max(0, Math.floor((expiresAt - now) / 1000));
+      const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+      const seconds = String(diff % 60).padStart(2, '0');
+      qrTimer.textContent = `${minutes}:${seconds}`;
+      if (diff <= 0) {
+        clearInterval(qrInterval);
+        qrInterval = null;
+        // automatically regenerate after expiry
+        fetchAndShowQR();
+      }
+    }
+    update();
+    qrInterval = setInterval(update, 1000);
+  }
+
+
+  function paintRow(row, value) {
+    const btnP = row.querySelector(".btn-present");
+    const btnA = row.querySelector(".btn-absent");
+    [btnP, btnA].forEach(b => {
+      b.classList.remove(...present, ...absent);
+      b.classList.add(...base);
+    });
+    if (value === "present") {
+      btnP.classList.remove(...base);
+      btnP.classList.add(...present);
+    } else if (value === "absent") {
+      btnA.classList.remove(...base);
+      btnA.classList.add(...absent);
+    }
+  }
+
+  function setRowState(row, value) {
+    const input = row.querySelector("input[type='hidden']");
+    input.value = value;
+    paintRow(row, value);
+  }
+
+  function recompute() {
+    let p = 0, a = 0, n = 0;
+    document.querySelectorAll("tbody input[type='hidden']").forEach(inp => {
+      if (inp.value === "present") p++;
+      else if (inp.value === "absent") a++;
+      else n++;
+    });
+    document.getElementById("count-present").textContent = p;
+    document.getElementById("count-absent").textContent = a;
+    document.getElementById("count-unmarked").textContent = n;
+  }
+
+  tbody.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-present, .btn-absent");
+    if (!btn) return;
+    const row = btn.closest("tr.attn-row");
+    const input = row.querySelector("input[type='hidden']");
+    const newVal = btn.classList.contains("btn-present") ? "present" : "absent";
+    setRowState(row, input.value === newVal ? "" : newVal);
+    recompute();
+  });
+
+  document.getElementById("btn-mark-all-present").addEventListener("click", () => {
+    document.querySelectorAll("tr.attn-row").forEach(r => setRowState(r, "present"));
+    recompute();
+  });
+
+  document.getElementById("btn-clear-all").addEventListener("click", () => {
+    document.querySelectorAll("tr.attn-row").forEach(r => setRowState(r, ""));
+    recompute();
+  });
+
+  document.querySelectorAll("tr.attn-row").forEach(r => {
+    const val = r.querySelector("input[type='hidden']").value || "";
+    paintRow(r, val);
+  });
+  recompute();
+});
+</script>
+
+{% endblock %}

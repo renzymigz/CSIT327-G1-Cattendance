@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kumbh+Sans:wght@100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'core_app/navbar.css' %}?v=1.2">
-    <script defer src="{% static '/core_app/navbar.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'core_app/css/navbar.css' %}?v=1.2">
+    <script defer src="{% static 'core_app/js/navbar.js' %}"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -241,7 +241,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
                     <div class="flex items-center space-x-3 mb-4">
-                        <img src="{% static 'images/logo.png' %}" class="w-8 h-8" alt="Logo">
+                        <img src="{% static 'core_app/images/logo.png' %}" class="w-8 h-8" alt="Logo">
                         <h3 class="text-xl text-[#a2314b] font-bold">CATTENDANCE</h3>
                     </div>
                     <p class="text-gray-400">

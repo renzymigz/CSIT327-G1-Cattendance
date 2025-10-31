@@ -15,9 +15,12 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ===============================================
+# BASE DIRECTORY
+# ===============================================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -25,16 +28,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-q9ks0-+yi5n-81f8+!hqx%_lvdz35bbf&j1#0!ylszp4zthq@l'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', 'csit327-g1-cattendance.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://csit327-g1-cattendance.onrender.com']
 
 
-# Application definition
-
+# ===============================================
+# INSTALLED APPS
+# ===============================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Project Apps
     'auth_app',
     'core_app',
     'dashboard_app',
@@ -50,8 +56,13 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'auth_app.User'
 
+
+# ===============================================
+# MIDDLEWARE
+# ===============================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,14 +71,30 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+
+# ===============================================
+# URLS / WSGI
+# ===============================================
 ROOT_URLCONF = 'cattendance_project.urls'
+WSGI_APPLICATION = 'cattendance_project.wsgi.application'
 
-# Default session for student/teacher (auth_app)
+
+# ===============================================
+# SESSION SETTINGS
+# ===============================================
 SESSION_COOKIE_NAME = "cattendance_session"
-
-# For admin views only
 ADMIN_SESSION_COOKIE_NAME = "cattendance_admin_session"
 
+
+# ===============================================
+# TEMPLATES
+# ===============================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -83,49 +110,36 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'cattendance_project.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# ===============================================
+# DATABASE CONFIGURATION
+# ===============================================
 DATABASES = {
-        "default": dj_database_url.config(
+    "default": dj_database_url.config(
         default="sqlite:///db.sqlite3",
-        conn_max_age=600, # persistent connections
-        ssl_require=True # enforce SSL
+        conn_max_age=600,  # persistent connections
+        ssl_require=False  # Try without SSL requirement first
     )
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# ===============================================
+# PASSWORD VALIDATION
+# ===============================================
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# ===============================================
+# INTERNATIONALIZATION
+# ===============================================
 LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'Asia/Manila'  # changed from UTC
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -133,16 +147,39 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'  
-STATICFILES_DIRS = [     
-    BASE_DIR / "static",
-]
-STATIC_ROOT = BASE_DIR / "staticfiles" 
+# STATICFILES_DIRS = [BASE_DIR / 'static']  # Not needed - Django finds app static folders automatically
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+
+# ===============================================
+# DEFAULT PRIMARY KEY
+# ===============================================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY') 
 SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
+
+# Logging configuration for better debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
