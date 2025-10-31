@@ -6,6 +6,8 @@ from django.conf import settings
 from auth_app.models import StudentProfile
 from dashboard_app.models import (Class, Enrollment, ClassSchedule, ClassSession, SessionAttendance, SessionQRCode)
 from dashboard_app.forms import ClassSessionForm
+import csv
+from django.http import HttpResponse
 from datetime import timedelta
 from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
@@ -173,6 +175,73 @@ def view_class(request, class_id):
         'sessions': sessions,
         'session_form': session_form,
     })
+    return render(request, 'dashboard_app/teacher/view_class.html', context)
+
+# ==============================
+# EXPORT TO CSV
+# ============================== 
+
+@login_required
+def export_enrolled_students(request, class_id):
+    from dashboard_app import models  # ensure imports stay clean
+    class_obj = Class.objects.get(id=class_id)
+    enrollments = Enrollment.objects.filter(class_obj=class_obj)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{class_obj.code}_enrolled_students.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Full Name', 'Email'])
+
+    for enrollment in enrollments:
+        user = enrollment.student.user
+        full_name = f"{user.first_name} {user.last_name}".strip()
+        if not full_name:  # if no name is provided
+            full_name = user.username or user.email
+        writer.writerow([full_name, user.email])
+
+    return response
+
+@login_required
+def export_session_attendance(request, class_id, session_id):
+    class_obj = get_object_or_404(Class, id=class_id)
+    session = get_object_or_404(ClassSession, id=session_id, class_obj=class_obj)
+    attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
+
+    # --- CSV Response ---
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{class_obj.code}_{session.date}_attendance.csv"'
+
+    writer = csv.writer(response)
+
+    # --- Header Information ---
+    schedules = ClassSchedule.objects.filter(class_obj=class_obj)
+    schedule_text = "; ".join([
+        f"{s.day_of_week} ({s.start_time.strftime('%I:%M %p')} - {s.end_time.strftime('%I:%M %p')})"
+        for s in schedules
+    ])
+
+    writer.writerow(['Class Name', 'Section', 'Class Schedule', 'Date'])
+    writer.writerow([class_obj.title, class_obj.section, schedule_text, session.date.strftime("%B %d, %Y")])
+    writer.writerow([])  # Empty row
+    writer.writerow(['Attendance', '', '', ''])
+    writer.writerow([])  # Empty row
+
+    # --- Column Headers ---
+    writer.writerow(['Full Name', 'Email', 'Status', '', ''])
+
+    # --- Attendance Data ---
+    for attendance in attendances:
+        user = attendance.student.user
+        full_name = f"{user.first_name} {user.last_name}".strip()
+        if not full_name:
+            full_name = user.username or user.email
+
+        status = "Present" if attendance.is_present else "Absent"
+        writer.writerow([full_name, user.email, status, '', ''])
+
+    return response
+
 
 # ==============================
 # CREATE SESSION

@@ -13,10 +13,13 @@ urlpatterns = [
 
     # Class Views
     path('class/<int:class_id>/', teacher_views.view_class, name='view_class'),
+    path('class/<int:class_id>/export/', teacher_views.export_enrolled_students, name='export_enrolled_students_csv'),
 
     # Class Sessions
     path('class/<int:class_id>/create-session/', teacher_views.create_session, name='create_session'),
     path('class/session/<int:session_id>/delete/', teacher_views.delete_session, name='delete_session'),
+    path('class/<int:class_id>/session/<int:session_id>/export/', teacher_views.export_session_attendance, name='export_session_attendance'),
+
 
     # ✅ Fixed Attendance View Route
     path(

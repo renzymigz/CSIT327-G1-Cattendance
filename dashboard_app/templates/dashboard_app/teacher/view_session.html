@@ -31,20 +31,34 @@
   </div>
 
   <!-- Bulk Buttons -->
-  <div class="flex gap-3 mb-6">
+  <div class="flex justify-between items-center mb-6">
+  <!-- Left group of buttons -->
+  <div class="flex gap-3">
     <button id="btn-generate-qr" type="button"
-            class="px-4 py-2 rounded-lg border border-gray-300 font-semibold bg bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white hover:from-[#892728] hover:to-[#b84547]">
+            class="px-4 py-2 rounded-lg border border-gray-300 font-semibold bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white hover:from-[#892728] hover:to-[#b84547]">
       <i class="fa-solid fa-qrcode mr-2"></i>Generate QR Code
     </button>
+
     <button id="btn-mark-all-present" type="button"
             class="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
       Mark All Present
     </button>
+
     <button id="btn-clear-all" type="button"
             class="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
       Clear All
     </button>
   </div>
+
+  <!-- Export button (far right) -->
+  <a href="{% url 'dashboard_teacher:export_session_attendance' class_obj.id session.id %}"
+     class="inline-flex items-center px-4 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white text-sm rounded-md shadow"
+     role="button">
+    Export to CSV
+  </a>
+</div>
+  
+
 
   {% if messages %}
     {% for message in messages %}
