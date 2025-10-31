@@ -13,43 +13,150 @@
   </div>
 
   <!-- Class list -->
-  {% if classes %}
+{% if classes %}
+  <!-- Class list with icons and improved UI -->
   <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for cls in classes %}
-    <a
-      href="{% url 'dashboard_teacher:view_class' cls.id %}"
-      class="block bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition p-5"
-    >
-      <h2 class="text-xl font-semibold text-[#6a1e1e] mb-1">{{ cls.title }}</h2>
-      <p class="text-sm text-gray-600 font-medium mb-2">
-        {{ cls.code }} — {{ cls.section }}
-      </p>
-      <p class="text-sm text-gray-600 mb-2">
-        <strong>Semester:</strong> {{ cls.semester }}
-      </p>
-      <p class="text-sm text-gray-600 mb-2">
-        <strong>Year:</strong> {{ cls.academic_year }}
-      </p>
+      <a
+        href="{% url 'dashboard_teacher:view_class' cls.id %}"
+        class="relative block rounded-lg shadow-md border border-gray-200 
+               hover:shadow-xl hover:border-[#6a1e1e] transition-all duration-300 
+               p-6 group overflow-hidden"
+        style="background: linear-gradient(to right, rgba(106, 30, 30, 0.05), rgba(255,255,255,0.9));"
+      >
+        <!-- Decorative background SVG (right side) -->
+        <div class="absolute right-2 top-1/2 -translate-y-1/2 opacity-10">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+               stroke-width="1.5" stroke="#6a1e1e" class="w-28 h-28">
+            <path stroke-linecap="round" stroke-linejoin="round" 
+              d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 
+              1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 
+              1.125h-4.5A1.125 1.125 0 0 1 3.75 
+              9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 
+              1.125-1.125h4.5c.621 0 1.125.504 
+              1.125 1.125v4.5c0 .621-.504 1.125-1.125 
+              1.125h-4.5a1.125 1.125 0 0 
+              1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 
+              1.125-1.125h4.5c.621 0 1.125.504 
+              1.125 1.125v4.5c0 .621-.504 1.125-1.125 
+              1.125h-4.5A1.125 1.125 0 0 
+              1 13.5 9.375v-4.5Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" 
+              d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 
+              6.75h.75v.75h-.75v-.75ZM13.5 
+              13.5h.75v.75h-.75v-.75ZM13.5 
+              19.5h.75v.75h-.75v-.75ZM19.5 
+              13.5h.75v.75h-.75v-.75ZM19.5 
+              19.5h.75v.75h-.75v-.75ZM16.5 
+              16.5h.75v.75h-.75v-.75Z" />
+          </svg>
+        </div>
+        <!-- Header with icon and title -->
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-[#6a1e1e] rounded-lg flex items-center 
+                   justify-center group-hover:bg-[#6a1e1e] transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path
+                stroke-linecap="round" stroke-linejoin="round"
+                d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 
+                   8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292
+                    c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 
+                      2.292m0-14.25v14.25"
+              ></path>
+            </svg>
+          </div>
 
-      {% if cls.schedules.all %}
-      <div class="mt-2">
-        <p class="text-sm font-semibold text-gray-700">Schedule:</p>
-        <ul class="list-disc list-inside text-sm text-gray-600">
-          {% for sched in cls.schedules.all %}
-          <li>
-            {{ sched.day_of_week }} — {{ sched.start_time|time:"h:i A" }} to {{ sched.end_time|time:"h:i A" }}
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      {% endif %}
-    </a>
+          <div class="flex-1">
+            <h2 class="text-lg font-bold text-gray-900 group-hover:text-[#6a1e1e] transition">
+              {{ cls.title }}
+            </h2>
+            <p class="text-sm text-gray-500 font-medium">
+              {{ cls.code }} — {{ cls.section }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Metadata section -->
+        <div class="space-y-3">
+          <!-- Semester -->
+          <div class="flex items-center gap-3">
+            <div class="flex-shrink-0 w-5 h-5 text-gray-400">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0
+                     00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Semester</p>
+              <p class="text-sm font-semibold text-gray-900">{{ cls.semester }}</p>
+            </div>
+          </div>
+
+          <!-- Year -->
+          <div class="flex items-center gap-3">
+            <div class="flex-shrink-0 w-5 h-5 text-gray-400">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4m0 4v4m0-11a9 9 0 110 18 9 9 0 010-18z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Academic Year</p>
+              <p class="text-sm font-semibold text-gray-900">{{ cls.academic_year }}</p>
+            </div>
+          </div>
+
+          <!-- Schedule -->
+          {% if cls.schedules.all %}
+            <div class="flex gap-3 pt-2">
+              <div class="flex-shrink-0 w-5 h-5 text-gray-400 mt-0.5">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Schedule</p>
+                <ul class="space-y-1">
+                  {% for sched in cls.schedules.all %}
+                    <li class="text-sm text-gray-700 flex items-center gap-2">
+                      <span class="w-1.5 h-1.5 bg-[#6a1e1e] rounded-full"></span>
+                      {{ sched.day_of_week }} —
+                      {{ sched.start_time|time:"h:i A" }} to
+                      {{ sched.end_time|time:"h:i A" }}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Hover indicator -->
+        <div class="mt-4 pt-4 border-t border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
+      <span class="text-xs font-semibold text-[#6a1e1e] flex items-center gap-1">
+        View Class
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+        </svg>
+      </span>
+    </div>
+      </a>
     {% endfor %}
   </div>
-  {% else %}
+{% else %}
   <p class="text-gray-600">No classes created yet.</p>
-  {% endif %}
-</div>
+{% endif %}
+
 
 <!-- Add Class Modal -->
 <div
