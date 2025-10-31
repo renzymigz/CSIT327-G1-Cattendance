@@ -15,9 +15,12 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ===============================================
+# BASE DIRECTORY
+# ===============================================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -34,8 +37,9 @@ ALLOWED_HOSTS = []
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://csit327-g1-cattendance.onrender.com']
 
 
-# Application definition
-
+# ===============================================
+# INSTALLED APPS
+# ===============================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Project Apps
     'auth_app',
     'core_app',
     'dashboard_app',
@@ -51,6 +56,10 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'auth_app.User'
 
+
+# ===============================================
+# MIDDLEWARE
+# ===============================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -65,14 +74,27 @@ MIDDLEWARE = [
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+
+# ===============================================
+# URLS / WSGI
+# ===============================================
 ROOT_URLCONF = 'cattendance_project.urls'
+WSGI_APPLICATION = 'cattendance_project.wsgi.application'
 
-# Default session for student/teacher (auth_app)
+
+# ===============================================
+# SESSION SETTINGS
+# ===============================================
 SESSION_COOKIE_NAME = "cattendance_session"
-
-# For admin views only
 ADMIN_SESSION_COOKIE_NAME = "cattendance_admin_session"
 
+
+# ===============================================
+# TEMPLATES
+# ===============================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -88,12 +110,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'cattendance_project.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# ===============================================
+# DATABASE CONFIGURATION
+# ===============================================
 DATABASES = {
     "default": dj_database_url.config(
         default="sqlite:///db.sqlite3",
@@ -103,34 +123,23 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# ===============================================
+# PASSWORD VALIDATION
+# ===============================================
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# ===============================================
+# INTERNATIONALIZATION
+# ===============================================
 LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'Asia/Manila'  # changed from UTC
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -142,10 +151,12 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles' 
 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+# ===============================================
+# DEFAULT PRIMARY KEY
+# ===============================================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY') 

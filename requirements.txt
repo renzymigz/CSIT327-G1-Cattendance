@@ -26,3 +26,6 @@ packaging==25.0
 typing_extensions==4.15.0
 certifi==2025.8.3
 idna==3.10
+
+# QR code generation (server-side)
+segno==1.6.0
