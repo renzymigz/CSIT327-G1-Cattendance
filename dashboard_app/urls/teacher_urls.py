@@ -24,4 +24,7 @@ urlpatterns = [
         teacher_views.view_session,
         name='view_session',
     ),
+    # Generate QR for a session (AJAX)
+    path('class/<int:class_id>/session/<int:session_id>/generate-qr/',
+         teacher_views.generate_qr, name='generate_qr'),
 ]

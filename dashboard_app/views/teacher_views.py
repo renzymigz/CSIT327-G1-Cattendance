@@ -3,17 +3,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
-
 from auth_app.models import StudentProfile
-from dashboard_app.models import (
-    Class, Enrollment, AttendanceRecord,
-    ClassSchedule, ClassSession, SessionAttendance
-)
+from dashboard_app.models import (Class, Enrollment, ClassSchedule, ClassSession, SessionAttendance, SessionQRCode)
 from dashboard_app.forms import ClassSessionForm
-from supabase import create_client
-import datetime
-import logging
-
+from datetime import timedelta
+from django.http import JsonResponse, HttpResponseForbidden
+from django.urls import reverse
+import segno, io, base64
 
 
 # ==============================
@@ -190,7 +186,7 @@ def create_session(request, class_id):
             messages.error(request, "Please select a schedule day.")
             return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-        # ✅ Create the session
+        # Create the session
         session = ClassSession.objects.create(
             class_obj=class_obj,
             schedule_day_id=schedule_day_id,
@@ -198,7 +194,7 @@ def create_session(request, class_id):
             status="ongoing"
         )
 
-        # ✅ Auto-add all enrolled students to SessionAttendance
+        # Auto-add all enrolled students to SessionAttendance
         enrollments = Enrollment.objects.filter(class_obj=class_obj)
         for e in enrollments:
             SessionAttendance.objects.get_or_create(session=session, student=e.student)
@@ -231,62 +227,73 @@ def view_session(request, class_id, session_id):
     class_obj = session.class_obj
     enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
 
-    # Ensure every enrolled student has a SessionAttendance record
     for enrollment in enrollments:
         SessionAttendance.objects.get_or_create(session=session, student=enrollment.student)
 
     attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
 
     if request.method == 'POST':
-        today = datetime.date.today().isoformat()
         success_count = 0
-        error_count = 0
-
         for attendance in attendances:
-            student_id = attendance.student.user.id
-            full_name = f"{attendance.student.user.first_name} {attendance.student.user.last_name}"
             status = request.POST.get(f'status_{attendance.student.pk}')
-
             if status not in ['present', 'absent']:
                 continue
 
-            try:
-                # ✅ Save to local database
-                attendance.is_present = (status == 'present')
-                attendance.save()
+            attendance.is_present = (status == 'present')
+            attendance.save()
+            success_count += 1
 
-                # ✅ Sync to Supabase using UPSERT
-                response = supabase.table("dashboard_app_attendance_records").upsert({
-                    "id": attendance.id,  # uses local record ID for conflict handling
-                    "date": today,
-                    "student_name": full_name,
-                    "status": status,
-                }).execute()
-
-                if response.data:
-                    success_count += 1
-                else:
-                    error_count += 1
-
-            except Exception as e:
-                logging.error(f"Supabase sync failed: {e}")
-                error_count += 1
-
-        # ✅ Inline message inside the attendance screen
         if success_count > 0:
-            messages.success(request, f"✅ {success_count} attendance record(s) synced to Supabase successfully!")
-        elif error_count > 0:
-            messages.warning(request, f"⚠️ Attendance saved locally, but {error_count} record(s) failed to sync.")
+            messages.success(request, f"{success_count} attendance record(s) saved successfully!")
         else:
-            messages.info(request, "ℹ️ No attendance changes detected.")
+            messages.info(request, "No attendance changes detected.")
 
         return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
 
-    # Render page
     return render(request, 'dashboard_app/teacher/view_session.html', {
         'session': session,
         'class_obj': class_obj,
         'class_id': class_id,
         'enrollments': enrollments,
         'attendances': attendances,
+    })
+
+
+@login_required
+def generate_qr(request, class_id, session_id):
+    """Generate or reuse a valid QR code for the given session and return as data URI JSON."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
+
+    # Only the teacher who owns the class can generate QR
+    if not hasattr(request.user, 'teacherprofile') or session.class_obj.teacher != request.user.teacherprofile:
+        return HttpResponseForbidden('Not allowed')
+
+    now = timezone.now()
+    validity_minutes = 5
+    expires_at = now + timedelta(minutes=validity_minutes)
+
+    # Check if there's an existing unexpired QR for this session
+    qr = SessionQRCode.objects.filter(session=session, expires_at__gt=now).first()
+
+    if not qr:
+        # Generate a new QR since none is active
+        qr = SessionQRCode.generate_for_session(session, validity_minutes=validity_minutes)
+
+    # Build absolute scan URL
+    scan_url = request.build_absolute_uri(f"/attendance/mark/{qr.code}/")
+
+    # Generate QR image (Segno)
+    qr_img = segno.make(scan_url)
+    buffer = io.BytesIO()
+    qr_img.save(buffer, kind='png', scale=5)
+    qr_data_uri = f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('ascii')}"
+
+    return JsonResponse({
+        'code': qr.code,
+        'expires_at': qr.expires_at.isoformat(),
+        'qr_image': qr_data_uri,
+        'scan_url': scan_url,
     })

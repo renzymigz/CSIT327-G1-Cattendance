@@ -1,5 +1,8 @@
 from django.db import models
 from auth_app.models import TeacherProfile, StudentProfile
+from django.utils import timezone
+import uuid
+from datetime import timedelta
 
 
 class Class(models.Model):
@@ -47,19 +50,6 @@ class Enrollment(models.Model):
     def __str__(self):
         return f"{self.student.user.email} in {self.class_obj.code}"
 
-
-class AttendanceRecord(models.Model):
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name='attendance_records')
-    date = models.DateField()
-    status = models.CharField(max_length=10, choices=[('Present', 'Present'), ('Absent', 'Absent')])
-
-    class Meta:
-        unique_together = ('enrollment', 'date')
-
-    def __str__(self):
-        return f"{self.enrollment.student.user.email} - {self.date} ({self.status})"
-
-
 class ClassSession(models.Model):
     class_obj = models.ForeignKey(Class, on_delete=models.CASCADE, related_name="sessions")
     schedule_day = models.ForeignKey(ClassSchedule, on_delete=models.CASCADE)
@@ -78,9 +68,31 @@ class SessionAttendance(models.Model):
     session = models.ForeignKey('ClassSession', on_delete=models.CASCADE, related_name='attendances')
     student = models.ForeignKey('auth_app.StudentProfile', on_delete=models.CASCADE)
     is_present = models.BooleanField(default=False)
-
+    marked_via_qr = models.BooleanField(default=False) 
+    
     class Meta:
         unique_together = ('session', 'student')
 
     def __str__(self):
         return f"{self.student.user.get_full_name()} - {self.session.class_obj.code} ({'Present' if self.is_present else 'Absent'})"
+
+class SessionQRCode(models.Model):
+    session = models.OneToOneField(ClassSession, on_delete=models.CASCADE, related_name='qr_code')
+    code = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def is_valid(self):
+        return timezone.now() < self.expires_at
+
+    @staticmethod
+    def generate_for_session(session, validity_minutes=5):
+        # Create or update QR code for session
+        code = uuid.uuid4().hex
+        now = timezone.now()
+        expires = now + timedelta(minutes=validity_minutes)
+        qr, created = SessionQRCode.objects.update_or_create(
+            session=session,
+            defaults={"code": code, "expires_at": expires}
+        )
+        return qr
