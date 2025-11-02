@@ -108,6 +108,43 @@ def add_class(request):
 
     return redirect('dashboard_teacher:manage_classes')
 
+# EDIT CLASS
+@login_required
+def edit_class(request, class_id):
+    if request.user.user_type != 'teacher':
+        return redirect('dashboard_student:dashboard')
+
+    cls = get_object_or_404(Class, id=class_id, teacher=request.user.teacherprofile)
+
+    if request.method == "POST":
+        cls.code = request.POST.get("code", "").strip()
+        cls.title = request.POST.get("title", "").strip()
+        cls.section = request.POST.get("section", "").strip()
+        cls.semester = request.POST.get("semester", "").strip()
+        cls.academic_year = request.POST.get("academic_year", "").strip()
+        cls.save()
+
+        messages.success(request, f"Class '{cls.code}' updated successfully.")
+        return redirect('dashboard_teacher:manage_classes')
+
+    return HttpResponseForbidden("Invalid request")
+
+
+# DELETE CLASS
+@login_required
+def delete_class(request, class_id):
+    if request.user.user_type != 'teacher':
+        return redirect('dashboard_student:dashboard')
+
+    if request.method == "POST":
+        cls = get_object_or_404(Class, id=class_id, teacher=request.user.teacherprofile)
+        title = cls.title
+        cls.delete()
+        messages.success(request, f"Class '{title}' has been deleted.")
+        return redirect('dashboard_teacher:manage_classes')
+
+    return HttpResponseForbidden("Invalid request")
+
 
 # ==============================
 # VIEW CLASS DETAILS

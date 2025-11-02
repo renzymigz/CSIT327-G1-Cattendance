@@ -17,44 +17,95 @@
     <nav class="flex flex-col gap-y-2">
         <!-- Common menu items for both -->
         <div class="px-5 ">
-            <a href="{% url 'dashboard_teacher:dashboard'%}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
-                <i class="fa-regular fa-grid-2 mr-3"></i>
-                Dashboard
-            </a>
+            {% url 'dashboard_teacher:dashboard' as dashboard_url %}
+            {% if request.resolver_match %}
+                {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
+                    <a href="{{ dashboard_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if ns == 'dashboard_teacher' and name == 'dashboard' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
+                        <i class="fa-regular fa-grid-2 mr-3"></i>
+                        Dashboard
+                    </a>
+                {% endwith %}
+            {% else %}
+                <a href="{{ dashboard_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                    <i class="fa-regular fa-grid-2 mr-3"></i>
+                    Dashboard
+                </a>
+            {% endif %}
         </div>
         
         <!-- Conditional menu items based on user type -->
         {% if user_type == 'teacher' %}
             <!-- Teacher-specific menu items -->
             <div class="px-5 ">
-                <a href="{% url 'dashboard_teacher:manage_classes' %}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
-                    <i class="fa-regular fa-users mr-3"></i>
-                    Manage Classes
-                </a>
+                {% url 'dashboard_teacher:manage_classes' as manage_classes_url %}
+                {% if request.resolver_match %}
+                    {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
+                        <a href="{{ manage_classes_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if ns == 'dashboard_teacher' and name == 'manage_classes' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
+                            <i class="fa-regular fa-users mr-3"></i>
+                            Manage Classes
+                        </a>
+                    {% endwith %}
+                {% else %}
+                    <a href="{{ manage_classes_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                        <i class="fa-regular fa-users mr-3"></i>
+                        Manage Classes
+                    </a>
+                {% endif %}
             </div>
         {% else %}
             <!-- Student-specific menu items -->
             <div class="px-5">
-                <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
-                    <i class="fa-regular fa-calendar mr-3"></i>
-                    My Attendance
-                </a>
+                {% comment %} Student attendance URL - adjust name if your urlconf differs {% endcomment %}
+                {% url 'dashboard_student:attendance' as student_attendance_url %}
+                {% if request.resolver_match %}
+                    {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
+                        <a href="{{ student_attendance_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if ns == 'dashboard_student' and name == 'attendance' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
+                            <i class="fa-regular fa-calendar mr-3"></i>
+                            My Attendance
+                        </a>
+                    {% endwith %}
+                {% else %}
+                    <a href="{{ student_attendance_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                        <i class="fa-regular fa-calendar mr-3"></i>
+                        My Attendance
+                    </a>
+                {% endif %}
             </div>
 
         {% endif %}
         
         <!-- Common menu items -->
         <div class="px-5 ">
-            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
-                <i class="fa-regular fa-user mr-3"></i>
-                Profile
-            </a>
+            {% url 'dashboard_teacher:profile' as profile_url %}
+            {% if request.resolver_match %}
+                {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
+                    <a href="{{ profile_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if name == 'profile' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
+                        <i class="fa-regular fa-user mr-3"></i>
+                        Profile
+                    </a>
+                {% endwith %}
+            {% else %}
+                <a href="{{ profile_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                    <i class="fa-regular fa-user mr-3"></i>
+                    Profile
+                </a>
+            {% endif %}
         </div>
         <div class="px-5">
-            <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
-                <i class="fa-regular fa-gear mr-3"></i>
-                Settings
-            </a>
+            {% url 'dashboard_teacher:settings' as settings_url %}
+            {% if request.resolver_match %}
+                {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
+                    <a href="{{ settings_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if name == 'settings' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
+                        <i class="fa-regular fa-gear mr-3"></i>
+                        Settings
+                    </a>
+                {% endwith %}
+            {% else %}
+                <a href="{{ settings_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
+                    <i class="fa-regular fa-gear mr-3"></i>
+                    Settings
+                </a>
+            {% endif %}
         </div>
 
         <!-- Logout button -->

@@ -19,7 +19,7 @@
 
 /* When this class is added, the element animates into view */
 .fade-in {
-	animation: fadeIn 800ms ease-out forwards;
+	animation: fadeIn 600ms ease-out forwards;
 }
 
 /* optional utility delays (can be used by adding classes or inline data attributes) */
