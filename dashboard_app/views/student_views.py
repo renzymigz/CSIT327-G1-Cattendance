@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from dashboard_app.models import Class, Enrollment, SessionAttendance, ClassSession
-
+from dashboard_app.models import Class, Enrollment, SessionAttendance, ClassSession, SessionQRCode
+from django.http import JsonResponse
+from django.utils import timezone 
 # ==============================
 # STUDENT DASHBOARD
 # ==============================
@@ -95,6 +96,7 @@ def view_attendance(request, class_id):
         attendance_data.append({
             'date': session.date,
             'status': status,
+            'marked_via_qr': bool(attendance.marked_via_qr) if attendance else False,
         })
 
     context = {
@@ -115,3 +117,37 @@ def profile(request):
     }
     return render(request, "dashboard_app/student/profile.html", context)
 
+@login_required
+def mark_attendance(request, qr_code):
+    if request.user.user_type != 'student':
+        return JsonResponse({'error': 'Unauthorized access'}, status=403)
+
+    try:
+        qr = SessionQRCode.objects.get(code=qr_code)
+    except SessionQRCode.DoesNotExist:
+        return JsonResponse({'error': 'Invalid or unknown QR code'}, status=404)
+
+    if timezone.now() > qr.expires_at:
+        return JsonResponse({'error': 'QR code expired'}, status=400)
+
+    student_profile = getattr(request.user, 'studentprofile', None)
+    session = qr.session
+
+    attendance, created = SessionAttendance.objects.get_or_create(
+        student=student_profile, session=session
+    )
+
+    # If already present, ensure we still mark that it was via QR if not already
+    if attendance.is_present:
+        if not attendance.marked_via_qr:
+            attendance.marked_via_qr = True
+            attendance.save()
+            return JsonResponse({'message': 'Attendance already marked; flagged as QR-marked.'})
+        return JsonResponse({'message': 'You have already marked your attendance for this session.'})
+
+    # Mark present and flag as QR-marked
+    attendance.is_present = True
+    attendance.marked_via_qr = True
+    attendance.save()
+
+    return JsonResponse({'message': 'Attendance marked successfully via QR!'})
