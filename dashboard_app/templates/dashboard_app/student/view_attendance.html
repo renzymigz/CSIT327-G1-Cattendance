@@ -118,9 +118,54 @@
       fps: 10,
       qrbox: { width: qrBoxSize, height: qrBoxSize } // dynamic size
     },
-    qrCodeMessage => {
+    async qrCodeMessage => {
       console.log("QR Code detected:", qrCodeMessage);
-      alert(`Scanned QR: ${qrCodeMessage}`);
+      // Attempt to POST to the mark attendance endpoint. The teacher encodes an absolute scan URL in the QR.
+      let scanUrl = qrCodeMessage;
+      if (!/^https?:\/\//i.test(scanUrl)) {
+        // If QR contains only the code, build student route
+        scanUrl = window.location.origin + '/dashboard/student/attendance/mark/' + encodeURIComponent(qrCodeMessage) + '/';
+      }
+
+      // Read CSRF token from cookie
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+
+      const csrftoken = getCookie('csrftoken');
+
+      try {
+        const resp = await fetch(scanUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-CSRFToken': csrftoken || '',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          }
+        });
+
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok) {
+          const msg = data.error || data.message || 'Failed to mark attendance.';
+          alert(msg);
+        } else {
+          const msg = data.message || 'Attendance marked successfully.';
+          alert(msg);
+          // Close scanner and refresh to show updated attendance status
+          stopScanner();
+          window.location.reload();
+          return;
+        }
+      } catch (err) {
+        console.error('Error marking attendance:', err);
+        alert('An error occurred while marking attendance.');
+      }
+
+      // Always stop scanner after handling
       stopScanner();
     },
     errorMessage => {}
