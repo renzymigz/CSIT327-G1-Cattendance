@@ -1,0 +1,51 @@
+{% load static %}
+<div class="bg-white shadow-lg w-72 fixed h-full">
+  <div class="flex items-center mx-auto gap-3 p-6 text-[#a2314b]">
+    <img src="{% static 'core_app/images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
+    <h1 class="text-xl font-bold">CATTENDANCE</h1>
+  </div>
+
+  <nav>
+    <div class="px-6 py-3">
+      <a href="{% url 'dashboard_student:dashboard' %}" 
+         class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'dashboard' %}bg-[#f6e8eb] text-[#a2314b]{% endif %}">
+        <i class="fas fa-home mr-3"></i>
+        Dashboard
+      </a>
+    </div>
+
+    <div class="px-6 py-3">
+      <a href="{% url 'dashboard_student:student_classes' %}" 
+         class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'student_classes' %}bg-[#f6e8eb] text-[#a2314b]{% endif %}">
+        <i class="fas fa-calendar-check mr-3"></i>
+        My Classes
+      </a>
+    </div>
+
+    <div class="px-6 py-3">
+      <a href="{% url 'dashboard_student:profile' %}" 
+         class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'profile' %}bg-[#f6e8eb] text-[#a2314b]{% endif %}">
+        <i class="fas fa-user mr-3"></i>
+        Profile
+      </a>
+    </div>
+
+    <div class="px-6 py-3">
+      <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+        <i class="fas fa-cog mr-3"></i>
+        Settings
+      </a>
+    </div>
+
+    <div class="px-6 py-3">
+      <form action="{% url 'auth:logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" 
+          class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg w-full">
+          <i class="fas fa-sign-out-alt mr-3"></i>
+          Logout
+        </button>
+      </form>
+    </div>
+  </nav>
+</div>

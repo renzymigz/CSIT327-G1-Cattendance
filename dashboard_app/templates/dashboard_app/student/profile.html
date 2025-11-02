@@ -1,0 +1,62 @@
+{% extends 'dashboard_app/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}My Profile{% endblock %}
+{% block page_title %}Profile{% endblock %}
+
+{% block content %}
+<div class="p-8">
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">My Profile</h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="col-span-1 space-y-6">
+      <div class="bg-white p-6 shadow rounded-2xl text-center">
+        <img src="{% static 'core_app/images/avatar_placeholder.jpg' %}" alt="Profile" class="w-24 h-24 rounded-full mx-auto mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">{{ user.first_name }} {{ user.last_name }}</h2>
+        <p class="text-sm text-gray-500">Student ID: 23-0711-470</p>
+
+        <div class="mt-4 space-y-2 text-sm text-gray-600">
+          <p><i class="fas fa-envelope mr-2 text-[#a2314b]"></i>{{ user.email }}</p>
+          <p><i class="fas fa-phone mr-2 text-[#a2314b]"></i>0915-726-9581</p>
+          <p><i class="fas fa-map-marker-alt mr-2 text-[#a2314b]"></i>Lapu-Lapu City, Cebu</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 shadow rounded-2xl">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Stats</h3>
+        <div class="space-y-2 text-sm">
+          <p class="flex justify-between"><span>Attendance Rate</span> <span class="text-green-600 font-semibold">92%</span></p>
+          <p class="flex justify-between"><span>Total Classes</span> <span class="font-semibold">6</span></p>
+          <p class="flex justify-between"><span>GPA</span> <span class="text-blue-600 font-semibold">4.5</span></p>
+          <p class="flex justify-between"><span>Credits Earned</span> <span class="font-semibold">45</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-span-2 space-y-6">
+      <div class="bg-white p-6 shadow rounded-2xl">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Personal Information</h3>
+        <div class="grid grid-cols-2 gap-4 text-sm text-gray-700">
+          <p><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+          <p><strong>Date of Birth:</strong></p>
+          <p><strong>Gender:</strong></p>
+          <p><strong>Nationality:</strong></p>
+          <p><strong>Blood Type:</strong></p>
+          <p><strong>Emergency Contact:</strong></p>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 shadow rounded-2xl">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Academic Information</h3>
+        <div class="grid grid-cols-2 gap-4 text-sm text-gray-700">
+          <p><strong>Program:</strong></p>
+          <p><strong>Major:</strong></p>
+          <p><strong>Year Level:</strong></p>
+          <p><strong>Semester:</strong></p>
+          <p><strong>Advisor:</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
