@@ -1,0 +1,55 @@
+{% extends 'dashboard_app/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}View Attendance{% endblock %}
+{% block page_title %}View Attendance{% endblock %}
+
+{% block content %}
+<div class="p-8">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">Attendance Record</h1>
+      <p class="text-gray-600">
+        {{ class_obj.title }} — Prof. {{ class_obj.teacher.user.get_full_name }}
+      </p>
+    </div>
+    <p class="text-gray-500">Welcome, {{ request.user.first_name }}</p>
+  </div>
+
+  <div class="bg-white shadow rounded-2xl p-6">
+    {% if attendance_data %}
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-100 text-left text-gray-700">
+            <th class="py-3 px-4 rounded-tl-xl">Date</th>
+            <th class="py-3 px-4">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in attendance_data %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="py-3 px-4 text-gray-700">{{ record.date|date:"F j, Y" }}</td>
+            <td class="py-3 px-4">
+              {% if record.status == "Present" %}
+                <span class="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">Present</span>
+              {% else %}
+                <span class="bg-red-100 text-red-700 text-sm font-medium px-3 py-1 rounded-full">Absent</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-gray-600">No attendance records found for this class.</p>
+    {% endif %}
+  </div>
+
+  <div class="mt-8">
+    <a href="{% url 'dashboard_student:student_classes' %}" 
+       class="inline-flex items-center gap-2 bg-[#a2314b] hover:bg-[#8e2942] text-white px-5 py-2.5 rounded-lg transition">
+      <i class="fa-solid fa-arrow-left"></i> Back to My Classes
+    </a>
+  </div>
+</div>
+{% endblock %}
