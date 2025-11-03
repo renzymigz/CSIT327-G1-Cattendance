@@ -1,0 +1,208 @@
+{% extends 'dashboard_app/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}View Attendance{% endblock %}
+{% block page_title %}View Attendance{% endblock %}
+
+{% block content %}
+<style>
+  #qrScannerArea video {
+    object-fit: cover;
+    width: 100% !important;
+    height: 100% !important;
+  }
+</style>
+
+<div class="p-8">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">Attendance Record</h1>
+      <p class="text-gray-600">
+        {{ class_obj.title }} — Prof. {{ class_obj.teacher.user.get_full_name }}
+      </p>
+    </div>
+    <div class="flex items-center gap-4">
+      <button id="scanQrBtn"
+        class="bg-[#a2314b] hover:bg-[#8e2942] text-white px-5 py-2.5 rounded-lg transition">
+        <i class="fa-solid fa-qrcode mr-2"></i> Scan QR
+      </button>
+      <p class="text-gray-500">Welcome, {{ request.user.first_name }}</p>
+    </div>
+  </div>
+
+  <div class="bg-white shadow rounded-2xl p-6">
+    {% if attendance_data %}
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-100 text-left text-gray-700">
+            <th class="py-3 px-4 rounded-tl-xl">Date</th>
+            <th class="py-3 px-4">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in attendance_data %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="py-3 px-4 text-gray-700">{{ record.date|date:"F j, Y" }}</td>
+            <td class="py-3 px-4">
+              {% if record.status == "Present" %}
+                <span class="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full inline-flex items-center">
+                  Present
+                  {% if record.marked_via_qr %}
+                    <i class="fa-solid fa-qrcode text-green-600 ml-2" title="Marked via QR"></i>
+                  {% endif %}
+                </span>
+              {% else %}
+                <span class="bg-red-100 text-red-700 text-sm font-medium px-3 py-1 rounded-full">Absent</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-gray-600">No attendance records found for this class.</p>
+    {% endif %}
+  </div>
+
+  <div class="mt-8">
+    <a href="{% url 'dashboard_student:student_classes' %}" 
+       class="inline-flex items-center gap-2 bg-[#a2314b] hover:bg-[#8e2942] text-white px-5 py-2.5 rounded-lg transition">
+      <i class="fa-solid fa-arrow-left"></i> Back to My Classes
+    </a>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- QR SCAN MODAL -->
+<!-- ========================= -->
+<div id="qrModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white rounded-xl shadow-lg w-[400px] p-6 relative">
+    <button id="closeQrModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <h2 class="text-xl font-semibold mb-4 text-center text-gray-800">Scan QR Code</h2>
+    <div id="qrScannerArea" class="w-full aspect-square rounded-lg overflow-hidden"></div>
+    <p class="text-center text-gray-500 mt-3 text-sm">Align the QR code within the frame</p>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- QR SCANNER LOGIC -->
+<!-- ========================= -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+  const qrModal = document.getElementById("qrModal");
+  const scanQrBtn = document.getElementById("scanQrBtn");
+  const closeQrModal = document.getElementById("closeQrModal");
+  const qrScannerArea = document.getElementById("qrScannerArea");
+
+  let html5QrCode; // reference to scanner
+  let isProcessing = false; // prevent duplicate handling from multiple scan callbacks
+
+  scanQrBtn.addEventListener("click", () => {
+    qrModal.classList.remove("hidden");
+
+    // Delay start a bit so modal is rendered
+    setTimeout(() => {
+      startScanner();
+    }, 300);
+  });
+
+  function startScanner() {
+  const width = qrScannerArea.offsetWidth; // get modal width
+  const qrBoxSize = Math.floor(width * 0.9); // 90% of available width
+
+  html5QrCode = new Html5Qrcode("qrScannerArea");
+  html5QrCode.start(
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: { width: qrBoxSize, height: qrBoxSize } // dynamic size
+    },
+    async qrCodeMessage => {
+      if (isProcessing) return;
+      isProcessing = true;
+      console.log("QR Code detected:", qrCodeMessage);
+
+      // stop the scanner immediately to avoid duplicate callbacks
+      try {
+        if (html5QrCode) {
+          await html5QrCode.stop();
+          try { html5QrCode.clear(); } catch (e) { /* ignore */ }
+        }
+      } catch (stopErr) {
+        console.warn('Error stopping scanner:', stopErr);
+      }
+
+      // Attempt to POST to the mark attendance endpoint. The teacher encodes an absolute scan URL in the QR.
+      let scanUrl = qrCodeMessage;
+      if (!/^https?:\/\//i.test(scanUrl)) {
+        // If QR contains only the code, build student route
+        scanUrl = window.location.origin + '/dashboard/student/attendance/mark/' + encodeURIComponent(qrCodeMessage) + '/';
+      }
+
+      // Read CSRF token from cookie
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+
+      const csrftoken = getCookie('csrftoken');
+
+      try {
+        const resp = await fetch(scanUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-CSRFToken': csrftoken || '',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          }
+        });
+
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok) {
+          const msg = data.error || data.message || 'Failed to mark attendance.';
+          alert(msg);
+        } else {
+          const msg = data.message || 'Attendance marked successfully.';
+          alert(msg);
+          // Close modal and refresh to show updated attendance status
+          qrModal.classList.add('hidden');
+          window.location.reload();
+          return;
+        }
+      } catch (err) {
+        console.error('Error marking attendance:', err);
+        alert('An error occurred while marking attendance.');
+      } finally {
+        isProcessing = false;
+      }
+    },
+    errorMessage => {}
+  ).catch(err => {
+    console.error("Unable to start scanning:", err);
+    alert("Failed to access camera. Please check browser permissions.");
+  });
+}
+
+  function stopScanner() {
+    if (html5QrCode) {
+      html5QrCode.stop().then(() => {
+        html5QrCode.clear();
+        qrModal.classList.add("hidden");
+      }).catch(err => console.error("Stop failed:", err));
+    } else {
+      qrModal.classList.add("hidden");
+    }
+  }
+
+  closeQrModal.addEventListener("click", stopScanner);
+  qrModal.addEventListener("click", (e) => {
+    if (e.target === qrModal) stopScanner();
+  });
+</script>
+
+{% endblock %}

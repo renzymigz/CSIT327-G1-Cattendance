@@ -24,17 +24,26 @@
     </script>
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css"/>
 </head>
+
 <body class="bg-[#f9fafa] font-sans">
     <div class="flex h-screen">
-        {% include 'dashboard_app/components/sidebar.html' %}
-        
-        <!-- Main Content -->
-        <div class="flex-1 ml-72">
+
+        <!-- Sidebar (Auto loads teacher or student version) -->
+        {% if user.user_type == "teacher" %}
+            {% include 'dashboard_app/components/sidebar.html' %}
+        {% elif user.user_type == "student" %}
+            {% include 'dashboard_app/components/sidebar_student.html' %}
+        {% else %}
+            {% include 'dashboard_app/components/sidebar.html' %}
+        {% endif %}
+
+    <!-- Main Content -->
+    <div id="mainContent" class="flex-1 md:ml-72 transition-all duration-300">
             <!-- Top Navigation -->
             <header class="bg-white shadow-sm border-b">
                 <div class="flex items-center justify-between px-6 py-4">
-                    <div class = "flex items-center justify-center">
-                        <button class = "mr-3 hover:bg-[#a2314b] p-2 hover:text-white transition-all rounded-2xl w-10 h-10">
+                    <div class="flex items-center justify-center">
+                        <button id="sidebarToggle" aria-controls="sidebar" aria-expanded="false" onclick="if (window.toggleSidebarGlobal) window.toggleSidebarGlobal(event)" class="mr-3 hover:bg-[#a2314b] p-2 hover:text-white transition-all rounded-2xl w-10 h-10" type="button">
                             <i class="fa-solid fa-bars"></i>
                         </button>
                         
@@ -47,7 +56,9 @@
                             <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                                 <i class="fas fa-user text-gray-600"></i>
                             </div>
-                            <span class="text-sm font-medium text-gray-700">Welcome, {{user.first_name}} {{user.last_name}}</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                Welcome, {{ user.first_name }} {{ user.last_name }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -60,5 +71,6 @@
             </main>
         </div>
     </div>
+        <script defer src="{% static 'js/sidebar.js' %}"></script>
 </body>
 </html>

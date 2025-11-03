@@ -388,8 +388,9 @@ def generate_qr(request, class_id, session_id):
         # Generate a new QR since none is active
         qr = SessionQRCode.generate_for_session(session, validity_minutes=validity_minutes)
 
-    # Build absolute scan URL
-    scan_url = request.build_absolute_uri(f"/attendance/mark/{qr.code}/")
+    # Build absolute scan URL using the student-facing route (namespaced)
+    # This ensures the generated QR points to the student mark_attendance view under /dashboard/student/
+    scan_url = request.build_absolute_uri(reverse('dashboard_student:mark_attendance', args=[qr.code]))
 
     # Generate QR image (Segno)
     qr_img = segno.make(scan_url)

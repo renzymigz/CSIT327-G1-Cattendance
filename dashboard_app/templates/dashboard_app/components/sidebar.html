@@ -1,14 +1,17 @@
 {% load static %}
-<!-- Sidebar -->
-<div class="bg-white w-72 fixed h-full border-r border-gray-200">
+<!-- Sidebar (responsive) -->
+<!-- Off-canvas wrapper: starts hidden on small screens, visible on md+ -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden md:hidden"></div>
+<div id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 transform -translate-x-full md:translate-x-0 transition-all duration-300 bg-white border-r border-gray-200">
+    <!-- Overlay for mobile when sidebar is open -->
      <div class="flex items-center mx-auto p-4 text-[#a2314b] ml-1">
         <img src="{% static 'core_app/images/logo.png' %}" class="w-[50px] h-[50px] mr-3" alt="Logo">
         <div class = "grid grid-col">
-            <h1 class="text-2xl font-bold">Cattendance</h1>
+            <h1 class="text-2xl font-bold sidebar-label">Cattendance</h1>
             {% if user_type == 'student' %}
-                <p class = "text-sm text-gray-700">Student Portal</p>
+                <p class = "text-sm text-gray-700 sidebar-label">Student Portal</p>
             {% else %}
-                <p class = "text-sm text-gray-700">Teacher Portal</p>
+                <p class = "text-sm text-gray-700 sidebar-label">Teacher Portal</p>
             {% endif %}
         </div>
     </div>
@@ -16,19 +19,19 @@
     <hr class =  "mb-5">
     <nav class="flex flex-col gap-y-2">
         <!-- Common menu items for both -->
-        <div class="px-5 ">
+        <div class="px-5">
             {% url 'dashboard_teacher:dashboard' as dashboard_url %}
             {% if request.resolver_match %}
                 {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
                     <a href="{{ dashboard_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if ns == 'dashboard_teacher' and name == 'dashboard' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
                         <i class="fa-regular fa-grid-2 mr-3"></i>
-                        Dashboard
+                        <span class="sidebar-label">Dashboard</span>
                     </a>
                 {% endwith %}
             {% else %}
                 <a href="{{ dashboard_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
-                    <i class="fa-regular fa-grid-2 mr-3"></i>
-                    Dashboard
+                        <i class="fa-regular fa-grid-2 mr-3"></i>
+                    <span class="sidebar-label">Dashboard</span>
                 </a>
             {% endif %}
         </div>
@@ -42,13 +45,13 @@
                     {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
                         <a href="{{ manage_classes_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if ns == 'dashboard_teacher' and name == 'manage_classes' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
                             <i class="fa-regular fa-users mr-3"></i>
-                            Manage Classes
+                            <span class="sidebar-label">Manage Classes</span>
                         </a>
                     {% endwith %}
                 {% else %}
                     <a href="{{ manage_classes_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
                         <i class="fa-regular fa-users mr-3"></i>
-                        Manage Classes
+                        <span class="sidebar-label">Manage Classes</span>
                     </a>
                 {% endif %}
             </div>
@@ -61,13 +64,13 @@
                     {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
                         <a href="{{ student_attendance_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if ns == 'dashboard_student' and name == 'attendance' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
                             <i class="fa-regular fa-calendar mr-3"></i>
-                            My Attendance
+                            <span class="sidebar-label">My Attendance</span>
                         </a>
                     {% endwith %}
                 {% else %}
                     <a href="{{ student_attendance_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
                         <i class="fa-regular fa-calendar mr-3"></i>
-                        My Attendance
+                        <span class="sidebar-label">My Attendance</span>
                     </a>
                 {% endif %}
             </div>
@@ -81,13 +84,13 @@
                 {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
                     <a href="{{ profile_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if name == 'profile' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
                         <i class="fa-regular fa-user mr-3"></i>
-                        Profile
+                        <span class="sidebar-label">Profile</span>
                     </a>
                 {% endwith %}
             {% else %}
                 <a href="{{ profile_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
                     <i class="fa-regular fa-user mr-3"></i>
-                    Profile
+                    <span class="sidebar-label">Profile</span>
                 </a>
             {% endif %}
         </div>
@@ -97,13 +100,13 @@
                 {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
                     <a href="{{ settings_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if name == 'settings' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
                         <i class="fa-regular fa-gear mr-3"></i>
-                        Settings
+                        <span class="sidebar-label">Settings</span>
                     </a>
                 {% endwith %}
             {% else %}
                 <a href="{{ settings_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
                     <i class="fa-regular fa-gear mr-3"></i>
-                    Settings
+                    <span class="sidebar-label">Settings</span>
                 </a>
             {% endif %}
         </div>
@@ -113,11 +116,10 @@
   <form action="{% url 'auth:logout' %}" method="post">
     {% csrf_token %}
     <button type="submit" class="flex items-center text-red-600 hover:bg-red-50 px-4 py-3 rounded-lg w-full">
-      <i class="fas fa-sign-out-alt mr-3"></i>
-      Logout
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            <span class="sidebar-label">Logout</span>
     </button>
   </form>
 </div>
     </nav>
-
 </div>
