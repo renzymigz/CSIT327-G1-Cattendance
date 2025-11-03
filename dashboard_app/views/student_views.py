@@ -134,7 +134,7 @@ def mark_attendance(request, qr_code):
     student_profile = getattr(request.user, 'studentprofile', None)
     session = qr.session
 
-    # Use an atomic transaction and select_for_update to avoid race conditions from multiple simultaneous scans
+    # atomic transaction & select_for_update to avoid race conditions from multiple simultaneous scans
     try:
         with transaction.atomic():
             attendance, created = SessionAttendance.objects.select_for_update().get_or_create(
@@ -160,5 +160,5 @@ def mark_attendance(request, qr_code):
 
             return JsonResponse({'message': 'You have already marked your attendance for this session.'})
     except Exception as e:
-        # Log server-side if needed; for now return a generic error
+        # return a generic error
         return JsonResponse({'error': 'Failed to mark attendance due to server error.'}, status=500)
