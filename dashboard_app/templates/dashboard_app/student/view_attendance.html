@@ -97,6 +97,7 @@
   const qrScannerArea = document.getElementById("qrScannerArea");
 
   let html5QrCode; // reference to scanner
+  let isProcessing = false; // prevent duplicate handling from multiple scan callbacks
 
   scanQrBtn.addEventListener("click", () => {
     qrModal.classList.remove("hidden");
@@ -119,7 +120,20 @@
       qrbox: { width: qrBoxSize, height: qrBoxSize } // dynamic size
     },
     async qrCodeMessage => {
+      if (isProcessing) return;
+      isProcessing = true;
       console.log("QR Code detected:", qrCodeMessage);
+
+      // stop the scanner immediately to avoid duplicate callbacks
+      try {
+        if (html5QrCode) {
+          await html5QrCode.stop();
+          try { html5QrCode.clear(); } catch (e) { /* ignore */ }
+        }
+      } catch (stopErr) {
+        console.warn('Error stopping scanner:', stopErr);
+      }
+
       // Attempt to POST to the mark attendance endpoint. The teacher encodes an absolute scan URL in the QR.
       let scanUrl = qrCodeMessage;
       if (!/^https?:\/\//i.test(scanUrl)) {
@@ -155,18 +169,17 @@
         } else {
           const msg = data.message || 'Attendance marked successfully.';
           alert(msg);
-          // Close scanner and refresh to show updated attendance status
-          stopScanner();
+          // Close modal and refresh to show updated attendance status
+          qrModal.classList.add('hidden');
           window.location.reload();
           return;
         }
       } catch (err) {
         console.error('Error marking attendance:', err);
         alert('An error occurred while marking attendance.');
+      } finally {
+        isProcessing = false;
       }
-
-      // Always stop scanner after handling
-      stopScanner();
     },
     errorMessage => {}
   ).catch(err => {
