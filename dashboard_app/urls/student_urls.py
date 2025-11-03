@@ -15,4 +15,7 @@ urlpatterns = [
 
     # ✅ Add this new Profile route
     path('profile/', student_views.profile, name='profile'),
+    
+    path('attendance/mark/<str:qr_code>/', student_views.mark_attendance, name='mark_attendance'),
+
 ]

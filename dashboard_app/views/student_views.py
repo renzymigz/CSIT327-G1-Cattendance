@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from dashboard_app.models import Class, Enrollment, SessionAttendance, ClassSession
-
+from dashboard_app.models import Class, Enrollment, SessionAttendance, ClassSession, SessionQRCode
+from django.http import JsonResponse
+from django.utils import timezone 
+from django.db import transaction
 # ==============================
 # STUDENT DASHBOARD
 # ==============================
@@ -95,6 +97,7 @@ def view_attendance(request, class_id):
         attendance_data.append({
             'date': session.date,
             'status': status,
+            'marked_via_qr': bool(attendance.marked_via_qr) if attendance else False,
         })
 
     context = {
@@ -115,3 +118,47 @@ def profile(request):
     }
     return render(request, "dashboard_app/student/profile.html", context)
 
+@login_required
+def mark_attendance(request, qr_code):
+    if request.user.user_type != 'student':
+        return JsonResponse({'error': 'Unauthorized access'}, status=403)
+
+    try:
+        qr = SessionQRCode.objects.get(code=qr_code)
+    except SessionQRCode.DoesNotExist:
+        return JsonResponse({'error': 'Invalid or unknown QR code'}, status=404)
+
+    if timezone.now() > qr.expires_at:
+        return JsonResponse({'error': 'QR code expired'}, status=400)
+
+    student_profile = getattr(request.user, 'studentprofile', None)
+    session = qr.session
+
+    # atomic transaction & select_for_update to avoid race conditions from multiple simultaneous scans
+    try:
+        with transaction.atomic():
+            attendance, created = SessionAttendance.objects.select_for_update().get_or_create(
+                student=student_profile,
+                session=session,
+                defaults={'is_present': True, 'marked_via_qr': True}
+            )
+
+            if created:
+                return JsonResponse({'message': 'Attendance marked successfully via QR!'})
+
+            # If record existed, update fields if needed
+            updated = False
+            if not attendance.is_present:
+                attendance.is_present = True
+                updated = True
+            if not attendance.marked_via_qr:
+                attendance.marked_via_qr = True
+                updated = True
+            if updated:
+                attendance.save()
+                return JsonResponse({'message': 'Attendance updated and flagged as QR-marked.'})
+
+            return JsonResponse({'message': 'You have already marked your attendance for this session.'})
+    except Exception as e:
+        # return a generic error
+        return JsonResponse({'error': 'Failed to mark attendance due to server error.'}, status=500)
