@@ -12,6 +12,7 @@ from datetime import timedelta
 from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 import segno, io, base64
+from django.db import transaction
 
 
 # ==============================
@@ -156,6 +157,9 @@ def view_class(request, class_id):
 
     teacher_profile = request.user.teacherprofile
     class_obj = get_object_or_404(Class, id=class_id, teacher=teacher_profile)
+    
+    auto_update_sessions(class_obj)
+    
     enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
     sessions = ClassSession.objects.filter(class_obj=class_obj).order_by('-date')
 
@@ -410,3 +414,38 @@ def generate_qr(request, class_id, session_id):
         'qr_image': qr_data_uri,
         'scan_url': scan_url,
     })
+
+def auto_update_sessions(class_obj):
+    """Auto-close ongoing sessions and mark absent students for completed ones."""
+    now = timezone.localtime()
+    today = now.date()
+    current_time = now.time()
+
+    # Preload related fields to minimize queries
+    sessions = (
+        ClassSession.objects
+        .filter(class_obj=class_obj, status="ongoing")
+        .select_related("schedule_day")
+    )
+    enrollments = list(Enrollment.objects.filter(class_obj=class_obj).select_related("student"))
+
+    for session in sessions:
+        schedule = session.schedule_day
+
+        should_complete = (
+            (session.date == today and current_time > schedule.end_time)
+            or (session.date < today)
+        )
+
+        if should_complete:
+            session.status = "completed"
+            session.save(update_fields=["status"])
+
+            # Auto-mark absent students for completed sessions
+            with transaction.atomic():
+                for enrollment in enrollments:
+                    SessionAttendance.objects.get_or_create(
+                        session=session,
+                        student=enrollment.student,
+                        defaults={"is_present": False}
+                    )

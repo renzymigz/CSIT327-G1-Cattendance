@@ -2,25 +2,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const items = Array.from(document.querySelectorAll('.fade-item'));
 
     const observerOptions = {
-        root: null, // observe relative to the viewport
-        rootMargin: '0px', // no margin offset
-        threshold: 0.5 // trigger fade-in when 50% of the element is in view
+        root: null, // 
+        rootMargin: '0px',
+        threshold: 0.3, 
     };
 
     const fadeInOnScroll = (entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                // Add fade-in class when element is in view
-                entry.target.classList.add('fade-in');
-                observer.unobserve(entry.target); // Stop observing once it's in view
+                const visibleItems = items.filter(el => el.getBoundingClientRect().top < window.innerHeight);
+                
+                visibleItems.forEach((el, i) => {
+                    el.style.animationDelay = `${i * 0.15}s`; // stagger delay
+                    el.classList.add('fade-in');
+                    observer.unobserve(el);
+                });
             }
         });
     };
 
     const observer = new IntersectionObserver(fadeInOnScroll, observerOptions);
 
-    // Start observing each fade-item element
-    items.forEach(function (el) {
-        observer.observe(el);
-    });
+    items.forEach(el => observer.observe(el));
 });

@@ -227,7 +227,7 @@
             <td class="p-2"><i class="fa-regular fa-clock pr-2"></i>{{ session.schedule_day.day_of_week }} — {{ session.schedule_day.start_time|time:"h:i A" }} to {{ session.schedule_day.end_time|time:"h:i A" }}</td>
             <td class="p-2">
               <span
-                class="px-3 py-1 rounded-lg border font-semibold text-sm {% if session.status == 'ongoing' %}bg-yellow-100 border-amber-400 text-yellow-500{% elif session.status == 'completed' %}bg-green-600{% else %}bg-gray-400{% endif %}">
+                class="px-3 py-1 rounded-lg border font-semibold text-sm {% if session.status == 'ongoing' %}bg-yellow-100 border-amber-400 text-yellow-500{% elif session.status == 'completed' %}border-green-400 text-[#166534] bg-[#DCFCE7] {% else %}bg-gray-400{% endif %}">
                 {{ session.status|capfirst }}
               </span>
             </td>
