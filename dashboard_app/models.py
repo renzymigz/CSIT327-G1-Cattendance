@@ -85,14 +85,16 @@ def export_enrolled_students(request, class_id):
 class SessionAttendance(models.Model):
     session = models.ForeignKey('ClassSession', on_delete=models.CASCADE, related_name='attendances')
     student = models.ForeignKey('auth_app.StudentProfile', on_delete=models.CASCADE)
-    is_present = models.BooleanField(default=False)
+    # Allow three states: True (present), False (absent), None (not marked yet)
+    is_present = models.BooleanField(null=True, default=None)
     marked_via_qr = models.BooleanField(default=False) 
     
     class Meta:
         unique_together = ('session', 'student')
 
     def __str__(self):
-        return f"{self.student.user.get_full_name()} - {self.session.class_obj.code} ({'Present' if self.is_present else 'Absent'})"
+        status = 'Present' if self.is_present is True else ('Absent' if self.is_present is False else 'Not Marked')
+        return f"{self.student.user.get_full_name()} - {self.session.class_obj.code} ({status})"
 
 class SessionQRCode(models.Model):
     session = models.OneToOneField(ClassSession, on_delete=models.CASCADE, related_name='qr_code')

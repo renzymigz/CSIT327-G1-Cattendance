@@ -57,7 +57,7 @@
   <!-- Class list -->
   {% if classes %}
   <!-- Class list with icons and improved UI -->
-  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 ">
+  <div class="grid grid-cols-1  xl:grid-cols-2 2xl:grid-cols-3 gap-6 ">
     {% for cls in classes %}
     <a
       href="{% url 'dashboard_teacher:view_class' cls.id %}"
@@ -90,9 +90,6 @@
           <div class="flex-shrink-0 w-5 h-5 text-gray-400">
             <i class="fa-regular fa-calendar"></i>
           </div>
-
-
-
           <div>
             <p class="text-xs text-gray-500 uppercase tracking-wide">
               Semester

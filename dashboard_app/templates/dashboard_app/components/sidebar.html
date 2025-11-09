@@ -59,7 +59,7 @@
             <!-- Student-specific menu items -->
             <div class="px-5">
                 {% comment %} Student attendance URL - adjust name if your urlconf differs {% endcomment %}
-                {% url 'dashboard_student:attendance' as student_attendance_url %}
+                {% url 'dashboard_student:student_classes' as student_attendance_url %}
                 {% if request.resolver_match %}
                     {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
                         <a href="{{ student_attendance_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if ns == 'dashboard_student' and name == 'attendance' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">

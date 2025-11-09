@@ -273,8 +273,13 @@ def export_session_attendance(request, class_id, session_id):
         full_name = f"{user.first_name} {user.last_name}".strip()
         if not full_name:
             full_name = user.username or user.email
-
-        status = "Present" if attendance.is_present else "Absent"
+        # Interpret three-state is_present: True, False, or None (Not Marked)
+        if attendance.is_present is True:
+            status = "Present"
+        elif attendance.is_present is False:
+            status = "Absent"
+        else:
+            status = "Not Marked"
         writer.writerow([full_name, user.email, status, '', ''])
 
     return response
@@ -357,6 +362,7 @@ def view_session(request, class_id, session_id):
         return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
 
     return render(request, 'dashboard_app/teacher/view_session.html', {
+        'user_type': 'teacher',
         'session': session,
         'class_obj': class_obj,
         'class_id': class_id,

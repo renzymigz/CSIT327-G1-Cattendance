@@ -62,10 +62,21 @@ def student_classes(request):
 
         enrolled_classes.append({
             'id': class_obj.id,
+            'code': class_obj.code,
+            'section': class_obj.section,
             'title': class_obj.title,
             'subject': class_obj.title,
             'teacher_name': class_obj.teacher.user.get_full_name(),
             'schedule': ", ".join(s.day_of_week for s in class_obj.schedules.all()),
+                'schedules': [
+                    {
+                        'day_of_week': s.day_of_week,
+                        'start_time': s.start_time,
+                        'end_time': s.end_time,
+                    } for s in class_obj.schedules.all()
+                ],
+                'semester': class_obj.semester,
+                'academic_year': class_obj.academic_year,
             'session_count': total_sessions,
             'attendance_rate': attendance_rate,
         })
@@ -93,17 +104,33 @@ def view_attendance(request, class_id):
     attendance_data = []
     for session in sessions:
         attendance = attendance_records.filter(session=session).first()
-        status = "Present" if attendance and attendance.is_present else "Absent"
+        # Three-state: True => Present, False => Absent, None or missing => Not Marked
+        if attendance and attendance.is_present is True:
+            status = "Present"
+        elif attendance and attendance.is_present is False:
+            status = "Absent"
+        else:
+            status = "Not Marked"
         attendance_data.append({
+            'session': session,
             'date': session.date,
             'status': status,
             'marked_via_qr': bool(attendance.marked_via_qr) if attendance else False,
         })
+    # Totals
+    total_present = attendance_records.filter(is_present=True).count()
+    total_absent = attendance_records.filter(is_present=False).count()
+    total_sessions = sessions.count()
+    attendance_rate = round((total_present / total_sessions) * 100, 2) if total_sessions > 0 else 0
 
     context = {
         'user_type': 'student',
         'class_obj': class_obj,
+        'sessions': sessions,
         'attendance_data': attendance_data,
+        'total_present': total_present,
+        'total_absent': total_absent,
+        'attendance_rate': attendance_rate,
     }
     return render(request, "dashboard_app/student/view_attendance.html", context)
 
