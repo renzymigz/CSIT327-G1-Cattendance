@@ -8,7 +8,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
       href="{% url 'dashboard_teacher:view_class' session.class_obj.id %}"
       class="text-[#a2314b] hover:underline flex items-center"
     >
-      <i class="fa-solid fa-arrow-left mr-2"></i> Back
+      ← Back to View Class
     </a>
     
   </div>
@@ -23,6 +23,14 @@ Attendance | Cattendance{% endblock %} {% block content %}
           <p class="text-base text-gray-500">
              {{session.schedule_day.day_of_week}}, {{ session.date|date:"F j, Y" }} at {{ session.schedule_day.start_time|time:"h:i A" }}
           </p>
+          <div class="mt-2">
+            <span class="px-3 py-1 rounded-lg border font-semibold text-sm 
+              {% if session.status == 'ongoing' %}bg-yellow-100 border-amber-400 text-yellow-500
+              {% elif session.status == 'completed' %}border-green-400 text-[#166534] bg-[#DCFCE7]
+              {% else %}bg-gray-400{% endif %}">
+              {{ session.status|capfirst }}
+            </span>
+          </div>
         </div>
       </div>
        <!-- Counters -->
@@ -50,7 +58,14 @@ Attendance | Cattendance{% endblock %} {% block content %}
       <button
         id="btn-generate-qr"
         type="button"
-        class="px-4 py-2 rounded-lg border border-gray-300 font-semibold bg-[#a2314b] text-white"
+        class="px-4 py-2 rounded-lg border font-semibold transition bg-[#a2314b] text-white border-gray-300 
+        {% if session.status == 'completed' %}
+          opacity-40 cursor-not-allowed border-gray-300
+        {% else %}
+          hover:opacity-90
+        {% endif %}"
+        {% if session.status == 'completed' %}disabled{% endif %}
+        title="{% if session.status == 'completed' %}Session has ended{% endif %}"
       >
         <i class="fa-solid fa-qrcode mr-2"></i>Generate QR Code
       </button>
@@ -58,7 +73,14 @@ Attendance | Cattendance{% endblock %} {% block content %}
       <button
         id="btn-mark-all-present"
         type="button"
-        class="px-4 py-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 hover:bg-gray-100"
+        class="px-4 py-2 rounded-lg border transition border-[#E2E8F0] bg-[#F8FAFC] text-gray-600
+        {% if session.status == 'completed' %}
+          opacity-70 cursor-not-allowed
+        {% else %}
+          hover:bg-gray-100
+        {% endif %}"
+        {% if session.status == 'completed' %}disabled{% endif %}
+        title="{% if session.status == 'completed' %}Session has ended{% endif %}"
       >
         Mark All Present
       </button>
@@ -66,7 +88,14 @@ Attendance | Cattendance{% endblock %} {% block content %}
       <button
         id="btn-clear-all"
         type="button"
-        class="px-4 py-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 hover:bg-gray-100"
+        class="px-4 py-2 rounded-lg border transition border-[#E2E8F0] bg-[#F8FAFC] text-gray-600
+        {% if session.status == 'completed' %}
+          opacity-70 cursor-not-allowed
+        {% else %}
+           hover:bg-gray-100
+        {% endif %}"
+        {% if session.status == 'completed' %}disabled{% endif %}
+        title="{% if session.status == 'completed' %}Session has ended{% endif %}"
       >
         Clear All
       </button>
@@ -82,9 +111,20 @@ Attendance | Cattendance{% endblock %} {% block content %}
     >
          <i class="fa-regular fa-download pr-2"></i>Export to CSV
       </a>
-        <button class = "px-4 py-2 rounded-lg border border-gray-300 font-semibold bg-[#a2314b] text-white hover:opacity-90" >
+        <button 
+          type="button"
+          id="btn-end-session"
+          class="px-4 py-2 rounded-lg border font-semibold transition bg-[#a2314b] text-white 
+          {% if session.status == 'completed' %}
+            opacity-40 cursor-not-allowed border-gray-300
+          {% else %}
+            hover:bg-[#8f2b43]
+          {% endif %}"
+          {% if session.status == 'completed' %}disabled{% endif %}
+          title="{% if session.status == 'completed' %}Session already ended{% endif %}"
+        >
           <i class="fa-regular fa-hourglass-end pr-2"></i>End Session 
-      </button>
+        </button>
 
     </div>
     
@@ -93,6 +133,15 @@ Attendance | Cattendance{% endblock %} {% block content %}
     </div>
   </div>
 
+  <!-- Session Status Notice -->
+  {% if session.status == 'completed' %}
+  <div class="mb-4">
+    <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg text-sm">
+      <i class="fa-solid fa-circle-info mr-2"></i>
+      <strong>This session has ended.</strong> Attendance records are now read-only. You can still export the attendance data.
+    </div>
+  </div>
+  {% endif %}
 
   <!-- Bulk Buttons -->
   
@@ -113,7 +162,14 @@ Attendance | Cattendance{% endblock %} {% block content %}
         <h2 class="text-lg font-semibold text-[#6a1e1e] "><i class="fa-regular fa-calendar pr-2"></i>Student Attendance</h2>
         <button
           type="submit"
-          class="px-5 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43] font-semibold transition"
+          class="px-5 py-2 rounded-lg font-semibold transition bg-[#a2314b] text-white 
+          {% if session.status == 'completed' %}
+            opacity-40  cursor-not-allowed
+          {% else %}
+            hover:bg-[#8f2b43]
+          {% endif %}"
+          {% if session.status == 'completed' %}disabled{% endif %}
+          title="{% if session.status == 'completed' %}Session has ended{% endif %}"
         >
           Save Attendance
         </button>
@@ -188,13 +244,25 @@ Attendance | Cattendance{% endblock %} {% block content %}
                 <div class="inline-flex gap-2">
                   <button
                     type="button"
-                    class="btn-present flex items-center justify-center w-10 h-10 rounded-md bg-[#F8FAFC] border border-[#E2E8F0] text-gray-600 transition hover:bg-gray-100"
+                    class="btn-present flex items-center justify-center w-10 h-10 rounded-md transition bg-[#F8FAFC] border border-[#E2E8F0] text-gray-600
+                    {% if session.status == 'completed' %}
+                      opacity-50 cursor-not-allowed border border-gray-300
+                    {% else %}
+                      hover:bg-gray-100
+                    {% endif %}"
+                    {% if session.status == 'completed' %}disabled{% endif %}
                   >
                     <i class="fa-regular fa-circle-check"></i>
                   </button>
                   <button
                     type="button"
-                    class="btn-absent flex items-center justify-center w-10 h-10 rounded-md bg-[#F8FAFC] border border-[#E2E8F0] text-gray-600 transition hover:bg-gray-100"
+                    class="btn-absent flex items-center justify-center w-10 h-10 rounded-md transition bg-[#F8FAFC] border border-[#E2E8F0] text-gray-600
+                    {% if session.status == 'completed' %}
+                      opacity-50 cursor-not-allowed border border-gray-300
+                    {% else %}
+                       hover:bg-gray-100
+                    {% endif %}"
+                    {% if session.status == 'completed' %}disabled{% endif %}
                   >
                     <i class="fa-regular fa-circle-xmark"></i>
                   </button>
@@ -277,6 +345,9 @@ Attendance | Cattendance{% endblock %} {% block content %}
     const qrImage = document.getElementById("qr-image");
     const qrTimer = document.getElementById("qr-timer");
 
+    // Check if session is completed
+    const isCompleted = "{{ session.status|lower }}" === "completed";
+
     let qrInterval = null;
 
     async function fetchAndShowQR() {
@@ -310,28 +381,34 @@ Attendance | Cattendance{% endblock %} {% block content %}
       }
     }
 
-    qrBtn.addEventListener("click", () => {
-      qrModal.classList.remove("hidden");
-      fetchAndShowQR();
-    });
+    if (qrBtn && !isCompleted) {
+      qrBtn.addEventListener("click", () => {
+        qrModal.classList.remove("hidden");
+        fetchAndShowQR();
+      });
+    }
 
-    qrClose.addEventListener("click", () => {
-      qrModal.classList.add("hidden");
-      if (qrInterval) {
-        clearInterval(qrInterval);
-        qrInterval = null;
-      }
-    });
-
-    qrModal.addEventListener("click", (e) => {
-      if (e.target === qrModal) {
+    if (qrClose) {
+      qrClose.addEventListener("click", () => {
         qrModal.classList.add("hidden");
         if (qrInterval) {
           clearInterval(qrInterval);
           qrInterval = null;
         }
-      }
-    });
+      });
+    }
+
+    if (qrModal) {
+      qrModal.addEventListener("click", (e) => {
+        if (e.target === qrModal) {
+          qrModal.classList.add("hidden");
+          if (qrInterval) {
+            clearInterval(qrInterval);
+            qrInterval = null;
+          }
+        }
+      });
+    }
 
     function startCountdown(expiresAt) {
       if (qrInterval) clearInterval(qrInterval);
@@ -355,6 +432,10 @@ Attendance | Cattendance{% endblock %} {% block content %}
     function paintRow(row, value) {
       const btnP = row.querySelector(".btn-present");
       const btnA = row.querySelector(".btn-absent");
+      
+      // Don't paint if session is completed
+      if (isCompleted) return;
+      
       [btnP, btnA].forEach((b) => {
         b.classList.remove(...present, ...absent);
         b.classList.add(...base);
@@ -369,6 +450,8 @@ Attendance | Cattendance{% endblock %} {% block content %}
     }
 
     function setRowState(row, value) {
+      if (isCompleted) return; // Prevent changes if completed
+      
       const input = row.querySelector("input[type='hidden']");
       input.value = value;
       paintRow(row, value);
@@ -389,6 +472,8 @@ Attendance | Cattendance{% endblock %} {% block content %}
     }
 
     tbody.addEventListener("click", (e) => {
+      if (isCompleted) return; // Prevent clicks if completed
+      
       const btn = e.target.closest(".btn-present, .btn-absent");
       if (!btn) return;
       const row = btn.closest("tr.attn-row");
@@ -400,21 +485,25 @@ Attendance | Cattendance{% endblock %} {% block content %}
       recompute();
     });
 
-    document
-      .getElementById("btn-mark-all-present")
-      .addEventListener("click", () => {
+    const markAllBtn = document.getElementById("btn-mark-all-present");
+    if (markAllBtn && !isCompleted) {
+      markAllBtn.addEventListener("click", () => {
         document
           .querySelectorAll("tr.attn-row")
           .forEach((r) => setRowState(r, "present"));
         recompute();
       });
+    }
 
-    document.getElementById("btn-clear-all").addEventListener("click", () => {
-      document
-        .querySelectorAll("tr.attn-row")
-        .forEach((r) => setRowState(r, ""));
-      recompute();
-    });
+    const clearAllBtn = document.getElementById("btn-clear-all");
+    if (clearAllBtn && !isCompleted) {
+      clearAllBtn.addEventListener("click", () => {
+        document
+          .querySelectorAll("tr.attn-row")
+          .forEach((r) => setRowState(r, ""));
+        recompute();
+      });
+    }
 
     document.querySelectorAll("tr.attn-row").forEach((r) => {
       const val = r.querySelector("input[type='hidden']").value || "";

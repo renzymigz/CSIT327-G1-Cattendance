@@ -370,6 +370,11 @@ def view_session(request, class_id, session_id):
     attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
 
     if request.method == 'POST':
+        # Prevent editing if session is completed
+        if session.status == 'completed':
+            messages.error(request, "Cannot modify attendance. This session has already ended.")
+            return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
+        
         success_count = 0
         for attendance in attendances:
             status = request.POST.get(f'status_{attendance.student.pk}')
@@ -408,6 +413,10 @@ def generate_qr(request, class_id, session_id):
     # Only the teacher who owns the class can generate QR
     if not hasattr(request.user, 'teacherprofile') or session.class_obj.teacher != request.user.teacherprofile:
         return HttpResponseForbidden('Not allowed')
+
+    # Prevent QR generation for completed sessions
+    if session.status == 'completed':
+        return JsonResponse({'error': 'Cannot generate QR code. Session has ended.'}, status=400)
 
     now = timezone.now()
     validity_minutes = 5
