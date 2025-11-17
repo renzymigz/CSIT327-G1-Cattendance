@@ -101,7 +101,7 @@
       <a
          href="{% url 'dashboard_teacher:export_enrolled_students_csv' class_obj.id %}"
         role="button"
-        class = "bg-[#F8FAFC]  border border-[#E2E8F0] text-gray-600 px-4 py-2 rounded-md  transition inline-flex items-center "
+        class = "border px-4 py-2  border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all "
         >
         <i class="fa-regular fa-download mr-2"></i>Export to CSV
       </a>
@@ -171,7 +171,10 @@
               <button
                 type="button"
                 class="bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-[#fee2e3] hover:text-[#c10006] hover:border-[#c100064b] px-2 py-1 rounded transition"
-                onclick="openRemoveModal('{{ enrollment.id }}', '{{ enrollment.student.user.email }}')">
+                onclick="openRemoveModal(
+                        '{{ enrollment.id }}',
+                        '{{ enrollment.student.user.first_name }} {{ enrollment.student.user.last_name }}'
+                    )">
                 <i class="fa-regular fa-trash-can"></i>
               </button>
             </td>
@@ -278,19 +281,19 @@
 
   <!-- Remove Student Modal -->
   <div id="removeModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 text-center">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 text-center fade-in transition-all">
       <h2 class="text-lg font-semibold text-[#6a1e1e] mb-2">Confirm Removal</h2>
       <p class="text-gray-600 mb-4">
         Are you sure you want to remove
-        <span id="studentEmail" class="font-medium text-[#a2314b]"></span> from this class?
+        <span id="studentName" class="font-medium text-[#a2314b]"></span> from this class?
       </p>
       <form id="removeForm" method="POST" class="flex justify-center gap-3">
         {% csrf_token %}
         <input type="hidden" name="remove_student" id="removeStudentId" />
-        <button type="button" onclick="closeRemoveModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg transition">
+        <button type="button" onclick="closeRemoveModal()" class="px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all">
           Cancel
         </button>
-        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+        <button type="submit" class="px-4 py-2 bg-[#8f2b43] hover:bg-[#a2314b]  text-white rounded-lg transition">
           Remove
         </button>
       </form>
@@ -355,8 +358,8 @@
     });
   });
 
-    function openRemoveModal(studentId, studentEmail) {
-      document.getElementById("studentEmail").textContent = studentEmail;
+    function openRemoveModal(studentId, studentName) {
+      document.getElementById("studentName").textContent = studentName;
       document.getElementById("removeStudentId").value = studentId;
       document.getElementById("removeModal").classList.remove("hidden");
       document.getElementById("removeModal").classList.add("flex");
