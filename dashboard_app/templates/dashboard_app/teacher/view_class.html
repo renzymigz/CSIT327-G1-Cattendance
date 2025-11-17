@@ -261,13 +261,17 @@
                     <i class="fa-regular fa-eye"></i>
                 </a>
                 
-                <a href="{% url 'dashboard_teacher:delete_session' session.id %}" 
-                    class="
-                        bg-[#F8FAFC] border border-[#E2E8F0] 
-                        hover:bg-red-50 hover:text-red-600 hover:border-red-500
-                        w-8 h-8 flex items-center justify-center rounded transition">
-                    <i class="fa-regular fa-trash-can"></i>
-                </a>
+                <button type="button"
+                  data-url="{% url 'dashboard_teacher:delete_session' session.id %}"
+                  data-session-id="{{ session.id }}"
+                  data-session-label="{{ session.date|date:'M d, Y' }} — {{ session.schedule_day.day_of_week }}"
+                  onclick="openRemoveSessionModal(this.dataset.sessionId, this.dataset.sessionLabel, this.dataset.url)"
+                  class="
+                    bg-[#F8FAFC] border border-[#E2E8F0] 
+                    hover:bg-red-50 hover:text-red-600 hover:border-red-500
+                    w-8 h-8 flex items-center justify-center rounded transition">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
             </td>
           </tr>
           {% endfor %}
@@ -295,6 +299,27 @@
         </button>
         <button type="submit" class="px-4 py-2 bg-[#8f2b43] hover:bg-[#a2314b]  text-white rounded-lg transition">
           Remove
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Remove Session Modal (matches Remove Student style) -->
+  <div id="removeSessionModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 text-center fade-in transition-all">
+      <h2 class="text-lg font-semibold text-[#6a1e1e] mb-2">Confirm Delete</h2>
+      <p class="text-gray-600 mb-4">
+        Are you sure you want to delete the session on
+        <span id="sessionName" class="font-medium text-[#a2314b]"></span>?
+      </p>
+      <form id="removeSessionForm" method="POST" class="flex justify-center gap-3">
+        {% csrf_token %}
+        <input type="hidden" name="remove_session" id="removeSessionId" />
+        <button type="button" onclick="closeRemoveSessionModal()" class="px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all">
+          Cancel
+        </button>
+        <button type="submit" class="px-4 py-2 bg-[#8f2b43] hover:bg-[#a2314b]  text-white rounded-lg transition">
+          Delete
         </button>
       </form>
     </div>
@@ -368,6 +393,23 @@
     function closeRemoveModal() {
       document.getElementById("removeModal").classList.add("hidden");
       document.getElementById("removeModal").classList.remove("flex");
+    }
+
+    function openRemoveSessionModal(sessionId, sessionLabel, actionUrl) {
+      document.getElementById("sessionName").textContent = sessionLabel;
+      document.getElementById("removeSessionId").value = sessionId;
+      const form = document.getElementById("removeSessionForm");
+      // set action to the provided delete URL
+      if(actionUrl){
+        form.action = actionUrl;
+      }
+      document.getElementById("removeSessionModal").classList.remove("hidden");
+      document.getElementById("removeSessionModal").classList.add("flex");
+    }
+
+    function closeRemoveSessionModal() {
+      document.getElementById("removeSessionModal").classList.add("hidden");
+      document.getElementById("removeSessionModal").classList.remove("flex");
     }
   </script>
 </div>
