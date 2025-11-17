@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
+import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -183,3 +184,11 @@ LOGGING = {
         },
     },
 }
+
+IP_VALIDATION_ENABLED = os.getenv("IP_VALIDATION_ENABLED", "True").lower() == "true"
+raw_default = os.getenv("ALLOWED_IP_RANGES_DEFAULT", "[]")
+try:
+    ALLOWED_IP_RANGES_DEFAULT = json.loads(raw_default)
+except Exception:
+    ALLOWED_IP_RANGES_DEFAULT = []
+IP_VALIDATION_LOG_LEVEL = os.getenv("IP_VALIDATION_LOG_LEVEL", "INFO")
