@@ -5,6 +5,14 @@ from dashboard_app.models import Class, Enrollment, SessionAttendance, ClassSess
 from django.http import JsonResponse
 from django.utils import timezone 
 from django.db import transaction
+import logging
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from .utils import get_client_ip, validate_ip_in_ranges, get_allowed_ip_ranges_for_class
+
+logger = logging.getLogger(__name__)
+
 # ==============================
 # STUDENT DASHBOARD
 # ==============================
@@ -119,6 +127,7 @@ def profile(request):
     return render(request, "dashboard_app/student/profile.html", context)
 
 @login_required
+@require_POST
 def mark_attendance(request, qr_code):
     if request.user.user_type != 'student':
         return JsonResponse({'error': 'Unauthorized access'}, status=403)
@@ -134,12 +143,31 @@ def mark_attendance(request, qr_code):
     student_profile = getattr(request.user, 'studentprofile', None)
     session = qr.session
 
+    # 2) IP validation
+    if settings.IP_VALIDATION_ENABLED:
+        client_ip = get_client_ip(request)
+        ip_ranges = get_allowed_ip_ranges_for_class(session.class_obj)
+        try:
+            valid = validate_ip_in_ranges(client_ip, ip_ranges)
+        except Exception as e:
+            logger.exception("IP validation error")
+            return JsonResponse({"status":"error","message":"Server error during IP validation"}, status=500)
+
+        # log
+        if not valid:
+            logger.warning("IP validation failed: ip=%s class_id=%s student=%s", client_ip, session.class_obj.id, request.user.id)
+            # Optionally record failed attempt in DB or analytics
+            return JsonResponse({"status":"error","message":"Access denied: IP not in allowed range"}, status=403)
+        else:
+            logger.info("IP validation passed: ip=%s class_id=%s student=%s", client_ip, session.class_obj.id, request.user.id)
     # atomic transaction & select_for_update to avoid race conditions from multiple simultaneous scans
     try:
         with transaction.atomic():
             attendance, created = SessionAttendance.objects.select_for_update().get_or_create(
                 student=student_profile,
                 session=session,
+                client_ip=get_client_ip(request),
+                ip_validated=True,
                 defaults={'is_present': True, 'marked_via_qr': True}
             )
 
