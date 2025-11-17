@@ -448,40 +448,39 @@ def generate_qr(request, class_id, session_id):
     })
 
 def auto_update_sessions(class_obj):
-    """Auto-close ongoing sessions and mark absent students for completed ones."""
+    """
+    Automatically end ongoing sessions whose time has passed
+    and mark all unmarked attendance records as absent.
+    """
     now = timezone.localtime()
     today = now.date()
     current_time = now.time()
 
-    # Preload related fields to minimize queries
+    # Get only ongoing sessions for this class
     sessions = (
         ClassSession.objects
         .filter(class_obj=class_obj, status="ongoing")
         .select_related("schedule_day")
     )
-    enrollments = list(Enrollment.objects.filter(class_obj=class_obj).select_related("student"))
 
     for session in sessions:
         schedule = session.schedule_day
 
-        should_complete = (
-            (session.date == today and current_time > schedule.end_time)
-            or (session.date < today)
+        # Determine if this session should be auto-completed
+        should_end = (
+            (session.date == today and current_time > schedule.end_time) or
+            (session.date < today)
         )
 
-        if should_complete:
-            session.status = "completed"
-            session.save(update_fields=["status"])
-
-            # Auto-mark absent students for completed sessions
+        if should_end:
             with transaction.atomic():
-                for enrollment in enrollments:
-                    SessionAttendance.objects.get_or_create(
-                        session=session,
-                        student=enrollment.student,
-                        defaults={"is_present": False}
-                    )
+                session.status = "completed"
+                session.save(update_fields=["status"])
 
+                SessionAttendance.objects.filter(
+                    session=session,
+                    is_present__isnull=True
+                ).update(is_present=False)
 
 # END SESSION
 @login_required
