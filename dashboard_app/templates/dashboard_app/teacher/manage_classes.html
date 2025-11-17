@@ -146,7 +146,7 @@
       <div class="flex justify-end gap-2">
   <button
     type="button"
-    class="edit-btn text-xs font-semibold border border-gray-300 p-2 rounded-md flex items-center gap-1"
+    class="edit-btn text-xs font-semibold border border-gray-300 p-2 rounded-md flex items-center gap-1 hover:bg-gray-100 transition"
     data-id="{{ cls.id }}"
     data-code="{{ cls.code }}"
     data-title="{{ cls.title }}"
@@ -160,7 +160,7 @@
 
   <button
     type="button"
-    class="delete-btn text-xs font-semibold border border-gray-300 p-2 rounded-md flex items-center gap-1 text-red-600"
+    class="delete-btn text-xs font-semibold border transition-all border-red-600 hover:bg-red-100 p-2 rounded-md flex items-center gap-1 text-red-600"
     data-id="{{ cls.id }}"
     data-title="{{ cls.title }}"
   >
