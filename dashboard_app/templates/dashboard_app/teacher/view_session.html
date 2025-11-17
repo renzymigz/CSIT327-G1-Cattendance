@@ -73,19 +73,26 @@ Attendance | Cattendance{% endblock %} {% block content %}
     </div>
 
     <!-- Export button (far right) -->
-    <a
+
+    <div class = "flex gap-3">
+      <a
       href="{% url 'dashboard_teacher:export_session_attendance' class_obj.id session.id %}"
-      class="inline-flex items-center px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md"
+      class="inline-flex items-center  px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all"
       role="button"
     >
-      <i class="fa-regular fa-download pr-2"></i>Export to CSV
-    </a>
+         <i class="fa-regular fa-download pr-2"></i>Export to CSV
+      </a>
+        <button class = "px-4 py-2 rounded-lg border border-gray-300 font-semibold bg-[#a2314b] text-white hover:opacity-90" >
+          <i class="fa-regular fa-hourglass-end pr-2"></i>End Session 
+      </button>
+
+    </div>
+    
   </div>
 
     </div>
   </div>
 
- 
 
   <!-- Bulk Buttons -->
   
@@ -106,7 +113,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
         <h2 class="text-lg font-semibold text-[#6a1e1e] "><i class="fa-regular fa-calendar pr-2"></i>Student Attendance</h2>
         <button
           type="submit"
-          class="px-5 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43]"
+          class="px-5 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43] font-semibold transition"
         >
           Save Attendance
         </button>

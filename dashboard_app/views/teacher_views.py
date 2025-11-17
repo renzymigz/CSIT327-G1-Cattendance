@@ -166,6 +166,22 @@ def view_class(request, class_id):
     session_form = ClassSessionForm()
     session_form.fields["schedule_day"].queryset = ClassSchedule.objects.filter(class_obj=class_obj)
 
+    # Check if current time matches any schedule
+    now = timezone.localtime()
+    current_day = now.strftime('%A') # e.g., 'Monday'
+    current_time = now.time()
+    
+    can_create_session = False
+    matching_schedule = None
+    
+    for schedule in class_obj.schedules.all():
+        if schedule.day_of_week == current_day:
+            # Check if current time is within the schedule window
+            if schedule.start_time <= current_time <= schedule.end_time:
+                can_create_session = True
+                matching_schedule = schedule
+                break
+
     # Add student to class
     if request.method == "POST" and "add_student" in request.POST:
         student_email = request.POST.get("student_email", "").strip().lower()
@@ -191,8 +207,12 @@ def view_class(request, class_id):
             messages.error(request, "Student not found or already removed.")
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-    # Create session
+    # Create session - with validation
     if request.method == "POST" and "create_session" in request.POST:
+        if not can_create_session:
+            messages.error(request, "Cannot create session. Current time does not match any class schedule.")
+            return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+            
         session_form = ClassSessionForm(request.POST)
         if session_form.is_valid():
             new_session = session_form.save(commit=False)
@@ -215,8 +235,10 @@ def view_class(request, class_id):
         'enrollments': enrollments,
         'sessions': sessions,
         'session_form': session_form,
+        'can_create_session': can_create_session,
+        'current_day': current_day,
+        'current_time': current_time,
     })
-    return render(request, 'dashboard_app/teacher/view_class.html', context)
 
 # ==============================
 # EXPORT TO CSV
