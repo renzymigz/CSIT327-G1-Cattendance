@@ -11,6 +11,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'core_app/css/navbar.css' %}?v=1.2">
     <script defer src="{% static 'core_app/js/navbar.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'core_app/css/fade.css' %}">
+    <script defer src="{% static 'core_app/js/fade.js' %}"></script>
+
     <script>
       tailwind.config = {
         theme: {
@@ -22,16 +25,27 @@
         }
       }
     </script>
-    
-</style>
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css"/>
+    <style>
+    /* Ensure padding is included in the element height so height:0 collapses fully */
+    .accordion-content {
+        box-sizing: border-box;
+        /* transition height and padding together for smooth collapse */
+        transition: height 0.35s ease, padding-top 0.25s ease, padding-bottom 0.25s ease;
+        overflow: hidden; /* extra guard */
+    }
+    /* Smooth arrow rotation; Tailwind rotate utility may already apply this, but keep a fallback */
+    .accordion-arrow {
+        transition: transform 0.3s ease;
+    }
+    </style>
 </head>
 
 <body class="font-sans bg-gray-50">
     {% include "core_app/components/navbar.html" %}
 
     {% comment %} Hero Section {% endcomment %}
-    <section class="relative h-[calc(100vh-4rem)] flex items-center justify-center">
+    <section id="home" class="relative min-h-dvh flex items-center justify-center transition" >
     {% comment %} Icons {% endcomment %}
     <div class="hidden lg:block">
         <div class="absolute top-1/2 left-1/2 -translate-x-[450px] -translate-y-[250px] z-10">
@@ -71,17 +85,17 @@
         </div>
 
         {% comment %} Sparkles FX {% endcomment %}
-        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 translate-x-[200px] -translate-y-[120px] text-xl text-[#f2b819] animate-pulse z-0"></i>
-        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 -translate-x-[250px] translate-y-[100px] text-xl text-[#f2b819] animate-pulse animation-delay-200 z-0"></i>
-        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 translate-x-[280px] translate-y-[80px] text-xl text-[#f2b819] animate-pulse animation-delay-100 z-0"></i>
+        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 translate-x-[200px] -translate-y-[120px] text-xl text-[#f2b819] animate-pulse z-0 rotate-45"></i>
+        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 -translate-x-[250px] translate-y-[100px] text-xl text-[#f2b819] animate-pulse animation-delay-200 z-0 -rotate-12"></i>
+        <i class="fa-light fa-sparkles absolute top-1/2 left-1/2 translate-x-[280px] translate-y-[80px] text-xl text-[#f2b819] animate-pulse animation-delay-100 z-0 rotate-12"></i>
     </div>
     
     {% comment %} Hero Content {% endcomment %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-10 relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-10 relative z-20 fade-item" data-fade-delay="0">
         {% comment %} Badge {% endcomment %}
         <div class="text-center m-5 mx-auto absolute -top-24 inset-x-0 border-[1.5px] border-[#743030] rounded-full w-fit px-4 py-1 text-[#743030] font-medium text-[12px] bg-white/10">
             <i class="fa-light fa-shield-virus mr-2"></i>
-            Powered by CIT-U Innovation V.1
+            Powered by CIT-U Innovation
         </div>
         
         <div class="text-center">
@@ -129,9 +143,9 @@
             
 
         
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 fade-item "  data-fade-delay="300">
                 <!-- Feature 1 -->
-                <div class="text-center p-6 shadow-lg bg-white rounded-2xl border border-gray-200 transform transition duration-300 hover:scale-105" >
+                <div class="text-center p-6 shadow-lg bg-white rounded-2xl border border-gray-200 transform transition duration-300 hover:scale-105 ">
                     <div class="w-16 h-16 bg-gradient-to-b from-[#a2314b] to-[#d64648] rounded-lg flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-qrcode text-2xl text-white"></i>
                     </div>
@@ -142,7 +156,7 @@
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="text-center p-6 shadow-lg bg-white rounded-2xl border border-gray-200 transform transition duration-300 hover:scale-105">
+                <div class="text-center p-6 shadow-lg bg-white rounded-2xl border border-gray-200 transform transition duration-300 hover:scale-105 " >
                     <div class="w-16 h-16 bg-gradient-to-b from-[#a2314b] to-[#d64648] rounded-lg flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-chart-line text-2xl text-white"></i>
                     </div>
@@ -215,7 +229,65 @@
         </div>
     </div>
 </section>
+{% comment %} Features Section {% endcomment %}
+<section id="features" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center m-5 mx-auto border-[1.5px] border-[#743030] rounded-full w-fit px-4 py-1 text-[#743030] font-medium text-[12px] bg-white/10">
+            <i class="fa-regular fa-question mr-2"></i>
+            Platform Questions
+        </div>
+        
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Got Questions About Cattendance? We've Got Answers!
+            </p>
+        </div>        
+        
+        <div class="w-full mx-auto">
+            <div class="space-y-8">
+                <div class="accordion-item shadow fade-item" data-fade-delay="100">
+                    <button class="relative accordion-header w-full font-semibold text-left p-4 rounded-lg focus:outline-none flex justify-between items-center">
+                        <div class="absolute top-0 left-0 right-0 h-2 rounded-t-lg shadow-[0px_-8px_0px_0px_#a2314b] pointer-events-none"></div>
+                        <span>What is Cattendance?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300 transform rotate-0 accordion-arrow"></i>
+                    </button>
+                    <div class="accordion-content p-4 bg-gray-50 overflow-hidden transition-all duration ease-in-out" style="height: 0;">
+                        <p>Cattendance is an attendance management system designed to simplify and streamline the process of tracking and managing student attendance.</p>
+                    </div>
+                </div>
 
+                <div class="accordion-item shadow fade-item" data-fade-delay="200">
+                    <button class="relative accordion-header font-semibold w-full text-left p-4 rounded-lg focus:outline-none flex justify-between items-center">
+                         <div class="absolute top-0 left-0 right-0 h-2 rounded-t-lg shadow-[0px_-8px_0px_0px_#a2314b] pointer-events-none"></div>
+                        <span>How do I mark attendance using Cattendance?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300 transform rotate-0 accordion-arrow"></i>
+                    </button>
+                    <div class="accordion-content p-4 bg-gray-50 overflow-hidden transition-all duration ease-in-out" style="height: 0;">
+                        <p>Simply generate a QR code for each class session, which students can scan to mark their attendance.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item shadow fade-item" data-fade-delay="300">
+                    <button class="relative accordion-header font-semibold w-full text-left p-4 rounded-lg focus:outline-none flex justify-between items-center">
+                         <div class="absolute top-0 left-0 right-0 h-2 rounded-t-lg shadow-[0px_-8px_0px_0px_#a2314b] pointer-events-none"></div>
+                        <span>Can I integrate Cattendance with other platforms?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300 transform rotate-0 accordion-arrow"></i>
+                    </button>
+                    <div class="accordion-content p-4 bg-gray-50 overflow-hidden transition-all duration ease-in-out" style="height: 0;">
+                        <p>Yes! Cattendance can be integrated with other systems like class schedules and enrollment databases.</p>
+                    </div>
+                </div>
+
+                <!-- Add more FAQ items here -->
+            </div>
+        </div>
+
+    </div>
+</section>
+
+    
     {% comment %} CTA Section  {% endcomment %}
     <section class="py-20 bg-gradient-to-br from-[#a2314b] to-[#d64648]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -273,4 +345,103 @@
         </div>
     </footer>
 </body>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Accessible accordion with smooth height animation and arrow rotation
+    const headers = document.querySelectorAll('.accordion-header');
+
+    headers.forEach(function (header) {
+        // make header keyboard-focusable and accessible
+        header.setAttribute('role', 'button');
+        header.setAttribute('tabindex', '0');
+        header.setAttribute('aria-expanded', 'false');
+
+        header.addEventListener('click', function () {
+            toggleAccordion(header);
+        });
+
+        header.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleAccordion(header);
+            }
+        });
+    });
+
+    // initialize contents: store original padding and collapse
+    document.querySelectorAll('.accordion-content').forEach(function (c) {
+        const cs = window.getComputedStyle(c);
+        // store original paddings so we can restore them when expanding
+        c.dataset.origPaddingTop = cs.paddingTop || '0px';
+        c.dataset.origPaddingBottom = cs.paddingBottom || '0px';
+        // start closed: remove padding and set height 0
+        c.style.paddingTop = '0px';
+        c.style.paddingBottom = '0px';
+        c.style.height = '0px';
+        c.setAttribute('aria-hidden', 'true');
+    });
+
+    function toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        if (!content) return;
+        const arrow = header.querySelector('.accordion-arrow');
+
+        const isOpen = content.classList.contains('open');
+
+        if (isOpen) {
+            // collapse
+            const startHeight = content.scrollHeight;
+            // set explicit height so we can animate to 0
+            content.style.height = startHeight + 'px';
+            // force reflow
+            content.offsetHeight;
+            // collapse padding and height together
+            requestAnimationFrame(function () {
+                content.style.paddingTop = '0px';
+                content.style.paddingBottom = '0px';
+                content.style.height = '0px';
+            });
+
+            content.classList.remove('open');
+            if (arrow) arrow.classList.remove('rotate-180');
+            header.setAttribute('aria-expanded', 'false');
+            content.setAttribute('aria-hidden', 'true');
+
+            // optional: cleanup after transition
+            const onTransitionEndClose = function (e) {
+                if (e.propertyName === 'height') {
+                    // keep height 0 to remain collapsed
+                    content.removeEventListener('transitionend', onTransitionEndClose);
+                }
+            };
+            content.addEventListener('transitionend', onTransitionEndClose);
+
+        } else {
+            // expand
+            content.classList.add('open');
+            // restore padding first so scrollHeight accounts for it
+            const origTop = content.dataset.origPaddingTop || '0px';
+            const origBottom = content.dataset.origPaddingBottom || '0px';
+            content.style.paddingTop = origTop;
+            content.style.paddingBottom = origBottom;
+            // now set height to scrollHeight and let CSS transition it
+            const targetHeight = content.scrollHeight;
+            content.style.height = targetHeight + 'px';
+
+            if (arrow) arrow.classList.add('rotate-180');
+            header.setAttribute('aria-expanded', 'true');
+            content.setAttribute('aria-hidden', 'false');
+
+            // after transition set height to auto so content can grow/shrink naturally
+            const onTransitionEnd = function (e) {
+                if (e.propertyName === 'height') {
+                    content.style.height = 'auto';
+                    content.removeEventListener('transitionend', onTransitionEnd);
+                }
+            };
+            content.addEventListener('transitionend', onTransitionEnd);
+        }
+    }
+});
+</script>
 </html>

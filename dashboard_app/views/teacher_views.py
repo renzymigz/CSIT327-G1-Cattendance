@@ -12,6 +12,7 @@ from datetime import timedelta
 from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 import segno, io, base64
+from django.db import transaction
 
 
 # ==============================
@@ -108,6 +109,43 @@ def add_class(request):
 
     return redirect('dashboard_teacher:manage_classes')
 
+# EDIT CLASS
+@login_required
+def edit_class(request, class_id):
+    if request.user.user_type != 'teacher':
+        return redirect('dashboard_student:dashboard')
+
+    cls = get_object_or_404(Class, id=class_id, teacher=request.user.teacherprofile)
+
+    if request.method == "POST":
+        cls.code = request.POST.get("code", "").strip()
+        cls.title = request.POST.get("title", "").strip()
+        cls.section = request.POST.get("section", "").strip()
+        cls.semester = request.POST.get("semester", "").strip()
+        cls.academic_year = request.POST.get("academic_year", "").strip()
+        cls.save()
+
+        messages.success(request, f"Class '{cls.code}' updated successfully.")
+        return redirect('dashboard_teacher:manage_classes')
+
+    return HttpResponseForbidden("Invalid request")
+
+
+# DELETE CLASS
+@login_required
+def delete_class(request, class_id):
+    if request.user.user_type != 'teacher':
+        return redirect('dashboard_student:dashboard')
+
+    if request.method == "POST":
+        cls = get_object_or_404(Class, id=class_id, teacher=request.user.teacherprofile)
+        title = cls.title
+        cls.delete()
+        messages.success(request, f"Class '{title}' has been deleted.")
+        return redirect('dashboard_teacher:manage_classes')
+
+    return HttpResponseForbidden("Invalid request")
+
 
 # ==============================
 # VIEW CLASS DETAILS
@@ -119,11 +157,30 @@ def view_class(request, class_id):
 
     teacher_profile = request.user.teacherprofile
     class_obj = get_object_or_404(Class, id=class_id, teacher=teacher_profile)
+    
+    auto_update_sessions(class_obj)
+    
     enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
     sessions = ClassSession.objects.filter(class_obj=class_obj).order_by('-date')
 
     session_form = ClassSessionForm()
     session_form.fields["schedule_day"].queryset = ClassSchedule.objects.filter(class_obj=class_obj)
+
+    # Check if current time matches any schedule
+    now = timezone.localtime()
+    current_day = now.strftime('%A') # e.g., 'Monday'
+    current_time = now.time()
+    
+    can_create_session = False
+    matching_schedule = None
+    
+    for schedule in class_obj.schedules.all():
+        if schedule.day_of_week == current_day:
+            # Check if current time is within the schedule window
+            if schedule.start_time <= current_time <= schedule.end_time:
+                can_create_session = True
+                matching_schedule = schedule
+                break
 
     # Add student to class
     if request.method == "POST" and "add_student" in request.POST:
@@ -150,8 +207,12 @@ def view_class(request, class_id):
             messages.error(request, "Student not found or already removed.")
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-    # Create session
+    # Create session - with validation
     if request.method == "POST" and "create_session" in request.POST:
+        if not can_create_session:
+            messages.error(request, "Cannot create session. Current time does not match any class schedule.")
+            return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+            
         session_form = ClassSessionForm(request.POST)
         if session_form.is_valid():
             new_session = session_form.save(commit=False)
@@ -174,8 +235,10 @@ def view_class(request, class_id):
         'enrollments': enrollments,
         'sessions': sessions,
         'session_form': session_form,
+        'can_create_session': can_create_session,
+        'current_day': current_day,
+        'current_time': current_time,
     })
-    return render(request, 'dashboard_app/teacher/view_class.html', context)
 
 # ==============================
 # EXPORT TO CSV
@@ -236,8 +299,13 @@ def export_session_attendance(request, class_id, session_id):
         full_name = f"{user.first_name} {user.last_name}".strip()
         if not full_name:
             full_name = user.username or user.email
-
-        status = "Present" if attendance.is_present else "Absent"
+        # Interpret three-state is_present: True, False, or None (Not Marked)
+        if attendance.is_present is True:
+            status = "Present"
+        elif attendance.is_present is False:
+            status = "Absent"
+        else:
+            status = "Not Marked"
         writer.writerow([full_name, user.email, status, '', ''])
 
     return response
@@ -302,6 +370,11 @@ def view_session(request, class_id, session_id):
     attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
 
     if request.method == 'POST':
+        # Prevent editing if session is completed
+        if session.status == 'completed':
+            messages.error(request, "Cannot modify attendance. This session has already ended.")
+            return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
+        
         success_count = 0
         for attendance in attendances:
             status = request.POST.get(f'status_{attendance.student.pk}')
@@ -320,6 +393,7 @@ def view_session(request, class_id, session_id):
         return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
 
     return render(request, 'dashboard_app/teacher/view_session.html', {
+        'user_type': 'teacher',
         'session': session,
         'class_obj': class_obj,
         'class_id': class_id,
@@ -339,6 +413,10 @@ def generate_qr(request, class_id, session_id):
     # Only the teacher who owns the class can generate QR
     if not hasattr(request.user, 'teacherprofile') or session.class_obj.teacher != request.user.teacherprofile:
         return HttpResponseForbidden('Not allowed')
+
+    # Prevent QR generation for completed sessions
+    if session.status == 'completed':
+        return JsonResponse({'error': 'Cannot generate QR code. Session has ended.'}, status=400)
 
     now = timezone.now()
     validity_minutes = 5
@@ -367,3 +445,38 @@ def generate_qr(request, class_id, session_id):
         'qr_image': qr_data_uri,
         'scan_url': scan_url,
     })
+
+def auto_update_sessions(class_obj):
+    """Auto-close ongoing sessions and mark absent students for completed ones."""
+    now = timezone.localtime()
+    today = now.date()
+    current_time = now.time()
+
+    # Preload related fields to minimize queries
+    sessions = (
+        ClassSession.objects
+        .filter(class_obj=class_obj, status="ongoing")
+        .select_related("schedule_day")
+    )
+    enrollments = list(Enrollment.objects.filter(class_obj=class_obj).select_related("student"))
+
+    for session in sessions:
+        schedule = session.schedule_day
+
+        should_complete = (
+            (session.date == today and current_time > schedule.end_time)
+            or (session.date < today)
+        )
+
+        if should_complete:
+            session.status = "completed"
+            session.save(update_fields=["status"])
+
+            # Auto-mark absent students for completed sessions
+            with transaction.atomic():
+                for enrollment in enrollments:
+                    SessionAttendance.objects.get_or_create(
+                        session=session,
+                        student=enrollment.student,
+                        defaults={"is_present": False}
+                    )

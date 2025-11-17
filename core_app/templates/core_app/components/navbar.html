@@ -1,32 +1,36 @@
 {% load static %}
 <!-- Navigation Component -->
-<nav class="bg-white shadow-[0px_6px_0px_0px_#a2314b,0px_10px_1px_rgba(221,_221,_221,_1),_0_10px_20px_rgba(204,_204,_204,_1)] z-50 select-none relative">
+<nav id="navbar" class="bg-transparent shadow-transparent z-50 select-none fixed top-0 left-0 w-full transition-all">
     <div class="max-w-[1300px] mx-auto">
         <div class="flex justify-between items-center h-16 px-4 sm:px-6 lg:px-8">
 
             <div class="flex items-center">
                 <img src="{% static 'core_app/images/logo.png' %}" class="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3" alt="Logo">
-                <h1 class="text-lg sm:text-xl font-bold text-[#a2314b] mr-3 sm:mr-6">CATTENDANCE</h1>
+                <a href="{% url 'homepage' %}">
+                <h1 class="text-lg sm:text-xl font-bold text-[#a2314b] mr-3 sm:mr-6">Cattendance</h1>
+                 </a>
                 
                 <div class="hidden md:flex items-center space-x-4 text-[14px] font-semibold">
-                    <a href="{% url 'homepage' %}" class="text-gray-600 p-2 px-3 rounded transition hover:bg-[#f8eff1] hover:text-[#a2314b]">
+                    {% if request.resolver_match.url_name == 'homepage' %}
+                    <a href="#home" class="text-gray-600 p-2 px-3 rounded-full transition hover:bg-[#f8eff1] hover:text-[#a2314b] smooth-scroll">
                         <i class="fa-regular fa-house mr-2"></i>Home
                     </a>
-                    <a href="#features" class="text-gray-600 p-2 px-3 rounded transition hover:bg-[#f8eff1] hover:text-[#a2314b] smooth-scroll">
+                    <a href="#features" class="text-gray-600 p-2 px-3 rounded-full transition hover:bg-[#f8eff1] hover:text-[#a2314b] smooth-scroll">
                         <i class="fa-regular fa-lightbulb mr-2"></i>Features
                     </a>
-                    <a href="#about" class="text-gray-600 p-2 px-3 rounded transition hover:bg-[#f8eff1] hover:text-[#a2314b] smooth-scroll">
+                    <a href="#about" class="text-gray-600 p-2 px-3 rounded-full transition hover:bg-[#f8eff1] hover:text-[#a2314b] smooth-scroll">
                         <i class="fa-regular fa-book mr-2"></i>About
-                    </a>  
+                    </a> 
+                    {% endif %}
                 </div>
             </div>
             
             <div class="hidden md:flex items-center space-x-4 text-[14px] font-semibold">
-                <a href="{% url 'auth_app:login' %}" class="bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white px-4 py-2 rounded-lg hover:bg-[#892728] transition">
-                    <i class="fa-solid fa-file-user mr-2"></i>Login
-                </a>
-                <a href="{% url 'auth_app:register' %}" class="border border-[#a2314b] text-[#a2314b] px-4 py-2 rounded-lg hover:bg-[#a2314b] hover:text-white transition">
+                <a href="{% url 'auth_app:register' %}" class=" text-[#a2314b] px-4 py-2 rounded-full hover:bg-[#f8eff1] hover:text-[#a2314b]  transition">
                     <i class="fa-regular fa-file-user mr-2"></i>Register
+                </a>
+                <a href="{% url 'auth_app:login' %}" class="bg-gradient-to-r from-[#a2314b] to-[#d64648] text-white px-4 py-2 rounded-full hover:opacity-80 transition">
+                    <i class="fa-solid fa-file-user mr-2"></i>Login
                 </a>
             </div>
             
@@ -41,7 +45,7 @@
         <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg border-t border-gray-200 hidden">
             <div class="px-4 py-4 space-y-4">
                 <!-- Mobile Navigation Links -->
-                <a href="{% url 'homepage' %}" class="block text-gray-600 hover:text-[#a2314b] transition py-2 text-sm font-medium">
+                <a href="#home" class="block text-gray-600 hover:text-[#a2314b] transition py-2 text-sm font-medium">
                     <i class="fa-regular fa-house mr-3 w-4"></i>Home
                 </a>
                 <a href="#features" class="block text-gray-600 hover:text-[#a2314b] transition py-2 text-sm font-medium smooth-scroll mobile-link">
@@ -67,4 +71,6 @@
 
 <!-- Include external CSS and JavaScript -->
 <link rel="stylesheet" href="{% static 'core_app/css/navbar.css' %}">
-<script src="{% static 'core_app/js/navbar.js' %}"></script>
+<script src="{% static 'core_app/js/navbar.js' %}" defer></script>
+
+
