@@ -15,6 +15,7 @@ class Class(models.Model):
     semester = models.CharField(max_length=20, blank=True, null=True)
     section = models.CharField(max_length=20, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    allowed_ip_ranges = models.JSONField(blank=True, null=True, help_text="List of allowed IP CIDR ranges, e.g., ['192.168.1.0/24']")
 
     def __str__(self):
         return f"{self.code} - {self.title}"
@@ -87,6 +88,8 @@ class SessionAttendance(models.Model):
     student = models.ForeignKey('auth_app.StudentProfile', on_delete=models.CASCADE)
     is_present = models.BooleanField(default=False)
     marked_via_qr = models.BooleanField(default=False) 
+    client_ip = models.GenericIPAddressField(blank=True, null=True)
+    ip_validated = models.BooleanField(default=False)
     
     class Meta:
         unique_together = ('session', 'student')
