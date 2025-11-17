@@ -13,6 +13,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 import segno, io, base64
 from django.db import transaction
+from django.http import HttpResponse
 
 
 # ==============================
@@ -480,3 +481,28 @@ def auto_update_sessions(class_obj):
                         student=enrollment.student,
                         defaults={"is_present": False}
                     )
+
+
+# END SESSION
+@login_required
+def end_session(request, class_id, session_id):
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+
+    session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
+
+    if not hasattr(request.user, 'teacherprofile') or session.class_obj.teacher != request.user.teacherprofile:
+        return HttpResponseForbidden('Not allowed')
+
+    if session.status == 'completed':
+        messages.info(request, 'Session has already ended.')
+        return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
+
+    with transaction.atomic():
+        session.status = 'completed'
+        session.save(update_fields=['status'])
+
+        SessionAttendance.objects.filter(session=session, is_present__isnull=True).update(is_present=False)
+
+    messages.success(request, 'Session ended. All unmarked students were marked absent.')
+    return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)

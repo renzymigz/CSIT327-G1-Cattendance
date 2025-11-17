@@ -125,6 +125,25 @@ Attendance | Cattendance{% endblock %} {% block content %}
         >
           <i class="fa-regular fa-hourglass-end pr-2"></i>End Session 
         </button>
+        
+        <!-- End Session Modal -->
+        <div id="endSessionModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+          <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 text-center fade-in transition-all">
+            <h2 class="text-lg font-semibold text-[#6a1e1e] mb-2">End Session</h2>
+            <p class="text-gray-600 mb-4">
+              Are you sure you want to end this session? All students who are not yet marked will be marked as <span class="font-semibold text-[#a2314b]">Absent</span>.
+            </p>
+            <form id="endSessionForm" method="POST" action="{% url 'dashboard_teacher:end_session' class_obj.id session.id %}" class="flex justify-center gap-3">
+              {% csrf_token %}
+              <button type="button" onclick="closeEndSessionModal()" class="px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all">
+                Cancel
+              </button>
+              <button type="submit" class="px-4 py-2 bg-[#8f2b43] hover:bg-[#a2314b] text-white rounded-lg transition">
+                End Session
+              </button>
+            </form>
+          </div>
+        </div>
 
     </div>
     
@@ -510,6 +529,24 @@ Attendance | Cattendance{% endblock %} {% block content %}
       paintRow(r, val);
     });
     recompute();
+
+    // End Session modal handlers
+    const endBtn = document.getElementById('btn-end-session');
+    const endModal = document.getElementById('endSessionModal');
+    function openEndSessionModal(){
+      if(endModal){ endModal.classList.remove('hidden'); endModal.classList.add('flex'); }
+    }
+    function closeEndSessionModal(){
+      if(endModal){ endModal.classList.add('hidden'); endModal.classList.remove('flex'); }
+    }
+    if(endBtn){
+      endBtn.addEventListener('click', (e)=>{
+        // only open modal if button is not disabled
+        if(!endBtn.disabled) openEndSessionModal();
+      });
+    }
+    // expose close to global for inline onclick on Cancel
+    window.closeEndSessionModal = closeEndSessionModal;
   });
 </script>
 
