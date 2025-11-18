@@ -42,7 +42,9 @@ CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',') if 
 allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',') if host.strip()]
 
-
+# Optional logging for verification
+print("CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
+print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 # ===============================================
 # INSTALLED APPS
 # ===============================================
