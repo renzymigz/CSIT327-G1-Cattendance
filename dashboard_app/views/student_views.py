@@ -171,9 +171,7 @@ def mark_attendance(request, qr_code):
             attendance, created = SessionAttendance.objects.select_for_update().get_or_create(
                 student=student_profile,
                 session=session,
-                client_ip=client_ip,
-                ip_validated=True,
-                defaults={'is_present': True, 'marked_via_qr': True}
+                defaults={'client_ip': client_ip,'ip_validated': True,'is_present': True, 'marked_via_qr': True}
             )
 
             if created:
@@ -186,6 +184,12 @@ def mark_attendance(request, qr_code):
                 updated = True
             if not attendance.marked_via_qr:
                 attendance.marked_via_qr = True
+                updated = True
+            if not attendance.ip_validated:
+                attendance.ip_validated = True
+                updated = True
+            if not attendance.client_ip:
+                attendance.client_ip = client_ip
                 updated = True
             if updated:
                 attendance.save()
