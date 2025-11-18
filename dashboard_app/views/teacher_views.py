@@ -4,7 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
 from auth_app.models import StudentProfile
-from dashboard_app.models import (Class, Enrollment, ClassSchedule, ClassSession, SessionAttendance, SessionQRCode)
+from dashboard_app.models import (
+    Class, Enrollment, ClassSchedule, ClassSession,
+    SessionAttendance, SessionQRCode
+)
 from dashboard_app.forms import ClassSessionForm
 import csv
 from django.http import HttpResponse
@@ -13,7 +16,6 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 import segno, io, base64
 import json
-
 
 
 # ==============================
@@ -120,15 +122,24 @@ def view_class(request, class_id):
         return redirect('dashboard_student:dashboard')
 
     teacher_profile = request.user.teacherprofile
+
+    # Correct: only query once
     class_obj = get_object_or_404(Class, id=class_id, teacher=teacher_profile)
-    enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
-    sessions = ClassSession.objects.filter(class_obj=class_obj).order_by('-date')
+
+    enrollments = Enrollment.objects.filter(
+        class_obj=class_obj
+    ).select_related("student__user")
+
+    sessions = ClassSession.objects.filter(
+        class_obj=class_obj
+    ).order_by("-date")
 
     session_form = ClassSessionForm()
     session_form.fields["schedule_day"].queryset = ClassSchedule.objects.filter(class_obj=class_obj)
-    class_obj = get_object_or_404(Class, pk=class_id)
 
-    # Add student to class
+    # ===========================
+    # ADD STUDENT
+    # ===========================
     if request.method == "POST" and "add_student" in request.POST:
         student_email = request.POST.get("student_email", "").strip().lower()
         try:
@@ -142,7 +153,9 @@ def view_class(request, class_id):
             messages.error(request, f"No student found with email '{student_email}'.")
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-    # Remove student
+    # ===========================
+    # REMOVE STUDENT
+    # ===========================
     if request.method == "POST" and "remove_student" in request.POST:
         enrollment_id = request.POST.get("remove_student")
         try:
@@ -153,7 +166,9 @@ def view_class(request, class_id):
             messages.error(request, "Student not found or already removed.")
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-    # Create session
+    # ===========================
+    # CREATE SESSION
+    # ===========================
     if request.method == "POST" and "create_session" in request.POST:
         session_form = ClassSessionForm(request.POST)
         if session_form.is_valid():
@@ -162,56 +177,61 @@ def view_class(request, class_id):
             new_session.status = "ongoing"
             new_session.save()
 
-            enrollments = Enrollment.objects.filter(class_obj=class_obj)
             for e in enrollments:
-                SessionAttendance.objects.get_or_create(session=new_session, student=e.student)
+                SessionAttendance.objects.get_or_create(
+                    session=new_session,
+                    student=e.student
+                )
 
             messages.success(request, "Class session created successfully.")
             return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
         else:
             messages.error(request, "Failed to create session. Please check the form.")
 
-        return render(request, 'dashboard_app/teacher/view_class.html', {
-            'user_type': 'teacher',
-            'class_obj': class_obj,
-            'enrollments': enrollments,
-            'sessions': sessions,
-            'session_form': session_form,
-        })
-        return render(request, 'dashboard_app/teacher/view_class.html', context)
-
-    if request.method == "POST":
+    # ===========================
+    # SAVE IP RANGES
+    # ===========================
+    if request.method == "POST" and "allowed_ip_ranges" in request.POST:
         raw = request.POST.get("allowed_ip_ranges", "")
-        # parse lines into list, remove empty lines
         ranges = [line.strip() for line in raw.splitlines() if line.strip()]
-        # optional: validate each with ipaddress.ip_network
-        valid = True
+
         import ipaddress
+        valid = True
         for r in ranges:
             try:
                 ipaddress.ip_network(r, strict=False)
             except ValueError:
                 valid = False
                 break
+
         if not valid:
             messages.error(request, "One or more CIDR ranges are invalid.")
         else:
             class_obj.allowed_ip_ranges = ranges
             class_obj.save()
             messages.success(request, "Allowed IP ranges updated.")
-            return redirect("dashboard:teacher:view_class", class_id=class_id)
+            return redirect('dashboard_teacher:view_class', class_id=class_id)
 
-    # pass text area initial
+    # Initial IP text for textarea
     initial_text = "\n".join(class_obj.allowed_ip_ranges or [])
-    return render(request, "dashboard_app/view_class.html", {"class": class_obj, "initial_ip_text": initial_text})
+
+    # ===========================
+    # FINAL RENDER — FIXED
+    # ===========================
+    return render(request, "dashboard_app/teacher/view_class.html", {
+        "class_obj": class_obj,        # FIXED ❗
+        "enrollments": enrollments,
+        "sessions": sessions,
+        "session_form": session_form,
+        "initial_ip_text": initial_text
+    })
+
 
 # ==============================
 # EXPORT TO CSV
-# ============================== 
-
+# ==============================
 @login_required
 def export_enrolled_students(request, class_id):
-    from dashboard_app import models  # ensure imports stay clean
     class_obj = Class.objects.get(id=class_id)
     enrollments = Enrollment.objects.filter(class_obj=class_obj)
 
@@ -224,11 +244,12 @@ def export_enrolled_students(request, class_id):
     for enrollment in enrollments:
         user = enrollment.student.user
         full_name = f"{user.first_name} {user.last_name}".strip()
-        if not full_name:  # if no name is provided
+        if not full_name:
             full_name = user.username or user.email
         writer.writerow([full_name, user.email])
 
     return response
+
 
 @login_required
 def export_session_attendance(request, class_id, session_id):
@@ -236,13 +257,11 @@ def export_session_attendance(request, class_id, session_id):
     session = get_object_or_404(ClassSession, id=session_id, class_obj=class_obj)
     attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
 
-    # --- CSV Response ---
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{class_obj.code}_{session.date}_attendance.csv"'
 
     writer = csv.writer(response)
 
-    # --- Header Information ---
     schedules = ClassSchedule.objects.filter(class_obj=class_obj)
     schedule_text = "; ".join([
         f"{s.day_of_week} ({s.start_time.strftime('%I:%M %p')} - {s.end_time.strftime('%I:%M %p')})"
@@ -251,14 +270,11 @@ def export_session_attendance(request, class_id, session_id):
 
     writer.writerow(['Class Name', 'Section', 'Class Schedule', 'Date'])
     writer.writerow([class_obj.title, class_obj.section, schedule_text, session.date.strftime("%B %d, %Y")])
-    writer.writerow([])  # Empty row
+    writer.writerow([])
     writer.writerow(['Attendance', '', '', ''])
-    writer.writerow([])  # Empty row
-
-    # --- Column Headers ---
+    writer.writerow([])
     writer.writerow(['Full Name', 'Email', 'Status', '', ''])
 
-    # --- Attendance Data ---
     for attendance in attendances:
         user = attendance.student.user
         full_name = f"{user.first_name} {user.last_name}".strip()
@@ -283,7 +299,6 @@ def create_session(request, class_id):
             messages.error(request, "Please select a schedule day.")
             return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-        # Create the session
         session = ClassSession.objects.create(
             class_obj=class_obj,
             schedule_day_id=schedule_day_id,
@@ -291,7 +306,6 @@ def create_session(request, class_id):
             status="ongoing"
         )
 
-        # Auto-add all enrolled students to SessionAttendance
         enrollments = Enrollment.objects.filter(class_obj=class_obj)
         for e in enrollments:
             SessionAttendance.objects.get_or_create(session=session, student=e.student)
@@ -299,7 +313,6 @@ def create_session(request, class_id):
         messages.success(request, "Session created successfully!")
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
-    # If GET request — redirect back
     return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
 
 
@@ -316,7 +329,7 @@ def delete_session(request, session_id):
 
 
 # ==============================
-# VIEW SESSION (ATTENDANCE + SUPABASE SYNC)
+# VIEW SESSION
 # ==============================
 @login_required
 def view_session(request, class_id, session_id):
@@ -364,7 +377,6 @@ def generate_qr(request, class_id, session_id):
 
     session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
 
-    # Only the teacher who owns the class can generate QR
     if not hasattr(request.user, 'teacherprofile') or session.class_obj.teacher != request.user.teacherprofile:
         return HttpResponseForbidden('Not allowed')
 
@@ -372,18 +384,13 @@ def generate_qr(request, class_id, session_id):
     validity_minutes = 5
     expires_at = now + timedelta(minutes=validity_minutes)
 
-    # Check if there's an existing unexpired QR for this session
     qr = SessionQRCode.objects.filter(session=session, expires_at__gt=now).first()
 
     if not qr:
-        # Generate a new QR since none is active
         qr = SessionQRCode.generate_for_session(session, validity_minutes=validity_minutes)
 
-    # Build absolute scan URL using the student-facing route (namespaced)
-    # This ensures the generated QR points to the student mark_attendance view under /dashboard/student/
     scan_url = request.build_absolute_uri(reverse('dashboard_student:mark_attendance', args=[qr.code]))
 
-    # Generate QR image (Segno)
     qr_img = segno.make(scan_url)
     buffer = io.BytesIO()
     qr_img.save(buffer, kind='png', scale=5)
