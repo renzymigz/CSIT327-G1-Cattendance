@@ -83,8 +83,13 @@ def add_class(request):
             messages.error(request, "Invalid schedule input.")
             return redirect('dashboard_teacher:manage_classes')
 
-        if Class.objects.filter(code=code).exists():
-            messages.error(request, "Class code already exists.")
+        if Class.objects.filter(
+            teacher=teacher_profile,
+            code=code,
+            academic_year=academic_year,
+            semester=semester
+        ).exists():
+            messages.error(request, "This class code is already used for the same academic year and semester.")
             return redirect('dashboard_teacher:manage_classes')
 
         new_class = Class.objects.create(
@@ -123,6 +128,18 @@ def edit_class(request, class_id):
         cls.section = request.POST.get("section", "").strip()
         cls.semester = request.POST.get("semester", "").strip()
         cls.academic_year = request.POST.get("academic_year", "").strip()
+
+        exists = Class.objects.filter(
+            teacher=request.user.teacherprofile,
+            code=request.POST.get("code", "").strip(),
+            academic_year=request.POST.get("academic_year", "").strip(),
+            semester=request.POST.get("semester", "").strip()
+        ).exclude(id=cls.id).exists()
+
+        if exists:
+            messages.error(request, "This class code already exists for the same academic year and semester.")
+            return redirect('dashboard_teacher:manage_classes')
+
         cls.save()
 
         messages.success(request, f"Class '{cls.code}' updated successfully.")
