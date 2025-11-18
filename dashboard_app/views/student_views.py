@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from dashboard_app.models import Class, Enrollment, SessionAttendance, ClassSession, SessionQRCode
-from django.http import JsonResponse
-from django.utils import timezone 
+from django.http import JsonResponse, HttpResponseForbidden
+from django.utils import timezone
 from django.db import transaction
+
 # ==============================
 # STUDENT DASHBOARD
 # ==============================
@@ -13,17 +14,17 @@ def dashboard_student(request):
     if request.user.user_type != 'student':
         return redirect('dashboard_teacher:dashboard')
 
-    # Fetch student profile and enrolled classes
     student_profile = getattr(request.user, 'studentprofile', None)
     enrolled_classes = Enrollment.objects.filter(student=student_profile).select_related('class_obj')
 
     total_classes = enrolled_classes.count()
 
-    # Compute attendance stats
     total_sessions = SessionAttendance.objects.filter(student=student_profile).count()
-    attended_sessions = SessionAttendance.objects.filter(student=student_profile, is_present=True).count()
-    missed_sessions = total_sessions - attended_sessions if total_sessions > 0 else 0
+    attended_sessions = SessionAttendance.objects.filter(
+        student=student_profile, is_present=True
+    ).count()
 
+    missed_sessions = total_sessions - attended_sessions if total_sessions > 0 else 0
     attendance_rate = round((attended_sessions / total_sessions) * 100, 2) if total_sessions > 0 else 0
 
     context = {
@@ -37,7 +38,7 @@ def dashboard_student(request):
 
 
 # ==============================
-# MY CLASSES / ATTENDANCE
+# MY CLASSES
 # ==============================
 @login_required
 def student_classes(request):
@@ -45,7 +46,9 @@ def student_classes(request):
         return redirect('dashboard_teacher:dashboard')
 
     student_profile = getattr(request.user, 'studentprofile', None)
-    enrollments = Enrollment.objects.filter(student=student_profile).select_related('class_obj', 'class_obj__teacher')
+    enrollments = Enrollment.objects.filter(student=student_profile).select_related(
+        'class_obj', 'class_obj__teacher'
+    )
 
     enrolled_classes = []
 
@@ -89,7 +92,7 @@ def student_classes(request):
 
 
 # ==============================
-# VIEW ATTENDANCE DETAILS
+# VIEW ATTENDANCE DETAILS (SECURE VERSION)
 # ==============================
 @login_required
 def view_attendance(request, class_id):
@@ -97,9 +100,24 @@ def view_attendance(request, class_id):
         return redirect('dashboard_teacher:dashboard')
 
     student_profile = getattr(request.user, 'studentprofile', None)
-    class_obj = get_object_or_404(Class, id=class_id)
+
+    # ❗ SECURE ENROLLMENT CHECK
+    enrollment = Enrollment.objects.filter(
+        student=student_profile,
+        class_obj_id=class_id
+    ).select_related('class_obj').first()
+
+    if not enrollment:
+        # Student is NOT enrolled — block access
+        return HttpResponseForbidden("You are not enrolled in this class.")
+
+    class_obj = enrollment.class_obj  # Safe to access now
+
     sessions = ClassSession.objects.filter(class_obj=class_obj).order_by('-date')
-    attendance_records = SessionAttendance.objects.filter(student=student_profile, session__in=sessions).select_related('session')
+    attendance_records = SessionAttendance.objects.filter(
+        student=student_profile,
+        session__in=sessions
+    ).select_related("session")
 
     attendance_data = []
     for session in sessions:
@@ -134,17 +152,24 @@ def view_attendance(request, class_id):
     }
     return render(request, "dashboard_app/student/view_attendance.html", context)
 
+
+# ==============================
+# PROFILE
+# ==============================
 @login_required
 def profile(request):
     if request.user.user_type != 'student':
         return redirect('dashboard_teacher:dashboard')
 
-    context = {
+    return render(request, "dashboard_app/student/profile.html", {
         'user_type': 'student',
         'user': request.user,
-    }
-    return render(request, "dashboard_app/student/profile.html", context)
+    })
 
+
+# ==============================
+# QR ATTENDANCE
+# ==============================
 @login_required
 def mark_attendance(request, qr_code):
     if request.user.user_type != 'student':
@@ -161,7 +186,6 @@ def mark_attendance(request, qr_code):
     student_profile = getattr(request.user, 'studentprofile', None)
     session = qr.session
 
-    # atomic transaction & select_for_update to avoid race conditions from multiple simultaneous scans
     try:
         with transaction.atomic():
             attendance, created = SessionAttendance.objects.select_for_update().get_or_create(
@@ -173,7 +197,6 @@ def mark_attendance(request, qr_code):
             if created:
                 return JsonResponse({'message': 'Attendance marked successfully via QR!'})
 
-            # If record existed, update fields if needed
             updated = False
             if not attendance.is_present:
                 attendance.is_present = True
@@ -181,11 +204,11 @@ def mark_attendance(request, qr_code):
             if not attendance.marked_via_qr:
                 attendance.marked_via_qr = True
                 updated = True
+
             if updated:
                 attendance.save()
                 return JsonResponse({'message': 'Attendance updated and flagged as QR-marked.'})
 
             return JsonResponse({'message': 'You have already marked your attendance for this session.'})
-    except Exception as e:
-        # return a generic error
+    except Exception:
         return JsonResponse({'error': 'Failed to mark attendance due to server error.'}, status=500)
