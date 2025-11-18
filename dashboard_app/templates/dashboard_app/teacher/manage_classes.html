@@ -10,36 +10,36 @@
     </div>
   </div>
 
-  <div class="flex items-center justify-between gap-3 mb-6">
-    <div class="flex items-center gap-3">
-      <div class="relative w-[450px]">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-        <input
-          type="text"
-          id="classSearch"
-          placeholder="Search class..."
-          class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-2 focus:ring-[#a2314b] transition-all focus:outline-none text-sm"
-        />
-      </div>
-
-      <select
-        id="classFilter"
-        class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b] text-sm bg-white"
-      >
-        <option value="">All Classes</option>
-        {% for cls in classes %}
-        <option value="{{ cls.code }}">{{ cls.code }}</option>
-        {% endfor %}
-      </select>
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+    <div class="relative w-full max-w-[450px]">
+      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+      <input
+        type="text"
+        id="classSearch"
+        placeholder="Search class..."
+        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-2 focus:ring-[#a2314b] transition-all focus:outline-none text-sm"
+      />
     </div>
 
-    <button
-      id="openAddClassModal"
-      class="bg-[#a2314b] hover:bg-[#8f2b43] text-white px-4 py-2 rounded-lg shadow-md transition"
+    <select
+      id="classFilter"
+      class="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b] text-sm bg-white"
     >
-      <i class="fa-regular fa-plus mr-2"></i>Create New Class
-    </button>
+      <option value="">All Classes</option>
+      {% for cls in classes %}
+      <option value="{{ cls.code }}">{{ cls.code }}</option>
+      {% endfor %}
+    </select>
   </div>
+
+  <button
+    id="openAddClassModal"
+    class="w-full md:w-auto bg-[#a2314b] hover:bg-[#8f2b43] text-white px-4 py-2 rounded-lg shadow-md transition"
+  >
+    <i class="fa-regular fa-plus mr-2"></i>Create New Class
+  </button>
+</div>
 
   {% if messages %}
     {% for message in messages %}
