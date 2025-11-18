@@ -126,6 +126,7 @@ def view_class(request, class_id):
 
     session_form = ClassSessionForm()
     session_form.fields["schedule_day"].queryset = ClassSchedule.objects.filter(class_obj=class_obj)
+    class_obj = get_object_or_404(Class, pk=class_id)
 
     # Add student to class
     if request.method == "POST" and "add_student" in request.POST:
@@ -170,16 +171,15 @@ def view_class(request, class_id):
         else:
             messages.error(request, "Failed to create session. Please check the form.")
 
-    return render(request, 'dashboard_app/teacher/view_class.html', {
-        'user_type': 'teacher',
-        'class_obj': class_obj,
-        'enrollments': enrollments,
-        'sessions': sessions,
-        'session_form': session_form,
-    })
-    return render(request, 'dashboard_app/teacher/view_class.html', context)
+        return render(request, 'dashboard_app/teacher/view_class.html', {
+            'user_type': 'teacher',
+            'class_obj': class_obj,
+            'enrollments': enrollments,
+            'sessions': sessions,
+            'session_form': session_form,
+        })
+        return render(request, 'dashboard_app/teacher/view_class.html', context)
 
-    class_obj = get_object_or_404(Class, pk=class_id)
     if request.method == "POST":
         raw = request.POST.get("allowed_ip_ranges", "")
         # parse lines into list, remove empty lines
