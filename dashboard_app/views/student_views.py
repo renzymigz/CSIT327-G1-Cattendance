@@ -185,6 +185,16 @@ def mark_attendance(request, qr_code):
 
     student_profile = getattr(request.user, 'studentprofile', None)
     session = qr.session
+    
+    is_enrolled = Enrollment.objects.filter(
+        student=student_profile,
+        class_obj=session.class_obj
+    ).exists()
+    
+    if not is_enrolled:
+        return JsonResponse({
+            'error': 'You are not enrolled in this class.'
+        }, status=403)
 
     try:
         with transaction.atomic():
