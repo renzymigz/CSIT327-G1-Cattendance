@@ -12,6 +12,8 @@ from datetime import timedelta
 from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 import segno, io, base64
+import json
+
 
 
 # ==============================
@@ -176,6 +178,32 @@ def view_class(request, class_id):
         'session_form': session_form,
     })
     return render(request, 'dashboard_app/teacher/view_class.html', context)
+
+    class_obj = get_object_or_404(Class, pk=class_id)
+    if request.method == "POST":
+        raw = request.POST.get("allowed_ip_ranges", "")
+        # parse lines into list, remove empty lines
+        ranges = [line.strip() for line in raw.splitlines() if line.strip()]
+        # optional: validate each with ipaddress.ip_network
+        valid = True
+        import ipaddress
+        for r in ranges:
+            try:
+                ipaddress.ip_network(r, strict=False)
+            except ValueError:
+                valid = False
+                break
+        if not valid:
+            messages.error(request, "One or more CIDR ranges are invalid.")
+        else:
+            class_obj.allowed_ip_ranges = ranges
+            class_obj.save()
+            messages.success(request, "Allowed IP ranges updated.")
+            return redirect("dashboard:teacher:view_class", class_id=class_id)
+
+    # pass text area initial
+    initial_text = "\n".join(class_obj.allowed_ip_ranges or [])
+    return render(request, "dashboard_app/view_class.html", {"class": class_obj, "initial_ip_text": initial_text})
 
 # ==============================
 # EXPORT TO CSV
