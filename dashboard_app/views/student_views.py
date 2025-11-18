@@ -9,7 +9,7 @@ import logging
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from .utils import get_client_ip, validate_ip_in_ranges, get_allowed_ip_ranges_for_class
+from dashboard_app.utils import get_client_ip, validate_ip_in_ranges, get_allowed_ip_ranges_for_class
 
 logger = logging.getLogger(__name__)
 
