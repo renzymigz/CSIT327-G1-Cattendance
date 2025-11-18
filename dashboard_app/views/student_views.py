@@ -141,6 +141,8 @@ def mark_attendance(request, qr_code):
         return JsonResponse({'error': 'QR code expired'}, status=400)
 
     student_profile = getattr(request.user, 'studentprofile', None)
+    if not student_profile:
+        return JsonResponse({'error': 'Student profile not found.'}, status=400)
     session = qr.session
 
     # 2) IP validation
@@ -160,13 +162,16 @@ def mark_attendance(request, qr_code):
             return JsonResponse({"status":"error","message":"Access denied: IP not in allowed range"}, status=403)
         else:
             logger.info("IP validation passed: ip=%s class_id=%s student=%s", client_ip, session.class_obj.id, request.user.id)
+    else:
+        client_ip = get_client_ip(request)
+        
     # atomic transaction & select_for_update to avoid race conditions from multiple simultaneous scans
     try:
         with transaction.atomic():
             attendance, created = SessionAttendance.objects.select_for_update().get_or_create(
                 student=student_profile,
                 session=session,
-                client_ip=get_client_ip(request),
+                client_ip=client_ip,
                 ip_validated=True,
                 defaults={'is_present': True, 'marked_via_qr': True}
             )
@@ -189,4 +194,8 @@ def mark_attendance(request, qr_code):
             return JsonResponse({'message': 'You have already marked your attendance for this session.'})
     except Exception as e:
         # return a generic error
+        logger.exception(
+            "Failed to mark attendance: student=%s, session=%s", 
+            student_profile.id, session.id
+        )
         return JsonResponse({'error': 'Failed to mark attendance due to server error.'}, status=500)
