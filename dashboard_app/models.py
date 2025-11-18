@@ -9,13 +9,16 @@ from datetime import timedelta
 
 class Class(models.Model):
     teacher = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='classes')
-    code = models.CharField(max_length=20, unique=True)
+    code = models.CharField(max_length=20)
     title = models.CharField(max_length=100)
     academic_year = models.CharField(max_length=15, blank=True, null=True)
     semester = models.CharField(max_length=20, blank=True, null=True)
     section = models.CharField(max_length=20, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     allowed_ip_ranges = models.JSONField(blank=True, null=True, help_text="List of allowed IP CIDR ranges, e.g., ['192.168.1.0/24']")
+
+    class Meta:
+        unique_together = ('teacher', 'code', 'academic_year', 'semester')
 
     def __str__(self):
         return f"{self.code} - {self.title}"
@@ -86,7 +89,8 @@ def export_enrolled_students(request, class_id):
 class SessionAttendance(models.Model):
     session = models.ForeignKey('ClassSession', on_delete=models.CASCADE, related_name='attendances')
     student = models.ForeignKey('auth_app.StudentProfile', on_delete=models.CASCADE)
-    is_present = models.BooleanField(default=False)
+    # Allow three states: True (present), False (absent), None (not marked yet)
+    is_present = models.BooleanField(null=True, default=None)
     marked_via_qr = models.BooleanField(default=False) 
     client_ip = models.GenericIPAddressField(blank=True, null=True)
     ip_validated = models.BooleanField(default=False)
@@ -95,7 +99,8 @@ class SessionAttendance(models.Model):
         unique_together = ('session', 'student')
 
     def __str__(self):
-        return f"{self.student.user.get_full_name()} - {self.session.class_obj.code} ({'Present' if self.is_present else 'Absent'})"
+        status = 'Present' if self.is_present is True else ('Absent' if self.is_present is False else 'Not Marked')
+        return f"{self.student.user.get_full_name()} - {self.session.class_obj.code} ({status})"
 
 class SessionQRCode(models.Model):
     session = models.OneToOneField(ClassSession, on_delete=models.CASCADE, related_name='qr_code')

@@ -2,7 +2,22 @@
     JS FOR THE RESPONSIVE STUFF (thx jeepeetee </3)
  */
 
+
+// JavaScript for changing navbar background on scroll
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("JS loaded");
+    const navbar = document.getElementById('navbar');
+    
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 0) {
+            navbar.classList.remove('bg-transparent');
+            navbar.classList.add('bg-white');
+        } else {
+            navbar.classList.remove('bg-white');
+            navbar.classList.add('bg-transparent');
+        }
+    });
+    
     // Mobile menu functionality
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -65,3 +80,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+

@@ -10,7 +10,9 @@ urlpatterns = [
     # Manage Classes
     path('manage-classes/', teacher_views.manage_classes, name='manage_classes'),
     path('manage-classes/add/', teacher_views.add_class, name='add_class'),
-
+    path('manage-classes/<int:class_id>/edit/', teacher_views.edit_class, name='edit_class'),
+    path('manage-classes/<int:class_id>/delete/', teacher_views.delete_class, name='delete_class'),
+    
     # Class Views
     path('class/<int:class_id>/', teacher_views.view_class, name='view_class'),
     path('class/<int:class_id>/export/', teacher_views.export_enrolled_students, name='export_enrolled_students_csv'),
@@ -21,7 +23,7 @@ urlpatterns = [
     path('class/<int:class_id>/session/<int:session_id>/export/', teacher_views.export_session_attendance, name='export_session_attendance'),
 
 
-    # ✅ Fixed Attendance View Route
+    # Fixed Attendance View Route
     path(
         'class/<int:class_id>/session/<int:session_id>/',
         teacher_views.view_session,

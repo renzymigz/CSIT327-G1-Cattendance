@@ -1,0 +1,31 @@
+/* Fade-in animations for initial page spawn */
+
+@keyframes fadeIn {
+	0% {
+		opacity: 0;
+		transform: translateY(20px);
+		transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Elements should start hidden with slight offset */
+.fade-item {
+	opacity: 0;
+	transform: translateY(20px);
+}
+
+/* When this class is added, the element animates into view */
+.fade-in {
+	animation: fadeIn 600ms ease-out forwards;
+}
+
+/* optional utility delays (can be used by adding classes or inline data attributes) */
+.fade-delay-100 { animation-delay: 100ms; }
+.fade-delay-200 { animation-delay: 200ms; }
+.fade-delay-300 { animation-delay: 300ms; }
+.fade-delay-400 { animation-delay: 400ms; }
+.fade-delay-500 { animation-delay: 500ms; }
