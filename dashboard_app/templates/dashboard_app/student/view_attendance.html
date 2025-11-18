@@ -153,7 +153,7 @@
       try {
         const resp = await fetch(scanUrl, {
           method: 'POST',
-          credentials: 'same-origin',
+          credentials: 'include',
           headers: {
             'X-CSRFToken': csrftoken || '',
             'X-Requested-With': 'XMLHttpRequest',
