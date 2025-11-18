@@ -176,24 +176,10 @@
     {% endif %}
     <!-- Allowed IP Ranges Form -->
   <div class="mb-5 bg-gray-50 p-4 rounded-lg border border-gray-200">
-    <form method="post" action="{% url 'dashboard_teacher:update_ip_ranges' class_obj.id %}">
-      {% csrf_token %}
-      <label class="block text-sm font-medium text-gray-700 mb-2" for="allowed_ip_ranges">
-        Allowed IP ranges (one CIDR per line):
-      </label>
-      <textarea
-        name="allowed_ip_ranges"
-        id="allowed_ip_ranges"
-        rows="4"
-        class="w-full bg-[#f6f7f8] border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#a2314b]"
-      >{{ initial_ip_text }}</textarea>
-
-      <button
-        type="submit"
-        class="mt-3 bg-[#a2314b] hover:bg-[#8f2b43] text-white px-4 py-2 rounded-lg shadow-md transition"
-      >
-        Save Allowed IPs
-      </button>
+    <form method="post">{% csrf_token %}
+      <label for="allowed_ip_ranges">Allowed IP ranges (one CIDR per line):</label>
+      <textarea name="allowed_ip_ranges" id="allowed_ip_ranges" rows="6">{{ initial_ip_text }}</textarea>
+      <button type="submit">Save</button>
     </form>
   </div>
 
