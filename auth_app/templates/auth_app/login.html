@@ -2,15 +2,7 @@
 {% block title %} Login | Cattendance{%endblock %} 
 {% block content %}
 <h1 class="font-semibold text-[24px] mb-2 text-center">Welcome Back</h1>
-<h1 class="text-[14px] text-[rgb(123,137,157)] mb-6 text-center">
-  Sign in as a
-  <span
-    id="role-text"
-    class="font-semibold border px-3 rounded-2xl border-[#a2314b] text-[#a2314b] bg-white"
-  >
-    Student
-  </span>
-</h1>
+
 
 <form method="post" class="flex flex-col gap-4">
   {% csrf_token %}
