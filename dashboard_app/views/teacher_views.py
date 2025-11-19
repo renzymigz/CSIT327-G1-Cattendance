@@ -13,6 +13,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 import segno, io, base64
 from django.db import transaction
+from django.http import HttpResponse
 
 
 # ==============================
@@ -464,36 +465,60 @@ def generate_qr(request, class_id, session_id):
     })
 
 def auto_update_sessions(class_obj):
-    """Auto-close ongoing sessions and mark absent students for completed ones."""
+    """
+    Automatically end ongoing sessions whose time has passed
+    and mark all unmarked attendance records as absent.
+    """
     now = timezone.localtime()
     today = now.date()
     current_time = now.time()
 
-    # Preload related fields to minimize queries
+    # Get only ongoing sessions for this class
     sessions = (
         ClassSession.objects
         .filter(class_obj=class_obj, status="ongoing")
         .select_related("schedule_day")
     )
-    enrollments = list(Enrollment.objects.filter(class_obj=class_obj).select_related("student"))
 
     for session in sessions:
         schedule = session.schedule_day
 
-        should_complete = (
-            (session.date == today and current_time > schedule.end_time)
-            or (session.date < today)
+        # Determine if this session should be auto-completed
+        should_end = (
+            (session.date == today and current_time > schedule.end_time) or
+            (session.date < today)
         )
 
-        if should_complete:
-            session.status = "completed"
-            session.save(update_fields=["status"])
-
-            # Auto-mark absent students for completed sessions
+        if should_end:
             with transaction.atomic():
-                for enrollment in enrollments:
-                    SessionAttendance.objects.get_or_create(
-                        session=session,
-                        student=enrollment.student,
-                        defaults={"is_present": False}
-                    )
+                session.status = "completed"
+                session.save(update_fields=["status"])
+
+                SessionAttendance.objects.filter(
+                    session=session,
+                    is_present__isnull=True
+                ).update(is_present=False)
+
+# END SESSION
+@login_required
+def end_session(request, class_id, session_id):
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+
+    session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
+
+    if not hasattr(request.user, 'teacherprofile') or session.class_obj.teacher != request.user.teacherprofile:
+        return HttpResponseForbidden('Not allowed')
+
+    if session.status == 'completed':
+        messages.info(request, 'Session has already ended.')
+        return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
+
+    with transaction.atomic():
+        session.status = 'completed'
+        session.save(update_fields=['status'])
+
+        SessionAttendance.objects.filter(session=session, is_present__isnull=True).update(is_present=False)
+
+    messages.success(request, 'Session ended. All unmarked students were marked absent.')
+    return redirect('dashboard_teacher:view_session', class_id=class_id, session_id=session.id)
