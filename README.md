@@ -21,7 +21,7 @@ Cattendance is a QR code–based attendance system designed to replace paper log
 | Ralph Keane A. Maestrado | Frontend Developer | ralphkeane.maestrado@cit.edu |
 
 ## Deployable Link
-**Live Demo:** [Cattendance on Render - Coming Soon]
+**Live Demo:** csit327-g1-cattendance.onrender.com
 
 ## Getting Started
 
@@ -37,7 +37,7 @@ Before setting up this project, ensure you have:
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/renzymigz/Cattendance.git](https://github.com/renzymigz/Cattendance.git)
+    git clone https://github.com/renzymigz/Cattendance.git
     cd Cattendance
     ```
 

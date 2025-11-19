@@ -5,54 +5,78 @@
 <div class="p-6">
   <!-- Header -->
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-[#6a1e1e] mb-1">
-      {{ class_obj.title }} ({{ class_obj.code }})
-    </h1>
-    <p class="text-sm text-gray-600 mb-2">
-      Section {{ class_obj.section }} | {{ class_obj.semester }} | {{ class_obj.academic_year }}
-    </p>
-
-    {% if class_obj.schedules.exists %}
-    <div class="mt-3 bg-gray-50 p-3 rounded-lg border border-gray-200 w-fit">
-      <h2 class="text-sm font-semibold text-gray-700 mb-1">Class Schedule</h2>
-      <ul class="list-disc list-inside text-sm text-gray-600">
-        {% for sched in class_obj.schedules.all %}
-        <li>
-          {{ sched.day_of_week }} — {{ sched.start_time|time:"h:i A" }} to {{ sched.end_time|time:"h:i A" }}
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-  </div>
-
-  <div class="my-6">
     <a href="{% url 'dashboard_teacher:manage_classes' %}" class="text-[#a2314b] hover:underline">
       ← Back to Manage Classes
     </a>
   </div>
 
-  <!-- Add Student Section -->
-  <div class="mb-8 bg-white p-5 rounded-xl shadow border border-gray-200">
-    <h2 class="text-lg font-semibold text-[#6a1e1e] mb-3">Add Student</h2>
-    <form method="POST" class="flex flex-col sm:flex-row gap-3">
-      {% csrf_token %}
-      <input type="hidden" name="add_student" value="1" />
-      <input
-        type="email"
-        name="student_email"
-        class="flex-grow bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
-        placeholder="Enter student email"
-        required
-      />
-      <button
-        type="submit"
-        class="bg-[#a2314b] hover:bg-[#8f2b43] text-white px-5 py-2 rounded-lg shadow-md transition"
-      >
-        Add
-      </button>
-    </form>
+  <div class="mb-6 bg-white p-6 rounded-xl shadow border border-gray-200">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      
+      <div class = "flex flex-col gap-6">
+      <div class = "text-sm text-gray-700 flex flex-col gap-2">
+        <div>
+          <i class="fa-solid fa-code pr-2"></i>COURSE CODE
+        </div>
+        <h1 class="text-2xl font-bold text-[#6a1e1e] mb-1">
+          {{ class_obj.code }}
+        </h1>
+      </div>
+      <div class = "text-sm text-gray-700 flex flex-col gap-2">
+        <div>
+          <i class="fa-regular fa-book pr-2"></i>COURSE TITLE
+        </div>
+        <h1 class="text-2xl font-bold text-[#6a1e1e] mb-1">
+          {{ class_obj.title }} 
+        </h1>
+      </div>
+      
+      <div class = "text-sm text-gray-700 flex flex-col gap-2">
+        <div>
+          <i class="fa-regular fa-tag pr-2"></i>SECTION
+        </div>
+        <h1 class="text-2xl font-bold text-[#6a1e1e] mb-1">
+          {{ class_obj.section }}
+        </h1>
+      </div>
+      </div>
+
+      <div class = "flex flex-col gap-6">
+      <div class = "text-sm text-gray-700 flex flex-col gap-2">
+        <div>
+          <i class="fa-solid fa-timer pr-2"></i>SEMESTER & ACADEMIC YEAR
+        </div>
+        <h1 class="text-2xl font-bold text-[#6a1e1e] mb-1">
+          {{ class_obj.semester }} Semester {{ class_obj.academic_year }}
+        </h1>
+      </div>
+
+      {% if class_obj.schedules.exists %}
+      <div class="text-sm text-gray-700 flex flex-col gap-2">
+        <h2 class="mb-1"><i class="fa-regular fa-calendar pr-2"></i>CLASS SCHEDULE</h2>
+        <ul class=" list-inside text-gray-600 text-base bg-[#F8FAFC] w-fit py-1 px-4 rounded-lg">
+          {% for sched in class_obj.schedules.all %}
+          <li>
+            <span class = "font-semibold">{{ sched.day_of_week }}</span>— {{ sched.start_time|time:"h:i A" }} - {{ sched.end_time|time:"h:i A" }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+    </div>
   </div>
+
+  <div class = "flex flex-col md:flex-row md:space-x-4 space-y-6 md:space-y-0 mb-4">
+    <button id="studentsTabBtn" class = "bg-[#8f2b43] text-white px-5 py-2 rounded-md shadow-md transition ">
+        <i class="fa-regular fa-user-group pr-2"></i>Enrolled Students
+    </button>
+
+    <button id="sessionsTabBtn" class = "border border-gray-400 bg-[#F8FAFC] text-gray-600 px-5 py-2 rounded-md transition ">
+        <i class="fa-regular fa-calendar pr-2"></i>Class Sessions 
+    </button>
+  </div>
+  <!-- Add Student Section -->
 
   {% if messages %}
     {% for message in messages %}
@@ -68,27 +92,71 @@
   {% endif %}
 
   <!-- Enrolled Students -->
-  <div class="bg-white p-5 rounded-xl shadow border border-gray-200 mb-8">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-lg font-semibold text-[#6a1e1e] mb-3">Enrolled Students</h2>
+  <div id="studentsTab" class="bg-white rounded-xl shadow border border-gray-200 mb-8 tab-section">
+    <div class="flex items-center justify-between p-5 text-center">
+      <h2 class="text-lg font-semibold text-[#6a1e1e] text-center justify-center items-center"><i class="fa-regular fa-user-group pr-2"></i>Enrolled Students</h2>
   
   <!-- Export button (far right) -->
+      <div class = "flex gap-4 text-base">
       <a
          href="{% url 'dashboard_teacher:export_enrolled_students_csv' class_obj.id %}"
-        class="inline-flex items-center px-4 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white text-sm rounded-md shadow"
-        role="button">
-        Export to CSV
+        role="button"
+        class = "border px-4 py-2  border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all "
+        >
+        <i class="fa-regular fa-download mr-2"></i>Export to CSV
       </a>
+
+      <button id="addStudentBtn"  class="inline-flex items-center px-5 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white rounded-md shadow"> 
+          <i class="fa-solid fa-plus mr-2"></i>Add Student
+      </button>
+      </div>
+    </div>
+
+    <hr class = "">
+
+    <div class = "p-6 space-y-4 border-b border-gray-200 transition-all duration-300 hidden" id="addStudentSection" >
+      <h1 class = "text-base font-semibold">Enroll New Student</h1>
+
+      <form method="POST" class="flex flex-row sm:flex-row gap-3">
+      {% csrf_token %}
+      <input type="hidden" name="add_student" value="1" />
+      <input
+        type="email"
+        name="student_email"
+        class="flex-grow bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
+        placeholder="Enter student email"
+        required
+      />
+
+      <div class = "">
+        <button
+        type="submit"
+        class="bg-[#a2314b] hover:bg-[#8f2b43] text-white px-5 py-2 rounded-lg shadow-md transition"
+        >
+        Add
+      </button>
+
+      <button
+        type="button"
+        class="bg-[#F8FAFC] cancel-btn  border border-[#E2E8F0]  px-5 py-2 rounded-lg transition"
+        >
+        Cancel
+      </button>
+      </div>
+      
+    </form>
+    
     </div>
 
     {% if enrollments %}
     <div class="overflow-x-auto">
       <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="text-left p-2">#</th>
-            <th class="text-left p-2">Student</th>
-            <th class="text-left p-2">Actions</th>
+        <thead class="bg-[#f9fafa]">
+          <tr class = "text-gray-700">
+            <th class="text-left p-2 font-semibold">Student ID</th>
+            <th class="text-left p-2 font-semibold">Name</th>
+            <th class="text-left p-2 font-semibold">Email</th>
+            <th class="text-left p-2 font-semibold">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -96,15 +164,18 @@
           <tr class="border-t hover:bg-gray-50 transition">
             <td class="p-2">{{ forloop.counter }}</td>
             <td class="p-2">
-              <span class="font-medium">{{ enrollment.student.user.get_full_name }}</span><br />
-              <span class="text-xs text-gray-500">{{ enrollment.student.user.email }}</span>
+             {{ enrollment.student.user.first_name }} {{ enrollment.student.user.last_name }}
             </td>
+            <td class="p-2"><i class="fa-light fa-envelope pr-2"></i>{{ enrollment.student.user.email }}</td>
             <td class="p-2">
               <button
                 type="button"
-                class="bg-[#a2314b] hover:bg-[#88263d] text-white px-3 py-1 rounded transition"
-                onclick="openRemoveModal('{{ enrollment.id }}', '{{ enrollment.student.user.email }}')">
-                Remove
+                class="bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-[#fee2e3] hover:text-[#c10006] hover:border-[#c100064b] px-2 py-1 rounded transition"
+                onclick="openRemoveModal(
+                        '{{ enrollment.id }}',
+                        '{{ enrollment.student.user.first_name }} {{ enrollment.student.user.last_name }}'
+                    )">
+                <i class="fa-regular fa-trash-can"></i>
               </button>
             </td>
           </tr>
@@ -113,32 +184,57 @@
       </table>
     </div>
     {% else %}
-    <p class="text-gray-500">No students enrolled yet.</p>
+    <p class="text-gray-500 p-5 text-center">No students enrolled yet.</p>
     {% endif %}
   </div>
-</div>
+
 
   <!-- Class Sessions -->
-  <div class="bg-white p-5 rounded-xl shadow border border-gray-200">
-    <h2 class="text-lg font-semibold text-[#6a1e1e] mb-3">Class Sessions</h2>
+  <div id = "sessionsTab" class="bg-white rounded-xl shadow border border-gray-200 tab-section hidden">
 
-    <!-- Create Session Form -->
-    <form method="POST" action="{% url 'dashboard_teacher:create_session' class_obj.id %}" class="flex flex-col sm:flex-row gap-3 mb-5">
-      {% csrf_token %}
-      {{ session_form.as_p }}
-      <button
-        type="submit"
-        class="bg-[#a2314b] hover:bg-[#8f2b43] text-white px-5 py-2 rounded-lg shadow-md transition self-start">
-        Create Session
-      </button>
-    </form>
+    <div class ="flex items-center justify-between p-5">
+      <h2 class="text-lg font-semibold text-[#6a1e1e] "><i class="fa-regular fa-calendar pr-2"></i>Class Sessions</h2>
 
+      <!-- Create Session Form -->
+      <form method="POST" action="{% url 'dashboard_teacher:create_session' class_obj.id %}" class="flex flex-col sm:flex-row gap-3  text-center items-center justify-center">
+        {% csrf_token %}
+        <span class = "bg-[#F8FAFC] border border-[#E2E8F0] text-gray-600 px-4 py-2 rounded-md">
+          {{ session_form.as_p }}
+        </span>
+        <button
+          type="submit"
+          id="createSessionBtn"
+          class="px-5 py-2 rounded-md shadow transition self-start bg-[#a2314b] text-white
+          {% if can_create_session %}
+            hover:bg-[#8f2b43]
+          {% else %}
+            opacity-40 cursor-not-allowed
+          {% endif %}"
+          {% if not can_create_session %}disabled{% endif %}
+          title="{% if not can_create_session %}Session can only be created during scheduled class time ({{ current_day }}, {{ current_time|time:'h:i A' }}){% endif %}">
+          Create Session
+        </button>
+      </form>
+    </div>
+
+    <!-- Schedule Notice -->
+    {% if not can_create_session %}
+    <div class="px-5 pb-3">
+      <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg text-sm">
+        <i class="fa-solid fa-circle-info mr-2"></i>
+        <strong>Note:</strong> You can only create a session during scheduled class time. 
+        Current: <strong>{{ current_day }}, {{ current_time|time:"h:i A" }}</strong>
+      </div>
+    </div>
+    {% endif %}
+
+    <hr class = "">
     <!-- Session List -->
     {% if sessions %}
     <div class="overflow-x-auto">
       <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-        <thead class="bg-gray-100">
-          <tr>
+        <thead class="bg-[#f9fafa]">
+          <tr class = "text-gray-700 font-semibold">
             <th class="text-left p-2">Date</th>
             <th class="text-left p-2">Schedule</th>
             <th class="text-left p-2">Status</th>
@@ -149,22 +245,33 @@
           {% for session in sessions %}
           <tr class="border-t hover:bg-gray-50 transition">
             <td class="p-2">{{ session.date|date:"M d, Y" }}</td>
-            <td class="p-2">{{ session.schedule_day.day_of_week }} — {{ session.schedule_day.start_time|time:"h:i A" }} to {{ session.schedule_day.end_time|time:"h:i A" }}</td>
+            <td class="p-2"><i class="fa-regular fa-clock pr-2"></i>{{ session.schedule_day.day_of_week }} — {{ session.schedule_day.start_time|time:"h:i A" }} to {{ session.schedule_day.end_time|time:"h:i A" }}</td>
             <td class="p-2">
               <span
-                class="px-2 py-1 rounded text-white text-sm {% if session.status == 'ongoing' %}bg-yellow-500{% elif session.status == 'completed' %}bg-green-600{% else %}bg-gray-400{% endif %}">
+                class="px-3 py-1 rounded-lg border font-semibold text-sm {% if session.status == 'ongoing' %}bg-yellow-100 border-amber-400 text-yellow-500{% elif session.status == 'completed' %}border-green-400 text-[#166534] bg-[#DCFCE7] {% else %}bg-gray-400{% endif %}">
                 {{ session.status|capfirst }}
               </span>
             </td>
-            <td class="p-2">
-              <a href="{% url 'dashboard_teacher:view_session' class_obj.id session.id %}" ... 
-                 class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow transition">
-                View
-              </a>
-              <a href="{% url 'dashboard_teacher:delete_session' session.id %}" 
-                 class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow transition ml-2">
-                Delete
-              </a>
+            <td class="p-2 flex items-center justify-start space-x-2"> 
+                <a href="{% url 'dashboard_teacher:view_session' class_obj.id session.id %}" 
+                    class="
+                        bg-[#F8FAFC] border border-[#E2E8F0] 
+                        hover:bg-[#e9f1ff] hover:text-blue-600 hover:border-blue-500 
+                        w-8 h-8 flex items-center justify-center rounded transition">
+                    <i class="fa-regular fa-eye"></i>
+                </a>
+                
+                <button type="button"
+                  data-url="{% url 'dashboard_teacher:delete_session' session.id %}"
+                  data-session-id="{{ session.id }}"
+                  data-session-label="{{ session.date|date:'M d, Y' }} — {{ session.schedule_day.day_of_week }}"
+                  onclick="openRemoveSessionModal(this.dataset.sessionId, this.dataset.sessionLabel, this.dataset.url)"
+                  class="
+                    bg-[#F8FAFC] border border-[#E2E8F0] 
+                    hover:bg-red-50 hover:text-red-600 hover:border-red-500
+                    w-8 h-8 flex items-center justify-center rounded transition">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
             </td>
           </tr>
           {% endfor %}
@@ -172,34 +279,112 @@
       </table>
     </div>
     {% else %}
-    <p class="text-gray-500">No sessions yet.</p>
+    <p class="text-gray-500 p-5 text-center">No sessions yet.</p>
     {% endif %}
   </div>
 
   <!-- Remove Student Modal -->
   <div id="removeModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 text-center">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 text-center fade-in transition-all">
       <h2 class="text-lg font-semibold text-[#6a1e1e] mb-2">Confirm Removal</h2>
       <p class="text-gray-600 mb-4">
         Are you sure you want to remove
-        <span id="studentEmail" class="font-medium text-[#a2314b]"></span> from this class?
+        <span id="studentName" class="font-medium text-[#a2314b]"></span> from this class?
       </p>
       <form id="removeForm" method="POST" class="flex justify-center gap-3">
         {% csrf_token %}
         <input type="hidden" name="remove_student" id="removeStudentId" />
-        <button type="button" onclick="closeRemoveModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg transition">
+        <button type="button" onclick="closeRemoveModal()" class="px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all">
           Cancel
         </button>
-        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+        <button type="submit" class="px-4 py-2 bg-[#8f2b43] hover:bg-[#a2314b]  text-white rounded-lg transition">
           Remove
         </button>
       </form>
     </div>
   </div>
 
+  <!-- Remove Session Modal (matches Remove Student style) -->
+  <div id="removeSessionModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 text-center fade-in transition-all">
+      <h2 class="text-lg font-semibold text-[#6a1e1e] mb-2">Confirm Delete</h2>
+      <p class="text-gray-600 mb-4">
+        Are you sure you want to delete the session on
+        <span id="sessionName" class="font-medium text-[#a2314b]"></span>?
+      </p>
+      <form id="removeSessionForm" method="POST" class="flex justify-center gap-3">
+        {% csrf_token %}
+        <input type="hidden" name="remove_session" id="removeSessionId" />
+        <button type="button" onclick="closeRemoveSessionModal()" class="px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all">
+          Cancel
+        </button>
+        <button type="submit" class="px-4 py-2 bg-[#8f2b43] hover:bg-[#a2314b]  text-white rounded-lg transition">
+          Delete
+        </button>
+      </form>
+    </div>
+  </div>
+
   <script>
-    function openRemoveModal(studentId, studentEmail) {
-      document.getElementById("studentEmail").textContent = studentEmail;
+    document.addEventListener("DOMContentLoaded", () => {
+      const studentsTabBtn = document.getElementById("studentsTabBtn");
+  const sessionsTabBtn = document.getElementById("sessionsTabBtn");
+  const studentsTab = document.getElementById("studentsTab");
+  const sessionsTab = document.getElementById("sessionsTab");
+
+  function switchTab(showTab) {
+    if (showTab === "students") {
+      studentsTab.classList.remove("hidden");
+      sessionsTab.classList.add("hidden");
+
+      studentsTabBtn.classList.add("bg-[#8f2b43]", "text-white", "shadow-md");
+      studentsTabBtn.classList.remove("bg-[#F8FAFC]", "text-gray-600", "border", "border-gray-400");
+
+      sessionsTabBtn.classList.remove("bg-[#8f2b43]", "text-white", "shadow-md");
+      sessionsTabBtn.classList.add("bg-[#F8FAFC]", "text-gray-600", "border", "border-gray-400");
+    } else {
+      studentsTab.classList.add("hidden");
+      sessionsTab.classList.remove("hidden");
+
+      sessionsTabBtn.classList.add("bg-[#8f2b43]", "text-white", "shadow-md");
+      sessionsTabBtn.classList.remove("bg-[#F8FAFC]", "text-gray-600", "border", "border-gray-400");
+
+      studentsTabBtn.classList.remove("bg-[#8f2b43]", "text-white", "shadow-md");
+      studentsTabBtn.classList.add("bg-[#F8FAFC]", "text-gray-600", "border", "border-gray-400");
+    }
+  }
+
+  // Event listeners
+  studentsTabBtn.addEventListener("click", () => switchTab("students"));
+  sessionsTabBtn.addEventListener("click", () => switchTab("sessions"));
+
+  // Default tab
+  switchTab("students");
+  
+    const addStudentSection = document.getElementById("addStudentSection");
+    const addStudentButton = document.querySelector("#addStudentBtn");
+    const cancelButton = addStudentSection.querySelector(".cancel-btn");
+
+    // Hide by default
+    addStudentSection.style.display = "none";
+
+    // Show section
+    addStudentButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      addStudentSection.style.display = "block";
+      addStudentButton.style.display = "block";
+    });
+
+    // Cancel button hides section
+    cancelButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      addStudentSection.style.display = "none";
+      addStudentButton.style.display = "inline-flex";
+    });
+  });
+
+    function openRemoveModal(studentId, studentName) {
+      document.getElementById("studentName").textContent = studentName;
       document.getElementById("removeStudentId").value = studentId;
       document.getElementById("removeModal").classList.remove("hidden");
       document.getElementById("removeModal").classList.add("flex");
@@ -209,7 +394,24 @@
       document.getElementById("removeModal").classList.add("hidden");
       document.getElementById("removeModal").classList.remove("flex");
     }
-  </script>
 
+    function openRemoveSessionModal(sessionId, sessionLabel, actionUrl) {
+      document.getElementById("sessionName").textContent = sessionLabel;
+      document.getElementById("removeSessionId").value = sessionId;
+      const form = document.getElementById("removeSessionForm");
+      // set action to the provided delete URL
+      if(actionUrl){
+        form.action = actionUrl;
+      }
+      document.getElementById("removeSessionModal").classList.remove("hidden");
+      document.getElementById("removeSessionModal").classList.add("flex");
+    }
+
+    function closeRemoveSessionModal() {
+      document.getElementById("removeSessionModal").classList.add("hidden");
+      document.getElementById("removeSessionModal").classList.remove("flex");
+    }
+  </script>
+</div>
 </div>
 {% endblock %}

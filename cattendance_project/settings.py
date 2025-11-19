@@ -74,10 +74,6 @@ MIDDLEWARE = [
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-
-
 # ===============================================
 # URLS / WSGI
 # ===============================================
@@ -145,7 +141,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+LOGIN_URL = 'auth_app:login'
 STATIC_URL = '/static/'  
 # STATICFILES_DIRS = [BASE_DIR / 'static']  # Not needed - Django finds app static folders automatically
 STATIC_ROOT = BASE_DIR / 'staticfiles' 
