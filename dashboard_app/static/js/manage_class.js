@@ -26,6 +26,9 @@ document.getElementById("addSchedule").addEventListener("click", () => {
     const newRow = container.firstElementChild.cloneNode(true);
     newRow.querySelectorAll("input, select").forEach((el) => (el.value = ""));
     container.appendChild(newRow);
+    const sel = newRow.querySelector('select[name="days[]"]');
+    if (sel) sel.addEventListener('change', updateDayOptions);
+    updateDayOptions();
 });
 
 document
@@ -35,8 +38,40 @@ document
             const row = e.target.closest(".schedule-item");
             const container = document.getElementById("scheduleContainer");
             if (container.children.length > 1) row.remove();
+            updateDayOptions();
         }
     });
+
+function updateDayOptions(){
+    const selects = Array.from(document.querySelectorAll('select[name="days[]"]'));
+    const selected = selects.map(s => s.value).filter(v => v);
+    selects.forEach(s => {
+        const current = s.value;
+        Array.from(s.options).forEach(opt => {
+            if (!opt.value) { opt.disabled = false; return; }
+            if (opt.value === current) {
+                opt.disabled = false;
+            } else if (selected.includes(opt.value)) {
+                opt.disabled = true;
+            } else {
+                opt.disabled = false;
+            }
+        });
+    });
+
+    const addBtn = document.getElementById('addSchedule');
+    const meetingDaysCount = document.querySelectorAll('select[name="days[]"] option').length - 1; 
+    if (selected.length >= meetingDaysCount) {
+        addBtn.disabled = true;
+        addBtn.classList.add('opacity-40','cursor-not-allowed');
+    } else {
+        addBtn.disabled = false;
+        addBtn.classList.remove('opacity-40','cursor-not-allowed');
+    }
+}
+
+document.querySelectorAll('select[name="days[]"]').forEach(s => s.addEventListener('change', updateDayOptions));
+updateDayOptions();
 
 document.querySelectorAll(".edit-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
