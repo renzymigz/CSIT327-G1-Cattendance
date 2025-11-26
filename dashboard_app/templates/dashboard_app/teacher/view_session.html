@@ -215,8 +215,8 @@ Attendance | Cattendance{% endblock %} {% block content %}
               class="attn-row"
               data-student="{{ s.pk }} hover:bg-gray-50 transition"
             >
-              <td class="p-2 text-gray-600">
-                {% if s.student_id %}{{ s.student_id }}{% else %}—{% endif %}
+              <td class="px-5 text-gray-600">
+                {{ s.student_id_number }}
               </td>
 
               <td class="p-2 font-medium text-gray-800">
