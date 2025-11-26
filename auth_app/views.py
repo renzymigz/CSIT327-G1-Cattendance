@@ -14,7 +14,6 @@ def register_view(request):
     if request.user.is_authenticated:
         if request.user.must_change_password:
                 return redirect('auth:change_temp_password')
-        
         if request.user.user_type == 'student':
             return redirect('dashboard_student:dashboard')
         else:
@@ -22,19 +21,29 @@ def register_view(request):
 
     if request.method == 'POST':
         email = request.POST.get('email')
+        student_id = request.POST.get('student_id_number')
         password = request.POST.get('password1')
         confirm_password = request.POST.get('password2')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         role = request.POST.get('selected_role') or 'student'
 
-        if not all([email, password, confirm_password, first_name, last_name]):
+        
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "An account with this email already exists.")
+            return render(request, 'auth_app/register.html')
+        
+        if not all([email, password, confirm_password, first_name, last_name, student_id]):
             messages.error(request, "All fields are required!")
             return render(request, 'auth_app/register.html')
         
         if not validate_password_strength(request, password, confirm_password):
             return render(request, 'auth_app/register.html')
-
+        
+        if StudentProfile.objects.filter(student_id_number=student_id).exists():
+            messages.error(request, "This Student ID is already taken.")
+            return render(request, 'auth_app/register.html')
+            
         # Create User
         user = User.objects.create_user(
             username=email,
