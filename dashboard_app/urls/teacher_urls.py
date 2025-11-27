@@ -22,6 +22,7 @@ urlpatterns = [
     path('class/session/<int:session_id>/delete/', teacher_views.delete_session, name='delete_session'),
     path('class/<int:class_id>/session/<int:session_id>/export/', teacher_views.export_session_attendance, name='export_session_attendance'),
     path('class/<int:class_id>/session/<int:session_id>/end/', teacher_views.end_session, name='end_session'),
+    path('class/<int:class_id>/session/<int:session_id>/end-qr/', teacher_views.end_qr, name='end_qr'),
 
 
     # Fixed Attendance View Route
