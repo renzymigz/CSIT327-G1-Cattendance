@@ -136,6 +136,7 @@ def view_attendance(request, class_id):
             'date': session.date,
             'status': status,
             'marked_via_qr': bool(attendance.marked_via_qr) if attendance else False,
+            'scan_time': attendance.timestamp if attendance else None,
         })
 
     total_present = attendance_records.filter(is_present=True).count()
@@ -215,25 +216,28 @@ def mark_attendance(request, qr_code):
             attendance, created = SessionAttendance.objects.select_for_update().get_or_create(
                 student=student_profile,
                 session=session,
-                defaults={'is_present': True, 'marked_via_qr': True}
+                defaults={'is_present': True, 'marked_via_qr': True, 'timestamp': timezone.now()}
             )
 
             if created:
-                return JsonResponse({'message': 'Attendance marked successfully via QR!'})
+                return JsonResponse({'message': 'Attendance marked successfully via QR!', 'class_id': session.class_obj.id})
 
             updated = False
-            if attendance.is_present is False:
+            if attendance.is_present is not True:
                 attendance.is_present = True
                 updated = True
             if not attendance.marked_via_qr:
                 attendance.marked_via_qr = True
                 updated = True
+            if not attendance.timestamp:
+                attendance.timestamp = timezone.now()
+                updated = True
 
             if updated:
                 attendance.save()
-                return JsonResponse({'message': 'Attendance updated and flagged as QR-marked.'})
+                return JsonResponse({'message': 'Attendance updated and flagged as QR-marked.', 'class_id': session.class_obj.id})
 
-            return JsonResponse({'message': 'You have already marked your attendance for this session.'})
+            return JsonResponse({'message': 'You have already marked your attendance for this session.', 'class_id': session.class_obj.id})
 
     except Exception:
         return JsonResponse({'error': 'Failed to mark attendance due to server error.'}, status=500)
