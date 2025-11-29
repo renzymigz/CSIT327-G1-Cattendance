@@ -87,6 +87,7 @@ class SessionQRCode(models.Model):
     code = models.CharField(max_length=64, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
+    qr_active = models.BooleanField(default=False)
 
     def is_valid(self):
         return timezone.now() < self.expires_at
@@ -99,6 +100,6 @@ class SessionQRCode(models.Model):
         expires = now + timedelta(minutes=validity_minutes)
         qr, created = SessionQRCode.objects.update_or_create(
             session=session,
-            defaults={"code": code, "expires_at": expires}
+            defaults={"code": code, "expires_at": expires, "qr_active": True}
         )
         return qr

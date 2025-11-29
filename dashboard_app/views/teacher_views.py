@@ -387,6 +387,20 @@ def view_session(request, class_id, session_id):
 
     attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
 
+    # Determine whether a QR is currently active for this session
+    now = timezone.now()
+    active_qr = False
+    try:
+        qr = session.qr_code
+        if qr and qr.expires_at:
+            if qr.expires_at <= now and qr.qr_active:
+                qr.qr_active = False
+                qr.save(update_fields=['qr_active'])
+            elif qr.expires_at > now and qr.qr_active:
+                active_qr = True
+    except SessionQRCode.DoesNotExist:
+        active_qr = False
+
     if request.method == 'POST':
         # Prevent editing if session is completed
         if session.status == 'completed':
@@ -417,6 +431,7 @@ def view_session(request, class_id, session_id):
         'class_id': class_id,
         'enrollments': enrollments,
         'attendances': attendances,
+        'qr_active': active_qr,
     })
 
 
@@ -437,7 +452,12 @@ def generate_qr(request, class_id, session_id):
         return JsonResponse({'error': 'Cannot generate QR code. Session has ended.'}, status=400)
 
     now = timezone.now()
-    validity_minutes = 5
+    # get requested minutes from POST form data if provided (fallback to 5)
+    try:
+        minutes_raw = request.POST.get('minutes')
+        validity_minutes = int(minutes_raw) if minutes_raw else 5
+    except Exception:
+        validity_minutes = 5
     expires_at = now + timedelta(minutes=validity_minutes)
 
     # Check if there's an existing unexpired QR for this session
@@ -446,8 +466,14 @@ def generate_qr(request, class_id, session_id):
     if not qr:
         # Generate a new QR since none is active
         qr = SessionQRCode.generate_for_session(session, validity_minutes=validity_minutes)
+    else:
+        # ensure qr_active set when reusing
+        if not qr.qr_active:
+            qr.qr_active = True
+            qr.expires_at = now + timedelta(minutes=validity_minutes)
+            qr.save(update_fields=['qr_active', 'expires_at'])
 
-    # Build absolute scan URL using the student-facing route (namespaced)
+    # scan URL using the student-facing route (namespaced)
     # This ensures the generated QR points to the student mark_attendance view under /dashboard/student/
     scan_url = request.build_absolute_uri(reverse('dashboard_student:mark_attendance', args=[qr.code]))
 
@@ -463,6 +489,29 @@ def generate_qr(request, class_id, session_id):
         'qr_image': qr_data_uri,
         'scan_url': scan_url,
     })
+
+
+@login_required
+def end_qr(request, class_id, session_id):
+    """Invalidate any active QR for a session."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
+
+    # Only the teacher who owns the class can end the QR
+    if not hasattr(request.user, 'teacherprofile') or session.class_obj.teacher != request.user.teacherprofile:
+        return HttpResponseForbidden('Not allowed')
+
+    now = timezone.now()
+    qr = SessionQRCode.objects.filter(session=session, expires_at__gt=now).first()
+    if not qr:
+        return JsonResponse({'ok': False, 'message': 'No active QR found.'})
+
+    qr.expires_at = now
+    qr.qr_active = False
+    qr.save(update_fields=['expires_at', 'qr_active'])
+    return JsonResponse({'ok': True, 'message': 'QR ended.'})
 
 def auto_update_sessions(class_obj):
     """

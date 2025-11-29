@@ -46,7 +46,7 @@ class User(AbstractUser):
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    student_id_number = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    student_id_number = models.CharField(max_length=20, unique=True)
     course = models.CharField(max_length=100, null=True, blank=True) 
     year_level = models.CharField(max_length=20, null=True, blank=True) 
     
@@ -56,7 +56,7 @@ class StudentProfile(models.Model):
 
 class TeacherProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    employee_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    employee_id = models.CharField(max_length=20, unique=True)
     department = models.CharField(max_length=100, null=True, blank=True)
     
     def __str__(self):
