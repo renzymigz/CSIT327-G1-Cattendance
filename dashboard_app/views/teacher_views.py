@@ -414,6 +414,8 @@ def view_session(request, class_id, session_id):
                 continue
 
             attendance.is_present = (status == 'present')
+            if not attendance.timestamp:
+                attendance.timestamp = timezone.now()
             attendance.save()
             success_count += 1
 

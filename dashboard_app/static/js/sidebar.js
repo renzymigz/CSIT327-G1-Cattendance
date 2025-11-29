@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const mainContent = document.getElementById('mainContent');
 
   // Labels inside links and header that should be hidden when sidebar is collapsed on desktop
-  const labelEls = sidebar ? sidebar.querySelectorAll('.sidebar-label') : [];
+   const labelEls = sidebar ? sidebar.querySelectorAll('.sidebar-label') : [];
+   const logoText = sidebar ? sidebar.querySelector('.leading-tight') : null;
 
   if (!toggleBtn || !sidebar) return;
 
@@ -47,8 +48,9 @@ document.addEventListener('DOMContentLoaded', function () {
       // adjust main content margin for md and up
       mainContent.classList.remove('md:ml-72');
       mainContent.classList.add('md:ml-24');
-      // hide labels
+      // hide labels and logo text
       labelEls.forEach(el => el.classList.add('hidden'));
+      if (logoText) logoText.classList.add('hidden');
       toggleBtn.setAttribute('aria-expanded', 'true');
     } else {
       // expand sidebar
@@ -56,20 +58,26 @@ document.addEventListener('DOMContentLoaded', function () {
       sidebar.classList.add('w-72');
       mainContent.classList.remove('md:ml-24');
       mainContent.classList.add('md:ml-72');
-      // show labels
+      // show labels and logo text
       labelEls.forEach(el => el.classList.remove('hidden'));
+      if (logoText) logoText.classList.remove('hidden');
       toggleBtn.setAttribute('aria-expanded', 'false');
     }
   }
 
-  toggleBtn.addEventListener('click', function (e) {
+  function handleToggle(e) {
     e.preventDefault();
     if (isDesktop()) {
       toggleDesktopCollapse();
     } else {
       toggleSidebar();
     }
-  });
+  }
+
+  toggleBtn.addEventListener('click', handleToggle);
+
+  // Expose globally for inline onclick
+  window.toggleSidebarGlobal = handleToggle;
 
   if (overlay) {
     overlay.addEventListener('click', function () {

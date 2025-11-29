@@ -73,8 +73,9 @@ class SessionAttendance(models.Model):
     student = models.ForeignKey('auth_app.StudentProfile', on_delete=models.CASCADE)
     # Allow three states: True (present), False (absent), None (not marked yet)
     is_present = models.BooleanField(null=True, default=None)
-    marked_via_qr = models.BooleanField(default=False) 
-    
+    marked_via_qr = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(null=True, blank=True)  # Time when attendance was marked
+
     class Meta:
         unique_together = ('session', 'student')
 

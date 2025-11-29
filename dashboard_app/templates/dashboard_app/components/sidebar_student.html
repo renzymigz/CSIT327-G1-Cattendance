@@ -11,8 +11,8 @@
   <div class="flex items-center mx-auto gap-3 p-6 text-[#a2314b] border-b border-gray-100">
     <img src="{% static 'core_app/images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
     <div class="leading-tight">
-      <h1 class="text-xl font-bold">Cattendance</h1>
-      <p class="text-xs text-gray-500 font-semibold">Student Portal</p>
+      <h1 class="text-xl font-bold sidebar-label">Cattendance</h1>
+      <p class="text-xs text-gray-500 font-semibold sidebar-label">Student Portal</p>
     </div>
   </div>
 
@@ -23,7 +23,7 @@
          class="flex items-center px-4 py-2 rounded-lg transition
          {% if p == dashboard_url %}bg-[#f6e8eb] text-[#a2314b]{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
         <i class="fas fa-border-all mr-3"></i>
-        Dashboard
+        <span class="sidebar-label">Dashboard</span>
       </a>
     </div>
 
@@ -33,7 +33,7 @@
          class="flex items-center px-4 py-2 rounded-lg transition
          {% if classes_url in p %}bg-[#f6e8eb] text-[#a2314b]{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
         <i class="fas fa-calendar-check mr-3"></i>
-        My Attendance
+        <span class="sidebar-label">My Attendance</span>
       </a>
     </div>
 
@@ -43,7 +43,7 @@
          class="flex items-center px-4 py-2 rounded-lg transition
          {% if p == profile_url %}bg-[#f6e8eb] text-[#a2314b]{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
         <i class="fas fa-user mr-3"></i>
-        Profile
+        <span class="sidebar-label">Profile</span>
       </a>
     </div>
 
@@ -52,7 +52,7 @@
       <a href="#"
          class="flex items-center px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-100">
         <i class="fas fa-cog mr-3"></i>
-        Settings
+        <span class="sidebar-label">Settings</span>
       </a>
     </div>
 
@@ -63,7 +63,7 @@
         <button type="submit"
                 class="flex items-center px-4 py-2 rounded-lg w-full transition text-red-600 hover:bg-red-50">
           <i class="fas fa-sign-out-alt mr-3"></i>
-          Logout
+          <span class="sidebar-label">Logout</span>
         </button>
       </form>
     </div>
