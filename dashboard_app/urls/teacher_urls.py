@@ -15,6 +15,7 @@ urlpatterns = [
     
     # Class Views
     path('class/<int:class_id>/', teacher_views.view_class, name='view_class'),
+    path('class/<int:class_id>/upload-csv/', teacher_views.upload_students_csv, name='upload_students_csv'),
     path('class/<int:class_id>/export/', teacher_views.export_enrolled_students, name='export_enrolled_students_csv'),
 
     # Class Sessions
