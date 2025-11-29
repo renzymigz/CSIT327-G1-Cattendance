@@ -106,8 +106,12 @@
         <i class="fa-regular fa-download mr-2"></i>Export to CSV
       </a>
 
-      <button id="addStudentBtn"  class="inline-flex items-center px-5 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white rounded-md shadow"> 
+      <button id="addStudentBtn"  class="inline-flex items-center px-5 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white rounded-md shadow">
           <i class="fa-solid fa-plus mr-2"></i>Add Student
+      </button>
+
+      <button id="uploadCsvBtn"  class="inline-flex items-center px-5 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white rounded-md shadow">
+          <i class="fa-solid fa-upload mr-2"></i>Upload CSV
       </button>
       </div>
     </div>
@@ -146,6 +150,38 @@
       
     </form>
     
+    </div>
+
+    <div class = "p-6 space-y-4 border-b border-gray-200 transition-all duration-300 hidden" id="uploadCsvSection" >
+      <h1 class = "text-base font-semibold">Add Students via CSV</h1>
+
+      <p class="text-sm text-gray-600 mb-4">CSV format: any columns, emails extracted from cells containing '@'</p>
+
+      <form method="POST" enctype="multipart/form-data" action="{% url 'dashboard_teacher:upload_students_csv' class_obj.id %}">
+        {% csrf_token %}
+        <input
+          type="file"
+          name="csv_file"
+          accept=".csv"
+          class="bg-[#F8FAFC] border border-[#E2E8F0] text-gray-600 px-3 py-2 rounded-md"
+          required
+        />
+        <button
+          type="submit"
+          name="upload_csv"
+          class="px-4 py-2 bg-[#8f2b43] text-white rounded-md hover:bg-[#7a243a]"
+        >
+          Upload CSV
+        </button>
+
+        <button
+          type="button"
+          class="csv-cancel-btn bg-[#F8FAFC] border border-[#E2E8F0] px-5 py-2 rounded-lg transition"
+        >
+          Cancel
+        </button>
+      </form>
+
     </div>
 
     {% if enrollments %}
@@ -215,8 +251,8 @@
           Create Session
         </button>
       </form>
-    </div>
 
+      </div>
     <!-- Schedule Notice -->
     {% if not can_create_session %}
     <div class="px-5 pb-3">
@@ -365,21 +401,44 @@
     const addStudentButton = document.querySelector("#addStudentBtn");
     const cancelButton = addStudentSection.querySelector(".cancel-btn");
 
+    const uploadCsvSection = document.getElementById("uploadCsvSection");
+    const uploadCsvButton = document.querySelector("#uploadCsvBtn");
+    const csvCancelButton = uploadCsvSection.querySelector(".csv-cancel-btn");
+
     // Hide by default
     addStudentSection.style.display = "none";
+    uploadCsvSection.style.display = "none";
 
-    // Show section
+    // Function to hide both sections
+    function hideBothSections() {
+      addStudentSection.style.display = "none";
+      uploadCsvSection.style.display = "none";
+    }
+
+    // Show add student section
     addStudentButton.addEventListener("click", (e) => {
       e.preventDefault();
+      hideBothSections();
       addStudentSection.style.display = "block";
-      addStudentButton.style.display = "block";
     });
 
-    // Cancel button hides section
+    // Cancel add student hides section
     cancelButton.addEventListener("click", (e) => {
       e.preventDefault();
       addStudentSection.style.display = "none";
-      addStudentButton.style.display = "inline-flex";
+    });
+
+    // Show upload CSV section
+    uploadCsvButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      hideBothSections();
+      uploadCsvSection.style.display = "block";
+    });
+
+    // Cancel upload CSV hides section
+    csvCancelButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      uploadCsvSection.style.display = "none";
     });
   });
 
