@@ -9,6 +9,23 @@ from django.db import transaction
 from auth_app.models import StudentProfile
 from dashboard_app.forms import StudentProfileEditForm
 
+def get_client_ip(request):
+    """Get the client's IP address from the request."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip or '127.0.0.1'  # Default to localhost if no IP found
+
+def same_network(teacher_ip: str, student_ip: str) -> bool:
+    """Check if student IP is on the same network as teacher IP."""
+    if not teacher_ip or not student_ip:
+        return False
+    teacher_prefix = ".".join(teacher_ip.split(".")[:3])
+    student_prefix = ".".join(student_ip.split(".")[:3])
+    return teacher_prefix == student_prefix
+
 
 # ==============================
 # STUDENT DASHBOARD
@@ -211,33 +228,57 @@ def mark_attendance(request, qr_code):
     if not is_enrolled:
         return JsonResponse({'error': 'You are not enrolled in this class.'}, status=403)
 
+    # Get student's IP address
+    student_ip = get_client_ip(request)
+
+    # Check if student is on the same network as teacher
+    is_same_network = same_network(session.teacher_ip, student_ip)
+    attendance_status = is_same_network  # True if same network, False if different
+
     try:
-        with transaction.atomic():
-            attendance, created = SessionAttendance.objects.select_for_update().get_or_create(
-                student=student_profile,
-                session=session,
-                defaults={'is_present': True, 'marked_via_qr': True, 'timestamp': timezone.now()}
-            )
+        attendance, created = SessionAttendance.objects.get_or_create(
+            student=student_profile,
+            session=session,
+            defaults={'is_present': attendance_status, 'marked_via_qr': True, 'timestamp': timezone.now()}
+        )
 
-            if created:
-                return JsonResponse({'message': 'Attendance marked successfully via QR!', 'class_id': session.class_obj.id})
+        if created:
+            status_text = "present" if attendance_status else "absent"
+            return JsonResponse({
+                'message': f'Attendance marked as {status_text} via QR!',
+                'class_id': session.class_obj.id,
+                'student_id': student_profile.pk,
+                'status': status_text
+            })
 
-            updated = False
-            if attendance.is_present is not True:
-                attendance.is_present = True
-                updated = True
-            if not attendance.marked_via_qr:
-                attendance.marked_via_qr = True
-                updated = True
-            if not attendance.timestamp:
-                attendance.timestamp = timezone.now()
-                updated = True
+        updated = False
+        if attendance.is_present != attendance_status:
+            attendance.is_present = attendance_status
+            updated = True
+        if not attendance.marked_via_qr:
+            attendance.marked_via_qr = True
+            updated = True
+        if not attendance.timestamp:
+            attendance.timestamp = timezone.now()
+            updated = True
 
-            if updated:
-                attendance.save()
-                return JsonResponse({'message': 'Attendance updated and flagged as QR-marked.', 'class_id': session.class_obj.id})
+        if updated:
+            attendance.save()
+            status_text = "present" if attendance_status else "absent"
+            return JsonResponse({
+                'message': f'Attendance updated to {status_text} and flagged as QR-marked.',
+                'class_id': session.class_obj.id,
+                'student_id': student_profile.pk,
+                'status': status_text
+            })
 
-            return JsonResponse({'message': 'You have already marked your attendance for this session.', 'class_id': session.class_obj.id})
+        current_status = "present" if attendance.is_present else "absent"
+        return JsonResponse({
+            'message': f'You have already marked your attendance for this session ({current_status}).',
+            'class_id': session.class_obj.id,
+            'student_id': student_profile.pk,
+            'status': current_status
+        })
 
-    except Exception:
-        return JsonResponse({'error': 'Failed to mark attendance due to server error.'}, status=500)
+    except Exception as e:
+        return JsonResponse({'error': f'Failed to mark attendance: {str(e)}'}, status=500)
