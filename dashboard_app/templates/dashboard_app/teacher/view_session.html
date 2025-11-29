@@ -252,7 +252,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
 
               <td class="p-2 ">
                 {% if a.timestamp %}
-                  {{ a.timestamp|date:"F j, Y, h:i A" }}
+                  {{ a.timestamp|time:"h:i A" }}
                 {% else %}
                   —
                 {% endif %}
