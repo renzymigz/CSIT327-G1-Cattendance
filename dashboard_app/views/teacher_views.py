@@ -15,6 +15,15 @@ import segno, io, base64
 from django.db import transaction
 from django.http import HttpResponse
 
+def get_client_ip(request):
+    """Get the client's IP address from the request."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip or '127.0.0.1'  # Default to localhost if no IP found
+
 
 # ==============================
 # DASHBOARD
@@ -236,6 +245,7 @@ def view_class(request, class_id):
             new_session = session_form.save(commit=False)
             new_session.class_obj = class_obj
             new_session.status = "ongoing"
+            new_session.teacher_ip = get_client_ip(request)
             new_session.save()
 
             enrollments = Enrollment.objects.filter(class_obj=class_obj)
@@ -346,7 +356,8 @@ def create_session(request, class_id):
             class_obj=class_obj,
             schedule_day_id=schedule_day_id,
             date=timezone.now().date(),
-            status="ongoing"
+            status="ongoing",
+            teacher_ip=get_client_ip(request)
         )
 
         # Auto-add all enrolled students to SessionAttendance
