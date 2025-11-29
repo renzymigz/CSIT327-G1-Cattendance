@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
-from auth_app.models import StudentProfile
+from auth_app.models import StudentProfile, User
 from dashboard_app.models import (Class, Enrollment, ClassSchedule, ClassSession, SessionAttendance, SessionQRCode)
 from dashboard_app.forms import ClassSessionForm
 import csv
@@ -498,6 +498,83 @@ def auto_update_sessions(class_obj):
                     session=session,
                     is_present__isnull=True
                 ).update(is_present=False)
+
+# UPLOAD STUDENTS CSV
+@login_required
+def upload_students_csv(request, class_id):
+    if request.user.user_type != 'teacher':
+        return redirect('dashboard_student:dashboard')
+
+    teacher_profile = request.user.teacherprofile
+    class_obj = get_object_or_404(Class, id=class_id, teacher=teacher_profile)
+
+    if request.method != 'POST' or 'upload_csv' not in request.POST:
+        return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+    csv_file = request.FILES.get('csv_file')
+    if not csv_file:
+        messages.error(request, 'No file uploaded.')
+        return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+    if not csv_file.name.endswith('.csv'):
+        messages.error(request, 'File must be a CSV.')
+        return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+    # Read and decode
+    file_data = csv_file.read().decode('utf-8')
+    csv_reader = csv.reader(io.StringIO(file_data))
+
+    # Skip header if present (flexible)
+    header = next(csv_reader, None)
+    # No strict validation - assume single column with emails
+
+    # Counters
+    enrolled = 0
+    skipped = 0
+    invalid_emails = []
+
+    for row_num, row in enumerate(csv_reader, start=2):
+        for col_num, cell in enumerate(row, start=1):
+            cell = cell.strip()
+            if '@' in cell:
+                # Potential email
+                if not cell:
+                    invalid_emails.append(f"Row {row_num}, Column {col_num}: Empty email")
+                    continue
+                # Basic email validation
+                if cell.count('@') != 1 or '.' not in cell.split('@')[1]:
+                    invalid_emails.append(f"Row {row_num}, Column {col_num}: Invalid email format '{cell}'")
+                    continue
+                email = cell.lower()
+
+                try:
+                    student_profile = StudentProfile.objects.get(user__email=email)
+                except StudentProfile.DoesNotExist:
+                    invalid_emails.append(f"'{cell}' is not registered as a student")
+                    continue
+
+                # Check if already enrolled
+                if Enrollment.objects.filter(class_obj=class_obj, student=student_profile).exists():
+                    skipped += 1
+                    continue
+
+                # Create enrollment
+                Enrollment.objects.create(class_obj=class_obj, student=student_profile)
+                enrolled += 1
+
+    # Messages
+    if enrolled > 0:
+        messages.success(request, f"{enrolled} student{'s' if enrolled != 1 else ''} enrolled.")
+    if skipped > 0:
+        messages.info(request, f"{skipped} student{'s' if skipped != 1 else ''} skipped (already enrolled).")
+    if invalid_emails:
+        for error in invalid_emails[:5]:
+            messages.error(request, error)
+        if len(invalid_emails) > 5:
+            messages.error(request, f"And {len(invalid_emails) - 5} more unregistered email{'s' if len(invalid_emails) - 5 != 1 else ''}.")
+
+    return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
 
 # END SESSION
 @login_required
