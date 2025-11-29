@@ -2,80 +2,80 @@
 {% block title %}Teacher Dashboard | Cattendance{% endblock %}
 {% block content %}
 
-<div class="p-6">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Teacher Dashboard</h1>
-    
-    <div class = "bg-gradient-to-r from-[#a2314b] to-[#c9545e] text-white rounded-2xl p-6 mb-8 text-2xl">
+<div class="p-4 md:p-6">
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Teacher Dashboard</h1>
+
+    <div class = "bg-gradient-to-r from-[#a2314b] to-[#c9545e] text-white rounded-2xl p-4 md:p-6 mb-6 md:mb-8 text-lg md:text-2xl">
         <p class = "font-semibold">Good Morning, {{ user.first_name }}!</p>
-        <p class = "mt-2 text-lg">Here's an overview of your classes and students today.</p>
+        <p class = "mt-2 text-sm md:text-lg">Here's an overview of your classes and students today.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white rounded-2xl h-28 p-5 border border-gray-300 md:grid-cols-2 grid items-center ">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div class="bg-white rounded-2xl p-4 md:p-5 border border-gray-300 grid grid-cols-2 items-center min-h-[100px] md:min-h-[112px]">
             <div>
-                <h2 class="text-lg font-semibold text-gray-700">Total Classes</h2>
-                <p class="text-3xl font-bold mt-2">8</p>
+                <h2 class="text-sm md:text-lg font-semibold text-gray-700">Total Classes</h2>
+                <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">8</p>
             </div>
-            <div class = "text-4xl flex justify-end">
+            <div class = "text-2xl md:text-4xl flex justify-end">
                 <i class="fa-solid fa-screen-users"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl h-28  p-5 border border-gray-300 md:grid-cols-2 grid items-center ">
+        <div class="bg-white rounded-2xl p-4 md:p-5 border border-gray-300 grid grid-cols-2 items-center min-h-[100px] md:min-h-[112px]">
             <div>
-                <h2 class="text-lg font-semibold text-gray-700">Total Students</h2>
-                <p class="text-3xl font-bold mt-2">120</p>
+                <h2 class="text-sm md:text-lg font-semibold text-gray-700">Total Students</h2>
+                <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">120</p>
             </div>
-            <div class = "text-4xl flex justify-end">
+            <div class = "text-2xl md:text-4xl flex justify-end">
                 <i class="fa-regular fa-graduation-cap"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl h-28  p-5 border border-gray-300 md:grid-cols-2 grid items-center ">
+        <div class="bg-white rounded-2xl p-4 md:p-5 border border-gray-300 grid grid-cols-2 items-center min-h-[100px] md:min-h-[112px]">
             <div>
-                <h2 class="text-lg font-semibold text-gray-700">Attendance Rate</h2>
-                <p class="text-3xl font-bold mt-2">91%</p>
+                <h2 class="text-sm md:text-lg font-semibold text-gray-700">Attendance Rate</h2>
+                <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">91%</p>
             </div>
-            <div class = "text-4xl flex justify-end">
+            <div class = "text-2xl md:text-4xl flex justify-end">
                 <i class="fa-regular fa-chart-simple"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl h-28  p-5 border border-gray-300 md:grid-cols-2 grid items-center ">
+        <div class="bg-white rounded-2xl p-4 md:p-5 border border-gray-300 grid grid-cols-2 items-center min-h-[100px] md:min-h-[112px]">
             <div>
-                <h2 class="text-lg font-semibold text-gray-700">Today's Classes</h2>
-                <p class="text-3xl font-bold mt-2">2</p>
+                <h2 class="text-sm md:text-lg font-semibold text-gray-700">Today's Classes</h2>
+                <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">2</p>
             </div>
-            <div class = "text-4xl flex justify-end">
+            <div class = "text-2xl md:text-4xl flex justify-end">
                 <i class="fa-solid fa-screen-users"></i>
             </div>
         </div>
     </div>
 
-     <div class="mt-10 bg-white p-5 border border-gray-300 rounded-2xl ">
+     <div class="mt-8 md:mt-10 bg-white p-4 md:p-5 border border-gray-300 rounded-2xl">
         <div class="">
-            <h2 class="text-2xl text-gray-700 font-semibold"><i class="fa-regular fa-calendar pr-2 "></i>Today's Classes</h2>
-            <p class="mt-3">Manage attendance for your classes</p>
+            <h2 class="text-lg md:text-2xl text-gray-700 font-semibold"><i class="fa-regular fa-calendar pr-2"></i>Today's Classes</h2>
+            <p class="mt-2 md:mt-3 text-sm md:text-base">Manage attendance for your classes</p>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-lg p-4 mt-6  flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="bg-[#f0f0f0] w-[70px] h-[70px] flex items-center justify-center rounded-lg text-xl font-bold text-[#555555]">
+        <div class="bg-white border border-gray-200 rounded-lg p-3 md:p-4 mt-4 md:mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                <div class="bg-[#f0f0f0] w-[50px] h-[50px] md:w-[70px] md:h-[70px] flex items-center justify-center rounded-lg text-lg md:text-xl font-bold text-[#555555] flex-shrink-0">
                 CS1
                 </div>
-                <div>
-                <p class="font-semibold ">CS101 - Introduction to Programming</p>
-                <p class="text-sm text-gray-500 ">10:00 AM - 11:30 AM</p>
-                <p class="text-sm text-gray-500 ">
+                <div class="min-w-0 flex-1">
+                <p class="font-semibold text-sm md:text-base truncate">CS101 - Introduction to Programming</p>
+                <p class="text-xs md:text-sm text-gray-500">10:00 AM - 11:30 AM</p>
+                <p class="text-xs md:text-sm text-gray-500">
                     <i class="fa-solid fa-users pr-2"></i>45 Students
                 </p>
                 </div>
             </div>
-            <div class = "flex flex-col w-48 items-end gap-2">
-                <p class="bg-green-600 text-white font-semibold flex items-center  justify-end rounded-full px-3 py-1 text-sm">
-                    <i class="fa-solid fa-check pr-2"></i> Completed 
+            <div class="flex flex-col sm:flex-row w-full sm:w-48 items-start sm:items-end gap-2 sm:gap-2">
+                <p class="bg-green-600 text-white font-semibold flex items-center justify-center sm:justify-end rounded-full px-2 md:px-3 py-1 text-xs md:text-sm w-full sm:w-auto">
+                    <i class="fa-solid fa-check pr-2"></i> Completed
                 </p>
-                <button class="bg-[#fafbfb] px-4 py-1 rounded-lg font-semibold border border-gray-300 flex items-center hover:bg-gray-100 transition">
+                <button class="bg-[#fafbfb] px-3 md:px-4 py-1 rounded-lg font-semibold border border-gray-300 flex items-center hover:bg-gray-100 transition text-xs md:text-sm w-full sm:w-auto justify-center">
                     <i class="fa-regular fa-users pr-2 text-gray-600"></i>
                     View Students
                 </button>

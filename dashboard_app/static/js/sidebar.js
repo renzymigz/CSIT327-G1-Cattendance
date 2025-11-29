@@ -43,8 +43,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (collapsed) {
       // shrink sidebar to icons-only
-      sidebar.classList.remove('w-72');
-      sidebar.classList.add('w-24');
+      sidebar.classList.remove('md:w-72');
+      sidebar.classList.add('md:w-24');
       // adjust main content margin for md and up
       mainContent.classList.remove('md:ml-72');
       mainContent.classList.add('md:ml-24');
@@ -54,8 +54,8 @@ document.addEventListener('DOMContentLoaded', function () {
       toggleBtn.setAttribute('aria-expanded', 'true');
     } else {
       // expand sidebar
-      sidebar.classList.remove('w-24');
-      sidebar.classList.add('w-72');
+      sidebar.classList.remove('md:w-24');
+      sidebar.classList.add('md:w-72');
       mainContent.classList.remove('md:ml-24');
       mainContent.classList.add('md:ml-72');
       // show labels and logo text
