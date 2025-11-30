@@ -218,9 +218,13 @@
         } else {
           const msg = data.message || 'Attendance marked successfully.';
           alert(msg);
-          // Close modal and refresh to show updated attendance status
+          // Close modal and redirect to the correct attendance view
           qrModal.classList.add('hidden');
-          window.location.reload();
+          if (data.class_id) {
+            window.location.href = '/dashboard/student/classes/' + data.class_id + '/attendance/';
+          } else {
+            window.location.reload();
+          }
           return;
         }
       } catch (err) {

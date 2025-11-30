@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
-from auth_app.models import User
+from auth_app.models import User, TeacherProfile
 
 
 @csrf_protect
@@ -47,30 +47,43 @@ def add_teacher(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
+        employee_id = request.POST.get('employee_id')
 
-        if not all([first_name, last_name, email]):
+        if not all([first_name, last_name, email, employee_id]):
             messages.error(request, "All fields are required.")
-            return render(request, 'admin_app/admin_dashboard.html')
+            return redirect('admin_dashboard')
 
         if User.objects.filter(email=email).exists():
-            messages.error(request, "A teacher with this email already exists.")
-            return render(request, 'admin_app/admin_dashboard.html')
+            messages.error(request, "A user with this email already exists.")
+            return redirect('admin_dashboard')
+        
+        if TeacherProfile.objects.filter(employee_id=employee_id).exists():
+            messages.error(request, "A teacher with this employee ID already exists.")
+            return redirect('admin_dashboard')
 
         # tempo password for new teacher
         temp_password = "Temp1234!"
 
         new_teacher = User.objects.create_user(
-        username=email,
-        email=email,
-        first_name=first_name,
-        last_name=last_name,
-        user_type='teacher',
-        password=temp_password,
+            username=email,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            user_type='teacher',
+            password=temp_password,
         )
         new_teacher.must_change_password = True
         new_teacher.save()
 
-        messages.success(request, f"Teacher account for {first_name} {last_name} created successfully!\nEmail: {email}\nTemporary Password: {temp_password}")
+        teacher_profile = new_teacher.teacherprofile
+        teacher_profile.employee_id = employee_id
+        teacher_profile.save()
+        
+        messages.success(
+            request,
+            f"Teacher account for {first_name} {last_name} created successfully!\n"
+            f"Email: {email}\nTemporary Password: {temp_password}"
+        )
         return redirect('admin_dashboard')
 
     return render(request, 'admin_app/admin_dashboard.html')

@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
-from auth_app.models import StudentProfile
+from auth_app.models import StudentProfile, User
 from dashboard_app.models import (Class, Enrollment, ClassSchedule, ClassSession, SessionAttendance, SessionQRCode)
 from dashboard_app.forms import ClassSessionForm
 import csv
@@ -387,6 +387,20 @@ def view_session(request, class_id, session_id):
 
     attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
 
+    # Determine whether a QR is currently active for this session
+    now = timezone.now()
+    active_qr = False
+    try:
+        qr = session.qr_code
+        if qr and qr.expires_at:
+            if qr.expires_at <= now and qr.qr_active:
+                qr.qr_active = False
+                qr.save(update_fields=['qr_active'])
+            elif qr.expires_at > now and qr.qr_active:
+                active_qr = True
+    except SessionQRCode.DoesNotExist:
+        active_qr = False
+
     if request.method == 'POST':
         # Prevent editing if session is completed
         if session.status == 'completed':
@@ -400,6 +414,8 @@ def view_session(request, class_id, session_id):
                 continue
 
             attendance.is_present = (status == 'present')
+            if not attendance.timestamp:
+                attendance.timestamp = timezone.now()
             attendance.save()
             success_count += 1
 
@@ -417,6 +433,7 @@ def view_session(request, class_id, session_id):
         'class_id': class_id,
         'enrollments': enrollments,
         'attendances': attendances,
+        'qr_active': active_qr,
     })
 
 
@@ -437,7 +454,12 @@ def generate_qr(request, class_id, session_id):
         return JsonResponse({'error': 'Cannot generate QR code. Session has ended.'}, status=400)
 
     now = timezone.now()
-    validity_minutes = 5
+    # get requested minutes from POST form data if provided (fallback to 5)
+    try:
+        minutes_raw = request.POST.get('minutes')
+        validity_minutes = int(minutes_raw) if minutes_raw else 5
+    except Exception:
+        validity_minutes = 5
     expires_at = now + timedelta(minutes=validity_minutes)
 
     # Check if there's an existing unexpired QR for this session
@@ -446,8 +468,14 @@ def generate_qr(request, class_id, session_id):
     if not qr:
         # Generate a new QR since none is active
         qr = SessionQRCode.generate_for_session(session, validity_minutes=validity_minutes)
+    else:
+        # ensure qr_active set when reusing
+        if not qr.qr_active:
+            qr.qr_active = True
+            qr.expires_at = now + timedelta(minutes=validity_minutes)
+            qr.save(update_fields=['qr_active', 'expires_at'])
 
-    # Build absolute scan URL using the student-facing route (namespaced)
+    # scan URL using the student-facing route (namespaced)
     # This ensures the generated QR points to the student mark_attendance view under /dashboard/student/
     scan_url = request.build_absolute_uri(reverse('dashboard_student:mark_attendance', args=[qr.code]))
 
@@ -463,6 +491,29 @@ def generate_qr(request, class_id, session_id):
         'qr_image': qr_data_uri,
         'scan_url': scan_url,
     })
+
+
+@login_required
+def end_qr(request, class_id, session_id):
+    """Invalidate any active QR for a session."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
+
+    # Only the teacher who owns the class can end the QR
+    if not hasattr(request.user, 'teacherprofile') or session.class_obj.teacher != request.user.teacherprofile:
+        return HttpResponseForbidden('Not allowed')
+
+    now = timezone.now()
+    qr = SessionQRCode.objects.filter(session=session, expires_at__gt=now).first()
+    if not qr:
+        return JsonResponse({'ok': False, 'message': 'No active QR found.'})
+
+    qr.expires_at = now
+    qr.qr_active = False
+    qr.save(update_fields=['expires_at', 'qr_active'])
+    return JsonResponse({'ok': True, 'message': 'QR ended.'})
 
 def auto_update_sessions(class_obj):
     """
@@ -498,6 +549,83 @@ def auto_update_sessions(class_obj):
                     session=session,
                     is_present__isnull=True
                 ).update(is_present=False)
+
+# UPLOAD STUDENTS CSV
+@login_required
+def upload_students_csv(request, class_id):
+    if request.user.user_type != 'teacher':
+        return redirect('dashboard_student:dashboard')
+
+    teacher_profile = request.user.teacherprofile
+    class_obj = get_object_or_404(Class, id=class_id, teacher=teacher_profile)
+
+    if request.method != 'POST' or 'upload_csv' not in request.POST:
+        return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+    csv_file = request.FILES.get('csv_file')
+    if not csv_file:
+        messages.error(request, 'No file uploaded.')
+        return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+    if not csv_file.name.endswith('.csv'):
+        messages.error(request, 'File must be a CSV.')
+        return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
+    # Read and decode
+    file_data = csv_file.read().decode('utf-8')
+    csv_reader = csv.reader(io.StringIO(file_data))
+
+    # Skip header if present (flexible)
+    header = next(csv_reader, None)
+    # No strict validation - assume single column with emails
+
+    # Counters
+    enrolled = 0
+    skipped = 0
+    invalid_emails = []
+
+    for row_num, row in enumerate(csv_reader, start=2):
+        for col_num, cell in enumerate(row, start=1):
+            cell = cell.strip()
+            if '@' in cell:
+                # Potential email
+                if not cell:
+                    invalid_emails.append(f"Row {row_num}, Column {col_num}: Empty email")
+                    continue
+                # Basic email validation
+                if cell.count('@') != 1 or '.' not in cell.split('@')[1]:
+                    invalid_emails.append(f"Row {row_num}, Column {col_num}: Invalid email format '{cell}'")
+                    continue
+                email = cell.lower()
+
+                try:
+                    student_profile = StudentProfile.objects.get(user__email=email)
+                except StudentProfile.DoesNotExist:
+                    invalid_emails.append(f"'{cell}' is not registered as a student")
+                    continue
+
+                # Check if already enrolled
+                if Enrollment.objects.filter(class_obj=class_obj, student=student_profile).exists():
+                    skipped += 1
+                    continue
+
+                # Create enrollment
+                Enrollment.objects.create(class_obj=class_obj, student=student_profile)
+                enrolled += 1
+
+    # Messages
+    if enrolled > 0:
+        messages.success(request, f"{enrolled} student{'s' if enrolled != 1 else ''} enrolled.")
+    if skipped > 0:
+        messages.info(request, f"{skipped} student{'s' if skipped != 1 else ''} skipped (already enrolled).")
+    if invalid_emails:
+        for error in invalid_emails[:5]:
+            messages.error(request, error)
+        if len(invalid_emails) > 5:
+            messages.error(request, f"And {len(invalid_emails) - 5} more unregistered email{'s' if len(invalid_emails) - 5 != 1 else ''}.")
+
+    return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
 
 # END SESSION
 @login_required

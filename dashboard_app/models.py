@@ -73,8 +73,9 @@ class SessionAttendance(models.Model):
     student = models.ForeignKey('auth_app.StudentProfile', on_delete=models.CASCADE)
     # Allow three states: True (present), False (absent), None (not marked yet)
     is_present = models.BooleanField(null=True, default=None)
-    marked_via_qr = models.BooleanField(default=False) 
-    
+    marked_via_qr = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(null=True, blank=True)  # Time when attendance was marked
+
     class Meta:
         unique_together = ('session', 'student')
 
@@ -87,6 +88,7 @@ class SessionQRCode(models.Model):
     code = models.CharField(max_length=64, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
+    qr_active = models.BooleanField(default=False)
 
     def is_valid(self):
         return timezone.now() < self.expires_at
@@ -99,6 +101,6 @@ class SessionQRCode(models.Model):
         expires = now + timedelta(minutes=validity_minutes)
         qr, created = SessionQRCode.objects.update_or_create(
             session=session,
-            defaults={"code": code, "expires_at": expires}
+            defaults={"code": code, "expires_at": expires, "qr_active": True}
         )
         return qr
