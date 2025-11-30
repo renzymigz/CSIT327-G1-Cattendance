@@ -233,7 +233,10 @@ def mark_attendance(request, qr_code):
 
     # Check if student is on the same network as teacher
     is_same_network = same_network(session.teacher_ip, student_ip)
-    attendance_status = is_same_network  # True if same network, False if different
+    if not is_same_network:
+        return JsonResponse({'error': 'Your attendance is unmarked because your WiFi is not the same as the teacher.'}, status=400)
+
+    attendance_status = True  # Only mark as present if on same network
 
     try:
         attendance, created = SessionAttendance.objects.get_or_create(
