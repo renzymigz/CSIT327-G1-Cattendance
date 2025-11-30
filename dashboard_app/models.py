@@ -64,6 +64,7 @@ class ClassSession(models.Model):
         choices=[("ongoing", "Ongoing"), ("completed", "Completed")],
         default="ongoing",
     )
+    teacher_ip = models.CharField(max_length=45, blank=True, null=True)  # Store teacher's IP when session starts
 
     def __str__(self):
         return f"{self.class_obj.code} - {self.schedule_day.day_of_week} ({self.date})"

@@ -52,9 +52,9 @@ Attendance | Cattendance{% endblock %} {% block content %}
         </div>
       </div>
       
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
     <!-- Left group of buttons -->
-    <div class="flex gap-3">
+    <div class="flex flex-col gap-3 sm:flex-row">
       <button
         id="btn-generate-qr"
         type="button"
@@ -103,7 +103,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
 
     <!-- Export button (far right) -->
 
-    <div class = "flex gap-3">
+    <div class = "flex flex-col gap-3 sm:flex-row">
       <a
       href="{% url 'dashboard_teacher:export_session_attendance' class_obj.id session.id %}"
       class="inline-flex items-center  px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all"
@@ -197,7 +197,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
       <hr class = "">
 
       {% csrf_token %}
-      <div class="overflow-hidden rounded-2xl border-gray-200 bg-white">
+      <div class="overflow-x-auto rounded-2xl border-gray-200 bg-white">
         <table class="min-w-full">
           <thead class="bg-gray-50 text-left text-gray-600 font-semibold">
             <tr class="bg-[#f9fafa]">
@@ -307,7 +307,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50"
       >
         <div
-          class="bg-white rounded-2xl p-5 min-w-[550px] max-w-sm relative shadow-xl"
+          class="bg-white rounded-2xl p-5 min-w-[300px] sm:min-w-[550px] max-w-2xl relative shadow-xl"
         >
           <button
             id="close-qr-modal"
@@ -327,7 +327,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
             <img
               id="qr-image"
               alt="Session QR Code"
-              class="w-[500px] h-[500px] p-2 my-8 rounded-lg"
+              class="w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] p-2 my-8 rounded-lg object-contain"
             />
           </div>
 
