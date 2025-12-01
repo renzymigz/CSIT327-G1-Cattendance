@@ -11,32 +11,24 @@
     </div>
   </div>
 
-  <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
-    <div class="relative w-full sm:w-[350px] lg:w-[450px]">
-      <i
-        class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-      ></i>
-      <input
-        type="text"
-        id="classSearch"
-        placeholder="Search class..."
-        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-2 focus:ring-[#a2314b] transition-all focus:outline-none text-sm"
-      />
-    </div>
-
+  <!-- FILTER (RIGHT SIDE) -->
+  <div class="flex justify-end mb-6">
     <select
       id="classFilter"
-      class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b] text-sm bg-white w-full sm:w-auto"
+      class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#a2314b] text-sm bg-white w-full sm:w-auto min-w-[180px]"
     >
-      <option value="">All Classes</option>
-      <option value=""></option>
+      <option value="all">All Classes</option>
+      {% for c in enrolled_classes %}
+        <option value="{{ c.id }}">{{ c.code }} — {{ c.section }}</option>
+      {% endfor %}
     </select>
   </div>
 
-  <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+  <div id="classesGrid" class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
     {% for c in enrolled_classes %}
     <div
-      class="fade-in relative block rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl hover:border-[#6a1e1e] transition-all duration-300 group overflow-hidden"
+      class="class-card fade-in relative block rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl hover:border-[#6a1e1e] transition-all duration-300 group overflow-hidden"
+      data-class-id="{{ c.id }}"
     >
       <!-- Header with icon and title -->
       <div class="flex items-start gap-3 mb-4 rounded-b-2xl">
@@ -47,9 +39,7 @@
         </div>
 
         <div class="flex-1">
-          <h2
-            class="text-lg font-bold text-gray-900 group-hover:text-[#6a1e1e] transition"
-          >
+          <h2 class="text-lg font-bold text-gray-900 group-hover:text-[#6a1e1e] transition">
             {{ c.title }}
           </h2>
           <p class="text-sm text-gray-500 font-medium">
@@ -66,12 +56,8 @@
             <i class="fa-regular fa-chalkboard-user"></i>
           </div>
           <div>
-            <p class="text-xs text-gray-500 uppercase tracking-wide">
-              Professor
-            </p>
-            <p class="text-sm font-semibold text-gray-900">
-              {{ c.teacher_name }}
-            </p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Professor</p>
+            <p class="text-sm font-semibold text-gray-900">{{ c.teacher_name }}</p>
           </div>
         </div>
 
@@ -82,12 +68,8 @@
               <i class="fa-regular fa-calendar"></i>
             </div>
             <div>
-              <p class="text-xs text-gray-500 uppercase tracking-wide">
-                Semester
-              </p>
-              <p class="text-sm font-semibold text-gray-900">
-                {{ c.semester }}
-              </p>
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Semester</p>
+              <p class="text-sm font-semibold text-gray-900">{{ c.semester }}</p>
             </div>
           </div>
 
@@ -97,12 +79,8 @@
               <i class="fa-regular fa-chalkboard"></i>
             </div>
             <div>
-              <p class="text-xs text-gray-500 uppercase tracking-wide">
-                Academic Year
-              </p>
-              <p class="text-sm font-semibold text-gray-900">
-                {{ c.academic_year }}
-              </p>
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Academic Year</p>
+              <p class="text-sm font-semibold text-gray-900">{{ c.academic_year }}</p>
             </div>
           </div>
         </div>
@@ -114,18 +92,14 @@
             <i class="fa-regular fa-clock"></i>
           </div>
           <div class="flex-1">
-            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">
-              Schedule
-            </p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Schedule</p>
             <ul class="space-y-1">
               {% for sched in c.schedules %}
               <li class="text-sm text-gray-700 flex items-center gap-2">
                 <span class="w-1.5 h-1.5 bg-[#6a1e1e] rounded-full"></span>
                 <div class="grid grid-cols-[120px_1fr] gap-x-2">
                   <div class="font-medium">{{ sched.day_of_week }}</div>
-                  <div>
-                    {{ sched.start_time|time:"h:i A" }} — {{ sched.end_time|time:"h:i A" }}
-                  </div>
+                  <div>{{ sched.start_time|time:"h:i A" }} — {{ sched.end_time|time:"h:i A" }}</div>
                 </div>
               </li>
               {% endfor %}
@@ -140,22 +114,15 @@
           </div>
 
           <div class="w-full">
-            <p class="text-xs text-gray-500 uppercase tracking-wide">
-              Attendance Rate
-            </p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Attendance Rate</p>
 
-            <!-- The bar itself (moved outside the <p>) -->
-            <div
-              class="w-full bg-gray-200 rounded-full h-2.5 my-2 overflow-hidden"
-            >
+            <div class="w-full bg-gray-200 rounded-full h-2.5 my-2 overflow-hidden">
               <div
-                class="bg-[#a2314b] h-2.5 rounded-full {% if class.attendance_rate >= 95 %}w-[95%] {% elif class.attendance_rate >= 90 %}w-[90%] {% elif class.attendance_rate >= 85 %}w-[85%] {% elif class.attendance_rate >= 80 %}w-[80%] {% elif class.attendance_rate >= 70 %}w-[70%] {% elif class.attendance_rate >= 60 %}w-[60%] {% else %}w-[50%]{% endif %}"
+                class="bg-[#a2314b] h-2.5 rounded-full {% if c.attendance_rate >= 95 %}w-[95%]{% elif c.attendance_rate >= 90 %}w-[90%]{% elif c.attendance_rate >= 85 %}w-[85%]{% elif c.attendance_rate >= 80 %}w-[80%]{% elif c.attendance_rate >= 70 %}w-[70%]{% elif c.attendance_rate >= 60 %}w-[60%]{% else %}w-[50%]{% endif %}"
               ></div>
             </div>
 
-            <p class="text-sm font-semibold text-gray-900">
-              {{ c.attendance_rate }}%
-            </p>
+            <p class="text-sm font-semibold text-gray-900">{{ c.attendance_rate }}%</p>
           </div>
         </div>
       </div>
@@ -172,10 +139,29 @@
       </div>
     </div>
     {% empty %}
-    <p class="text-gray-600 col-span-2">
-      You are not enrolled in any classes yet.
-    </p>
+    <p class="text-gray-600 col-span-2">You are not enrolled in any classes yet.</p>
     {% endfor %}
   </div>
 </div>
+
+<script>
+  const classFilter = document.getElementById("classFilter");
+  const classCards = document.querySelectorAll(".class-card");
+
+  if (classFilter) {
+    classFilter.addEventListener("change", () => {
+      const selected = classFilter.value;
+
+      classCards.forEach(card => {
+        const id = card.dataset.classId;
+
+        if (selected === "all" || selected === id) {
+          card.classList.remove("hidden");
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+    });
+  }
+</script>
 {% endblock %}
