@@ -34,8 +34,56 @@ def dashboard_teacher(request):
         return redirect('auth:login')
     if request.user.user_type != 'teacher':
         return redirect('dashboard_student:dashboard')
+    # Teacher-specific aggregates for dashboard panels
+    teacher_profile = request.user.teacherprofile
 
-    return render(request, "dashboard_app/teacher/dashboard.html", {'user_type': 'teacher'})
+    total_classes = Class.objects.filter(teacher=teacher_profile).count()
+
+    # Count unique students across all classes owned by this teacher
+    total_students = (
+        Enrollment.objects.filter(class_obj__teacher=teacher_profile)
+        .values('student')
+        .distinct()
+        .count()
+    )
+
+    # Today's classes based on schedule day names
+    now = timezone.localtime()
+    current_day = now.strftime('%A')
+
+    todays_qs = (
+        ClassSchedule.objects.filter(class_obj__teacher=teacher_profile, day_of_week=current_day)
+        .select_related('class_obj')
+    )
+
+    # distinct count of class objects that meet today
+    todays_count = todays_qs.values('class_obj').distinct().count()
+
+    # lightweight list for display (code, title, start/end, enrolled count, class id)
+    todays_classes = []
+    class_ids_seen = set()
+    for sched in todays_qs:
+        cid = sched.class_obj.id
+        if cid in class_ids_seen:
+            continue
+        class_ids_seen.add(cid)
+        enrolled_count = Enrollment.objects.filter(class_obj=sched.class_obj).count()
+        todays_classes.append({
+            'id': cid,
+            'code': sched.class_obj.code,
+            'title': sched.class_obj.title,
+            'start_time': sched.start_time,
+            'end_time': sched.end_time,
+            'students': enrolled_count,
+        })
+
+    return render(request, "dashboard_app/teacher/dashboard.html", {
+        'user_type': 'teacher',
+        'total_classes': total_classes,
+        'total_students': total_students,
+        'todays_count': todays_count,
+        'todays_classes': todays_classes,
+    })
 
 
 # ==============================
