@@ -1,88 +1,128 @@
-{% extends "dashboard_app/base_dashboard.html" %}
-{% block title %}Teacher Dashboard | Cattendance{% endblock %}
-{% block content %}
+{% extends "dashboard_app/base_dashboard.html" %} {% block title %}Teacher
+Dashboard | Cattendance{% endblock %} {% block content %}
 
-<div class="p-4 md:p-6">
-    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Teacher Dashboard</h1>
-
-    <div class = "bg-gradient-to-r from-[#a2314b] to-[#c9545e] text-white rounded-2xl p-4 md:p-6 mb-6 md:mb-8 text-lg md:text-2xl">
-        <p class = "font-semibold">Good Morning, {{ user.first_name }}!</p>
-        <p class = "mt-2 text-sm md:text-lg">Here's an overview of your classes and students today.</p>
+<div class="p-6">
+  <div class="flex justify-between items-center mb-6">
+    <div class="grid grid-col gap-y-5">
+      <h1 class="text-2xl font-bold text-[#6a1e1e]">Teacher Dashboard</h1>
+      <p>Here's an overview of your classes and attendance</p>
     </div>
+  </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <div class="bg-white rounded-2xl p-4 md:p-5 border border-gray-300 grid grid-cols-2 items-center min-h-[100px] md:min-h-[112px]">
-            <div>
-                <h2 class="text-sm md:text-lg font-semibold text-gray-700">Total Classes</h2>
-                <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">8</p>
-            </div>
-            <div class = "text-2xl md:text-4xl flex justify-end">
-                <i class="fa-solid fa-screen-users"></i>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-4 md:p-5 border border-gray-300 grid grid-cols-2 items-center min-h-[100px] md:min-h-[112px]">
-            <div>
-                <h2 class="text-sm md:text-lg font-semibold text-gray-700">Total Students</h2>
-                <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">120</p>
-            </div>
-            <div class = "text-2xl md:text-4xl flex justify-end">
-                <i class="fa-regular fa-graduation-cap"></i>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-4 md:p-5 border border-gray-300 grid grid-cols-2 items-center min-h-[100px] md:min-h-[112px]">
-            <div>
-                <h2 class="text-sm md:text-lg font-semibold text-gray-700">Attendance Rate</h2>
-                <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">91%</p>
-            </div>
-            <div class = "text-2xl md:text-4xl flex justify-end">
-                <i class="fa-regular fa-chart-simple"></i>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-4 md:p-5 border border-gray-300 grid grid-cols-2 items-center min-h-[100px] md:min-h-[112px]">
-            <div>
-                <h2 class="text-sm md:text-lg font-semibold text-gray-700">Today's Classes</h2>
-                <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">2</p>
-            </div>
-            <div class = "text-2xl md:text-4xl flex justify-end">
-                <i class="fa-solid fa-screen-users"></i>
-            </div>
-        </div>
-    </div>
-
-     <div class="mt-8 md:mt-10 bg-white p-4 md:p-5 border border-gray-300 rounded-2xl">
-        <div class="">
-            <h2 class="text-lg md:text-2xl text-gray-700 font-semibold"><i class="fa-regular fa-calendar pr-2"></i>Today's Classes</h2>
-            <p class="mt-2 md:mt-3 text-sm md:text-base">Manage attendance for your classes</p>
-        </div>
-
-        <div class="bg-white border border-gray-200 rounded-lg p-3 md:p-4 mt-4 md:mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                <div class="bg-[#f0f0f0] w-[50px] h-[50px] md:w-[70px] md:h-[70px] flex items-center justify-center rounded-lg text-lg md:text-xl font-bold text-[#555555] flex-shrink-0">
-                CS1
-                </div>
-                <div class="min-w-0 flex-1">
-                <p class="font-semibold text-sm md:text-base truncate">CS101 - Introduction to Programming</p>
-                <p class="text-xs md:text-sm text-gray-500">10:00 AM - 11:30 AM</p>
-                <p class="text-xs md:text-sm text-gray-500">
-                    <i class="fa-solid fa-users pr-2"></i>45 Students
-                </p>
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row w-full sm:w-48 items-start sm:items-end gap-2 sm:gap-2">
-                <p class="bg-green-600 text-white font-semibold flex items-center justify-center sm:justify-end rounded-full px-2 md:px-3 py-1 text-xs md:text-sm w-full sm:w-auto">
-                    <i class="fa-solid fa-check pr-2"></i> Completed
-                </p>
-                <button class="bg-[#fafbfb] px-3 md:px-4 py-1 rounded-lg font-semibold border border-gray-300 flex items-center hover:bg-gray-100 transition text-xs md:text-sm w-full sm:w-auto justify-center">
-                    <i class="fa-regular fa-users pr-2 text-gray-600"></i>
-                    View Students
-                </button>
-            </div>
-        </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+    <div
+      class="bg-[#eff6ff] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
+    >
+      <div class = "text-blue-500">
+        <h2 class="text-sm md:text-lg font-medium ">
+          Total Classes
+        </h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{{ total_classes }}</p>
+      </div>
 
     </div>
 
+    <div
+      class="bg-[#f0fdf4] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
+    >
+      <div class = "text-green-500">
+        <h2 class="text-sm md:text-lg font-medium ">
+          Total Students
+        </h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{{ total_students }}</p>
+      </div>
+
+    </div>
+
+    <div
+      class="bg-[#fbf5ff] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
+    >
+      <div class = "text-purple-500">
+        <h2 class="text-sm md:text-lg font-medium ">
+          Today's Classes
+        </h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{{ todays_count }}</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div
+    class="mt-8 md:mt-10 bg-white p-4 md:p-5 border border-gray-300 rounded-2xl"
+  >
+    <h2 class="text-lg md:text-2xl text-gray-700 font-semibold">
+      Quick Actions
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
+      <a
+        href="{% url 'dashboard_teacher:manage_classes' %}"
+        class="hover:bg-[#fff2f2] hover:border-[#6a1e1e] group border-gray-300 p-6 rounded-2xl flex flex-col justify-center items-center border-dashed border-2 transition"
+      >
+        <i class="fa-solid fa-calendar-days text-3xl text-gray-400 mb-2 group-hover:text-[#6a1e1e] transition"></i>
+        <span class="font-medium">View My Classes</span>
+        <p class="text-sm text-gray-500">Check your class</p>
+      </a>
+
+      <a
+        href="{% url 'dashboard_student:profile' %}"
+        class="hover:bg-[#fff2f2] hover:border-[#6a1e1e] group p-6 border-gray-300 rounded-2xl flex flex-col justify-center items-center border-dashed border-2 transition"
+      >
+        <i class="fa-solid fa-user text-3xl text-gray-400 text mb-2 group-hover:text-[#6a1e1e] transition"></i>
+        <span class="font-medium">View Profile</span>
+        <p class="text-sm text-gray-500">
+          View and update your profile information
+        </p>
+      </a>
+    </div>
+  </div>
+
+  {% comment %} <div
+    class="mt-8 md:mt-10 bg-white p-4 md:p-5 border border-gray-300 rounded-2xl"
+  >
+    <div class="">
+      <h2 class="text-lg md:text-2xl text-gray-700 font-semibold">
+        <i class="fa-regular fa-calendar pr-2"></i>Today's Classes
+      </h2>
+      <p class="mt-2 md:mt-3 text-sm md:text-base">
+        Manage attendance for your classes
+      </p>
+    </div>
+
+    <div
+      class="bg-white border border-gray-200 rounded-lg p-3 md:p-4 mt-4 md:mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+    >
+      <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+        <div
+          class="bg-[#f0f0f0] w-[50px] h-[50px] md:w-[70px] md:h-[70px] flex items-center justify-center rounded-lg text-lg md:text-xl font-bold text-[#555555] flex-shrink-0"
+        >
+          CS1
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="font-semibold text-sm md:text-base truncate">
+            CS101 - Introduction to Programming
+          </p>
+          <p class="text-xs md:text-sm text-gray-500">10:00 AM - 11:30 AM</p>
+          <p class="text-xs md:text-sm text-gray-500">
+            <i class="fa-solid fa-users pr-2"></i>45 Students
+          </p>
+        </div>
+      </div>
+      <div
+        class="flex flex-col sm:flex-row w-full sm:w-48 items-start sm:items-end gap-2 sm:gap-2"
+      >
+        <p
+          class="bg-green-600 text-white font-semibold flex items-center justify-center sm:justify-end rounded-full px-2 md:px-3 py-1 text-xs md:text-sm w-full sm:w-auto"
+        >
+          <i class="fa-solid fa-check pr-2"></i> Completed
+        </p>
+        <button
+          class="bg-[#fafbfb] px-3 md:px-4 py-1 rounded-lg font-semibold border border-gray-300 flex items-center hover:bg-gray-100 transition text-xs md:text-sm w-full sm:w-auto justify-center"
+        >
+          <i class="fa-regular fa-users pr-2 text-gray-600"></i>
+          View Students
+        </button>
+      </div>
+    </div>
+  </div> {% endcomment %}
 </div>
 {% endblock %}
