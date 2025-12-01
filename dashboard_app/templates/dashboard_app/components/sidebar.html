@@ -118,28 +118,7 @@
             {% endif %}
         </div>
 
-        <!-- Settings -->
-        <div class="px-5">
-            {% if user_type == 'student' %}
-                {% url 'dashboard_student:settings' as settings_url %}
-            {% else %}
-                {% url 'dashboard_teacher:settings' as settings_url %}
-            {% endif %}
-
-            {% if request.resolver_match %}
-                {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
-                    <a href="{{ settings_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if name == 'settings' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
-                        <i class="fa-regular fa-gear mr-3"></i>
-                        <span class="sidebar-label">Settings</span>
-                    </a>
-                {% endwith %}
-            {% else %}
-                <a href="{{ settings_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
-                    <i class="fa-regular fa-gear mr-3"></i>
-                    <span class="sidebar-label">Settings</span>
-                </a>
-            {% endif %}
-        </div>
+      
 
         <!-- Logout -->
         <div class="px-5">
