@@ -6,47 +6,88 @@
 
 {% block content %}
 <div class="p-4 md:p-8">
-    <div class="flex justify-between items-center mb-6 md:mb-8">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Student Dashboard</h1>
+     <div class="flex justify-between items-center mb-6">
+    <div class="grid grid-col gap-y-5">
+      <h1 class="text-2xl font-bold text-[#6a1e1e]">Student Dashboard</h1>
+        <p>Here's an overview of your classes and attendance</p>
+    </div>
+  </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+    <div
+      class="bg-[#eff6ff] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
+    >
+      <div class="text-blue-500">
+        <h2 class="text-sm md:text-lg font-medium">My Classes</h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">
+          {{ total_classes }}
+        </p>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white shadow rounded-2xl p-6 border-l-4 border-blue-500">
-            <h3 class="text-gray-600 font-medium">My Classes</h3>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_classes }}</p>
-        </div>
-
-        <div class="bg-white shadow rounded-2xl p-6 border-l-4 border-green-500">
-            <h3 class="text-gray-600 font-medium">My Attendance Rate</h3>
-            <p class="text-3xl font-bold text-green-600 mt-2">{{ attendance_rate }}%</p>
-        </div>
-
-        <div class="bg-white shadow rounded-2xl p-6 border-l-4 border-indigo-500">
-            <h3 class="text-gray-600 font-medium">Completed Sessions</h3>
-            <p class="text-3xl font-bold text-indigo-600 mt-2">{{ sessions_attended }}</p>
-        </div>
-
-        <div class="bg-white shadow rounded-2xl p-6 border-l-4 border-yellow-400">
-            <h3 class="text-gray-600 font-medium">Missed Sessions</h3>
-            <p class="text-3xl font-bold text-yellow-500 mt-2">{{ sessions_missed }}</p>
-        </div>
+    <div
+      class="bg-[#f0fdf4] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
+    >
+      <div class="text-green-500">
+        <h2 class="text-sm md:text-lg font-medium">My Attendance Rate</h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">
+          {{ attendance_rate }}
+        </p>
+      </div>
     </div>
 
-    <div class="mt-10">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <a href="{% url 'dashboard_student:student_classes' %}" class="bg-blue-50 hover:bg-blue-100 p-6 rounded-2xl flex flex-col justify-center items-center shadow transition">
-                <i class="fa-solid fa-calendar-days text-3xl text-blue-600 mb-2"></i>
-                <span class="font-medium text-blue-800">View My Classes</span>
-                <p class="text-sm text-gray-500">Check your attendance and schedule</p>
-            </a>
-
-            <a href="{% url 'dashboard_student:profile' %}" class="bg-green-50 hover:bg-green-100 p-6 rounded-2xl flex flex-col justify-center items-center shadow transition">
-                <i class="fa-solid fa-user text-3xl text-green-600 mb-2"></i>
-                <span class="font-medium text-green-800">View Profile</span>
-                <p class="text-sm text-gray-500">View and update your profile information</p>
-            </a>
-        </div>
+    <div
+      class="bg-[#fbf5ff] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
+    >
+      <div class="text-purple-500">
+        <h2 class="text-sm md:text-lg font-medium">Completed Sessions</h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">
+          {{ sessions_attended }}
+        </p>
+      </div>
     </div>
+
+    <div
+      class="bg-[#fff5f5] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
+    >
+      <div class="text-red-500">
+        <h2 class="text-sm md:text-lg font-medium">Missed Sessions</h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">
+          {{ sessions_attended }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+   
+    <div
+    class="mt-8 md:mt-10 bg-white p-4 md:p-5 border border-gray-300 rounded-2xl"
+  >
+    <h2 class="text-lg md:text-2xl text-gray-700 font-semibold">
+      Quick Actions
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
+      <a
+        href="{% url 'dashboard_student:student_classes' %}"
+        class="hover:bg-[#fff2f2] hover:border-[#6a1e1e] group border-gray-300 p-6 rounded-2xl flex flex-col justify-center items-center border-dashed border-2 transition"
+      >
+        <i class="fa-solid fa-calendar-days text-3xl text-gray-400 mb-2 group-hover:text-[#6a1e1e] transition"></i>
+        <span class="font-medium">View My Classes</span>
+        <p class="text-sm text-gray-500">Check your attendance and schedule</p>
+      </a>
+
+      <a
+        href="{% url 'dashboard_student:profile' %}"
+        class="hover:bg-[#fff2f2] hover:border-[#6a1e1e] group p-6 border-gray-300 rounded-2xl flex flex-col justify-center items-center border-dashed border-2 transition"
+      >
+        <i class="fa-solid fa-user text-3xl text-gray-400 text mb-2 group-hover:text-[#6a1e1e] transition"></i>
+        <span class="font-medium">View Profile</span>
+        <p class="text-sm text-gray-500">
+          View and update your profile information
+        </p>
+      </a>
+    </div>
+  </div>
+
 </div>
 {% endblock %}

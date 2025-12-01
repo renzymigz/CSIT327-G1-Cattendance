@@ -13,37 +13,34 @@ Dashboard | Cattendance{% endblock %} {% block content %}
     <div
       class="bg-[#eff6ff] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
     >
-      <div class = "text-blue-500">
-        <h2 class="text-sm md:text-lg font-medium ">
-          Total Classes
-        </h2>
-        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{{ total_classes }}</p>
+      <div class="text-blue-500">
+        <h2 class="text-sm md:text-lg font-medium">Total Classes</h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">
+          {{ total_classes }}
+        </p>
       </div>
-
     </div>
 
     <div
       class="bg-[#f0fdf4] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
     >
-      <div class = "text-green-500">
-        <h2 class="text-sm md:text-lg font-medium ">
-          Total Students
-        </h2>
-        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{{ total_students }}</p>
+      <div class="text-green-500">
+        <h2 class="text-sm md:text-lg font-medium">Total Students</h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">
+          {{ total_students }}
+        </p>
       </div>
-
     </div>
 
     <div
       class="bg-[#fbf5ff] rounded-2xl p-4 md:p-5 border border-gray-300 items-center min-h-[100px] md:min-h-28"
     >
-      <div class = "text-purple-500">
-        <h2 class="text-sm md:text-lg font-medium ">
-          Today's Classes
-        </h2>
-        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{{ todays_count }}</p>
+      <div class="text-purple-500">
+        <h2 class="text-sm md:text-lg font-medium">Today's Classes</h2>
+        <p class="text-2xl md:text-3xl font-bold mt-1 md:mt-2">
+          {{ todays_count }}
+        </p>
       </div>
-
     </div>
   </div>
 
@@ -58,16 +55,20 @@ Dashboard | Cattendance{% endblock %} {% block content %}
         href="{% url 'dashboard_teacher:manage_classes' %}"
         class="hover:bg-[#fff2f2] hover:border-[#6a1e1e] group border-gray-300 p-6 rounded-2xl flex flex-col justify-center items-center border-dashed border-2 transition"
       >
-        <i class="fa-solid fa-calendar-days text-3xl text-gray-400 mb-2 group-hover:text-[#6a1e1e] transition"></i>
+        <i
+          class="fa-solid fa-calendar-days text-3xl text-gray-400 mb-2 group-hover:text-[#6a1e1e] transition"
+        ></i>
         <span class="font-medium">View My Classes</span>
         <p class="text-sm text-gray-500">Check your class</p>
       </a>
 
       <a
-        href="{% url 'dashboard_student:profile' %}"
+        href="{% url 'dashboard_teacher:teacher_profile' %}"
         class="hover:bg-[#fff2f2] hover:border-[#6a1e1e] group p-6 border-gray-300 rounded-2xl flex flex-col justify-center items-center border-dashed border-2 transition"
       >
-        <i class="fa-solid fa-user text-3xl text-gray-400 text mb-2 group-hover:text-[#6a1e1e] transition"></i>
+        <i
+          class="fa-solid fa-user text-3xl text-gray-400 text mb-2 group-hover:text-[#6a1e1e] transition"
+        ></i>
         <span class="font-medium">View Profile</span>
         <p class="text-sm text-gray-500">
           View and update your profile information
@@ -76,7 +77,8 @@ Dashboard | Cattendance{% endblock %} {% block content %}
     </div>
   </div>
 
-  {% comment %} <div
+  {% comment %}
+  <div
     class="mt-8 md:mt-10 bg-white p-4 md:p-5 border border-gray-300 rounded-2xl"
   >
     <div class="">
@@ -123,6 +125,7 @@ Dashboard | Cattendance{% endblock %} {% block content %}
         </button>
       </div>
     </div>
-  </div> {% endcomment %}
+  </div>
+  {% endcomment %}
 </div>
 {% endblock %}
