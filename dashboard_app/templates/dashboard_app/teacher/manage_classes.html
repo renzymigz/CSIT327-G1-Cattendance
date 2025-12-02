@@ -52,7 +52,7 @@
     <a
       href="{% url 'dashboard_teacher:view_class' cls.id %}"
       data-code="{{ cls.code }}"
-      class="class-card fade-in relative block rounded-lg shadow-md p-6 bg-white border border-gray-200 hover:shadow-xl hover:border-[#6a1e1e] transition-all duration-300 group overflow-hidden"
+      class="class-card fade-in relative block rounded-lg shadow-md p-6 bg-white border border-gray-200 hover:shadow-xl hover:border-[#6a1e1e] transition-all duration-300 group overflow-hidden flex flex-col"
     >
       <!-- Header with icon and title -->
       <div class="flex items-start gap-3 mb-4 rounded-b-2xl">
@@ -120,6 +120,7 @@
         {% endif %}
       </div>
 
+      <div class="mt-auto">
       <hr class="my-4">
 
       <!-- Hover indicator -->
@@ -140,7 +141,7 @@
 
         <button
           type="button"
-          class="delete-btn text-xs font-semibold border transition-all border-red-600 hover:bg-red-100 p-2 rounded-md flex items-center gap-1 text-red-600"
+          class="delete-btn text-xs font-semibold border transition-all border-red-300 hover:bg-red-100 p-2 rounded-md flex items-center gap-1 text-red-600"
           data-id="{{ cls.id }}"
           data-title="{{ cls.title }}"
         >
@@ -148,6 +149,7 @@
           Delete
         </button>
       </div>
+    </div>
     </a>
     {% endfor %}
   </div>
