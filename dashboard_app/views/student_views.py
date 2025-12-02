@@ -5,7 +5,7 @@ from dashboard_app.models import Enrollment, SessionAttendance, ClassSession, Se
 from django.http import JsonResponse, HttpResponseForbidden
 from django.utils import timezone
 from django.db import transaction
-
+from django.core.exceptions import PermissionDenied
 from auth_app.models import StudentProfile
 from dashboard_app.forms import StudentProfileEditForm
 
@@ -128,7 +128,7 @@ def view_attendance(request, class_id):
     ).select_related('class_obj').first()
 
     if not enrollment:
-        return HttpResponseForbidden("You are not enrolled in this class.")
+        raise PermissionDenied()
 
     class_obj = enrollment.class_obj
 
