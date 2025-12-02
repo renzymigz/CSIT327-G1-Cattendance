@@ -54,11 +54,9 @@ def register_view(request):
             user_type=role.lower()
         )
 
-        # Create Profile
-        if role.lower() == 'student':
-            StudentProfile.objects.get_or_create(user=user)
-        else:
-            TeacherProfile.objects.get_or_create(user=user)
+        student_profile, _ = StudentProfile.objects.get_or_create(user=user)
+        student_profile.student_id_number = student_id
+        student_profile.save()
 
         messages.success(request, "Account created successfully!")
         return redirect('auth:login')
