@@ -8,7 +8,7 @@ from django.db import transaction
 from datetime import timedelta
 import csv
 import segno, io, base64
-
+from django.core.exceptions import PermissionDenied
 from auth_app.models import StudentProfile, TeacherProfile, User
 from dashboard_app.models import (
     Class, Enrollment, ClassSchedule, ClassSession,
@@ -223,7 +223,10 @@ def edit_class(request, class_id):
     if request.user.user_type != 'teacher':
         return redirect('dashboard_student:dashboard')
 
-    cls = get_object_or_404(Class, id=class_id, teacher=request.user.teacherprofile)
+    cls = get_object_or_404(Class, id=class_id)
+    # If the class exists but the current teacher is not the owner, raise 403
+    if not hasattr(request.user, 'teacherprofile') or cls.teacher != request.user.teacherprofile:
+        raise PermissionDenied
 
     if request.method == "POST":
         cls.code = request.POST.get("code", "").strip()
@@ -258,7 +261,9 @@ def delete_class(request, class_id):
         return redirect('dashboard_student:dashboard')
 
     if request.method == "POST":
-        cls = get_object_or_404(Class, id=class_id, teacher=request.user.teacherprofile)
+        cls = get_object_or_404(Class, id=class_id)
+        if not hasattr(request.user, 'teacherprofile') or cls.teacher != request.user.teacherprofile:
+            raise PermissionDenied
         title = cls.title
         cls.delete()
         messages.success(request, f"Class '{title}' has been deleted.")
@@ -276,7 +281,9 @@ def view_class(request, class_id):
         return redirect('dashboard_student:dashboard')
 
     teacher_profile = request.user.teacherprofile
-    class_obj = get_object_or_404(Class, id=class_id, teacher=teacher_profile)
+    class_obj = get_object_or_404(Class, id=class_id)
+    if class_obj.teacher != teacher_profile:
+        raise PermissionDenied
 
     auto_update_sessions(class_obj)
 
@@ -633,7 +640,9 @@ def upload_students_csv(request, class_id):
         return redirect('dashboard_student:dashboard')
 
     teacher_profile = request.user.teacherprofile
-    class_obj = get_object_or_404(Class, id=class_id, teacher=teacher_profile)
+    class_obj = get_object_or_404(Class, id=class_id)
+    if class_obj.teacher != teacher_profile:
+        raise PermissionDenied
 
     if request.method != 'POST' or 'upload_csv' not in request.POST:
         return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
