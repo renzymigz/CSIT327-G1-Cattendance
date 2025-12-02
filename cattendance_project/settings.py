@@ -110,14 +110,14 @@ TEMPLATES = [
 # ===============================================
 # DATABASE CONFIGURATION
 # ===============================================
+ENV = os.getenv('ENV', 'production')
 DATABASES = {
     "default": dj_database_url.config(
         default="sqlite:///db.sqlite3",
-        conn_max_age=600,  # persistent connections
+        conn_max_age=0 if ENV == 'development' else 600,
         ssl_require=os.getenv('DJANGO_SECURE_SSL_REDIRECT','True') == 'True' 
     )
 }
-
 
 # ===============================================
 # PASSWORD VALIDATION

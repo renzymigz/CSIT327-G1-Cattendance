@@ -10,36 +10,27 @@
     </div>
   </div>
 
+  <!-- UPDATED: Removed Search Bar + moved Filter to the right beside Create button -->
   <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-  <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
-    <div class="relative w-full max-w-[450px]">
-      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-      <input
-        type="text"
-        id="classSearch"
-        placeholder="Search class..."
-        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:ring-2 focus:ring-[#a2314b] transition-all focus:outline-none text-sm"
-      />
+    <div class="flex items-center gap-3 w-full md:w-auto md:ml-auto">
+      <select
+        id="classFilter"
+        class="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b] text-sm bg-white"
+      >
+        <option value="">All Classes</option>
+        {% for cls in classes %}
+        <option value="{{ cls.code }}">{{ cls.code }}</option>
+        {% endfor %}
+      </select>
+
+      <button
+        id="openAddClassModal"
+        class="w-full md:w-auto bg-[#a2314b] hover:bg-[#8f2b43] text-white px-4 py-2 rounded-lg shadow-md transition"
+      >
+        <i class="fa-regular fa-plus mr-2"></i>Create New Class
+      </button>
     </div>
-
-    <select
-      id="classFilter"
-      class="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b] text-sm bg-white"
-    >
-      <option value="">All Classes</option>
-      {% for cls in classes %}
-      <option value="{{ cls.code }}">{{ cls.code }}</option>
-      {% endfor %}
-    </select>
   </div>
-
-  <button
-    id="openAddClassModal"
-    class="w-full md:w-auto bg-[#a2314b] hover:bg-[#8f2b43] text-white px-4 py-2 rounded-lg shadow-md transition"
-  >
-    <i class="fa-regular fa-plus mr-2"></i>Create New Class
-  </button>
-</div>
 
   {% if messages %}
     {% for message in messages %}
@@ -56,15 +47,15 @@
 
   <!-- Class list -->
   {% if classes %}
-  <!-- Class list with icons and improved UI -->
-  <div class="grid grid-cols-1  xl:grid-cols-2 2xl:grid-cols-3 gap-6 ">
+  <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
     {% for cls in classes %}
     <a
       href="{% url 'dashboard_teacher:view_class' cls.id %}"
-      class="fade-item relative block rounded-lg shadow-md p-6 bg-white border border-gray-200 hover:shadow-xl hover:border-[#6a1e1e] transition-all duration-300  group overflow-hidden"
+      data-code="{{ cls.code }}"
+      class="class-card fade-in relative block rounded-lg shadow-md p-6 bg-white border border-gray-200 hover:shadow-xl hover:border-[#6a1e1e] transition-all duration-300 group overflow-hidden flex flex-col"
     >
       <!-- Header with icon and title -->
-      <div class="flex items-start gap-3 mb-4   rounded-b-2xl">
+      <div class="flex items-start gap-3 mb-4 rounded-b-2xl">
         <div
           class="flex-shrink-0 w-10 h-10 bg-[#6a1e1e] rounded-lg flex items-center justify-center group-hover:bg-[#6a1e1e] transition"
         >
@@ -72,9 +63,7 @@
         </div>
 
         <div class="flex-1">
-          <h2
-            class="text-lg font-bold text-gray-900 group-hover:text-[#6a1e1e] transition"
-          >
+          <h2 class="text-lg font-bold text-gray-900 group-hover:text-[#6a1e1e] transition">
             {{ cls.title }}
           </h2>
           <p class="text-sm text-gray-500 font-medium">
@@ -91,12 +80,8 @@
             <i class="fa-regular fa-calendar"></i>
           </div>
           <div>
-            <p class="text-xs text-gray-500 uppercase tracking-wide">
-              Semester
-            </p>
-            <p class="text-sm font-semibold text-gray-900">
-              {{ cls.semester }}
-            </p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Semester</p>
+            <p class="text-sm font-semibold text-gray-900">{{ cls.semester }}</p>
           </div>
         </div>
 
@@ -106,12 +91,8 @@
             <i class="fa-regular fa-chalkboard"></i>
           </div>
           <div>
-            <p class="text-xs text-gray-500 uppercase tracking-wide">
-              Academic Year
-            </p>
-            <p class="text-sm font-semibold text-gray-900">
-              {{ cls.academic_year }}
-            </p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Academic Year</p>
+            <p class="text-sm font-semibold text-gray-900">{{ cls.academic_year }}</p>
           </div>
         </div>
 
@@ -122,16 +103,14 @@
             <i class="fa-regular fa-clock"></i>
           </div>
           <div class="flex-1">
-            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">
-              Schedule
-            </p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Schedule</p>
             <ul class="space-y-1">
               {% for sched in cls.schedules.all %}
               <li class="text-sm text-gray-700 flex items-center gap-2">
                 <span class="w-1.5 h-1.5 bg-[#6a1e1e] rounded-full"></span>
                 <div class="grid grid-cols-[100px_1fr] gap-x-2">
                   <div>{{ sched.day_of_week }}</div>
-                  {{ sched.start_time|time:"h:i A" }} — {{sched.end_time|time:"h:i A" }}
+                  {{ sched.start_time|time:"h:i A" }} — {{ sched.end_time|time:"h:i A" }}
                 </div>
               </li>
               {% endfor %}
@@ -141,34 +120,36 @@
         {% endif %}
       </div>
 
-      <hr class = "my-4">
+      <div class="mt-auto">
+      <hr class="my-4">
+
       <!-- Hover indicator -->
       <div class="flex justify-end gap-2">
-  <button
-    type="button"
-    class="edit-btn text-xs font-semibold border border-gray-300 p-2 rounded-md flex items-center gap-1 hover:bg-gray-100 transition"
-    data-id="{{ cls.id }}"
-    data-code="{{ cls.code }}"
-    data-title="{{ cls.title }}"
-    data-section="{{ cls.section }}"
-    data-semester="{{ cls.semester }}"
-    data-year="{{ cls.academic_year }}"
-  >
-    <i class="fa-regular fa-pen-to-square mr-1"></i>
-    Edit
-  </button>
+        <button
+          type="button"
+          class="edit-btn text-xs font-semibold border border-gray-300 p-2 rounded-md flex items-center gap-1 hover:bg-gray-100 transition"
+          data-id="{{ cls.id }}"
+          data-code="{{ cls.code }}"
+          data-title="{{ cls.title }}"
+          data-section="{{ cls.section }}"
+          data-semester="{{ cls.semester }}"
+          data-year="{{ cls.academic_year }}"
+        >
+          <i class="fa-regular fa-pen-to-square mr-1"></i>
+          Edit
+        </button>
 
-  <button
-    type="button"
-    class="delete-btn text-xs font-semibold border transition-all border-red-600 hover:bg-red-100 p-2 rounded-md flex items-center gap-1 text-red-600"
-    data-id="{{ cls.id }}"
-    data-title="{{ cls.title }}"
-  >
-    <i class="fa-regular fa-trash-can mr-2"></i>
-    Delete
-  </button>
-</div>
-
+        <button
+          type="button"
+          class="delete-btn text-xs font-semibold border transition-all border-red-300 hover:bg-red-100 p-2 rounded-md flex items-center gap-1 text-red-600"
+          data-id="{{ cls.id }}"
+          data-title="{{ cls.title }}"
+        >
+          <i class="fa-regular fa-trash-can mr-2"></i>
+          Delete
+        </button>
+      </div>
+    </div>
     </a>
     {% endfor %}
   </div>
@@ -184,10 +165,7 @@
     <div class="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative fade-in">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-[#6a1e1e]">Add New Class</h2>
-        <button
-          id="closeAddClassModal"
-          class="text-gray-500 hover:text-gray-700"
-        >
+        <button id="closeAddClassModal" class="text-gray-500 hover:text-gray-700">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -240,7 +218,8 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Semester</label>
-              <select name="semester" class="w-full bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]" required>
+              <select name="semester"
+                class="w-full bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]" required>
                 <option value="" disabled selected>Select Semester</option>
                 <option value="1st">1st</option>
                 <option value="2nd">2nd</option>
@@ -267,9 +246,7 @@
 
           <!-- Dynamic Schedules -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1"
-              >Class Schedule</label
-            >
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Class Schedule</label>
             <div id="scheduleContainer" class="space-y-3">
               <div class="schedule-item flex flex-col gap-2">
                 <div class="flex gap-3 items-center">
@@ -306,28 +283,20 @@
               </div>
             </div>
 
-            <button
-              type="button"
-              id="addSchedule"
-              class="mt-2 text-sm text-[#a2314b] font-semibold hover:underline"
-            >
+            <button type="button" id="addSchedule"
+              class="mt-2 text-sm text-[#a2314b] font-semibold hover:underline">
               + Add another day
             </button>
           </div>
         </div>
 
         <div class="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            id="cancelAddClass"
-            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
-          >
+          <button type="button" id="cancelAddClass"
+            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
             Cancel
           </button>
-          <button
-            type="submit"
-            class="px-4 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43] shadow-md"
-          >
+          <button type="submit"
+            class="px-4 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43] shadow-md">
             Create Class
           </button>
         </div>
@@ -335,17 +304,11 @@
     </div>
   </div>
 
-  <div
-    id="editModal"
-    class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-  >
+  <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative fade-in">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-[#6a1e1e]">Edit Class</h2>
-        <button
-          id="closeEditModal"
-          class="text-gray-500 hover:text-gray-700"
-        >
+        <button id="closeEditModal" class="text-gray-500 hover:text-gray-700">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -419,17 +382,12 @@
           </div>
         </div>
         <div class="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            id="cancelEdit"
-            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
-          >
+          <button type="button" id="cancelEdit"
+            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
             Cancel
           </button>
-          <button
-            type="submit"
-            class="px-4 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43]"
-          >
+          <button type="submit"
+            class="px-4 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43]">
             Save Changes
           </button>
         </div>
@@ -438,30 +396,22 @@
   </div>
 
   <!-- DELETE CONFIRM MODAL -->
-  <div
-    id="deleteModal"
-    class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-  >
+  <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 text-center fade-in">
       <h2 class="text-xl font-bold mb-3 text-[#6a1e1e]">Delete Class</h2>
       <p class="text-gray-600 mb-6">
-        Are you sure you want to delete <span class ="text-[#a2314b]" id="deleteClassName"></span>?
+        Are you sure you want to delete <span class="text-[#a2314b]" id="deleteClassName"></span>?
       </p>
       <form id="deleteClassForm" method="POST">
         {% csrf_token %}
         <input type="hidden" name="class_id" id="deleteClassId" />
         <div class="flex justify-center gap-3">
-          <button
-            type="button"
-            id="cancelDelete"
-            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
-          >
+          <button type="button" id="cancelDelete"
+            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
             Cancel
           </button>
-          <button
-            type="submit"
-            class="px-4 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43]"
-          >
+          <button type="submit"
+            class="px-4 py-2 rounded-lg bg-[#a2314b] text-white hover:bg-[#8f2b43]">
             Delete
           </button>
         </div>
@@ -470,7 +420,25 @@
   </div>
 
   <script src="{% static 'js/manage_class.js' %}"></script>
-  
-</div>
-  {% endblock %}
 
+  <!-- FILTER FUNCTION (works even if you removed search bar) -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const classFilter = document.getElementById("classFilter");
+      const cards = document.querySelectorAll(".class-card");
+
+      if (!classFilter || !cards.length) return;
+
+      classFilter.addEventListener("change", () => {
+        const selected = (classFilter.value || "").trim().toLowerCase();
+
+        cards.forEach(card => {
+          const code = (card.dataset.code || "").trim().toLowerCase();
+          if (selected === "" || code === selected) card.classList.remove("hidden");
+          else card.classList.add("hidden");
+        });
+      });
+    });
+  </script>
+</div>
+{% endblock %}

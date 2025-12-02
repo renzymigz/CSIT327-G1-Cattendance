@@ -29,11 +29,9 @@
   <div class="flex min-h-screen">
 
     <!-- Include the correct sidebar based on user type -->
-    {% if user_type == 'teacher' %}
+  
       {% include 'dashboard_app/components/sidebar.html' %}
-    {% else %}
-      {% include 'dashboard_app/components/sidebar_student.html' %}
-    {% endif %}
+   
 
     <!-- Main Content -->
     <div id="mainContent" class="flex-1 ml-0 md:ml-72 transition-all duration-300 relative z-0">

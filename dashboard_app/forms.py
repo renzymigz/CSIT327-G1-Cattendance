@@ -24,8 +24,10 @@ class TeacherProfileEditForm(forms.ModelForm):
     class Meta:
         model = TeacherProfile
         fields = ["department"]
-        widgets = {
-            "department": forms.TextInput(attrs={
-                "class": "w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#a2314b]/30"
-            }),
-        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["department"].widget.attrs.update({
+            "class": "w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200",
+            "placeholder": "Enter department"
+        })
