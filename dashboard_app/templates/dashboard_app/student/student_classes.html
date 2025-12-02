@@ -108,24 +108,6 @@
         </div>
         {% endif %}
 
-        <div class="flex items-center gap-3 w-full pt-2">
-          <div class="flex-shrink-0 w-5 h-5 text-gray-400">
-            <i class="fa-regular fa-monitor-waveform"></i>
-          </div>
-
-          <div class="w-full">
-            <p class="text-xs text-gray-500 uppercase tracking-wide">Attendance Rate</p>
-
-            <div class="w-full bg-gray-200 rounded-full h-2.5 my-2 overflow-hidden">
-              <div
-                class="bg-[#a2314b] h-2.5 rounded-full {% if c.attendance_rate >= 95 %}w-[95%]{% elif c.attendance_rate >= 90 %}w-[90%]{% elif c.attendance_rate >= 85 %}w-[85%]{% elif c.attendance_rate >= 80 %}w-[80%]{% elif c.attendance_rate >= 70 %}w-[70%]{% elif c.attendance_rate >= 60 %}w-[60%]{% else %}w-[50%]{% endif %}"
-              ></div>
-            </div>
-
-            <p class="text-sm font-semibold text-gray-900">{{ c.attendance_rate }}%</p>
-          </div>
-        </div>
-      </div>
 
       <hr class="my-4" />
 
