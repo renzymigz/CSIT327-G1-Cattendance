@@ -75,7 +75,7 @@ def add_class(request):
     teacher_profile = request.user.teacherprofile
 
     if request.method == "POST":
-        code = request.POST.get("code", "").strip()
+        code = request.POST.get("code", "").strip().upper()
         title = request.POST.get("title", "").strip()
         academic_year = request.POST.get("academic_year", "").strip()
         semester = request.POST.get("semester", "").strip()
@@ -85,14 +85,96 @@ def add_class(request):
         start_times = request.POST.getlist("start_times[]")
         end_times = request.POST.getlist("end_times[]")
 
-        if not all([code, title, academic_year, semester, section]) or not days:
-            messages.error(request, "All fields are required.")
+        # Validation errors list
+        errors = []
+
+        # Class Code validations
+        if not code:
+            errors.append("Class code is required.")
+        else:
+            if len(code) < 5 or len(code) > 10:
+                errors.append("Class code must be between 5 and 10 characters.")
+            if not any(c.isalpha() for c in code) or not any(c.isdigit() for c in code):
+                errors.append("Class code must contain at least one letter and one number.")
+            if not code.replace('_', '').isalnum():
+                errors.append("Class code can only contain letters, numbers, and underscores.")
+
+        # Class Title validations
+        if not title:
+            errors.append("Class title is required.")
+        else:
+            title = ' '.join(title.split())  # Strip extra spaces
+            if len(title) < 4:
+                errors.append("Class title must be at least 4 characters long.")
+            import re
+            if not re.match(r'^[a-zA-Z0-9\s\.,!?\'"-]+$', title):
+                errors.append("Class title can only contain letters, numbers, spaces, and basic punctuation.")
+
+        # Section validations
+        if not section:
+            errors.append("Section is required.")
+        else:
+            if ' ' in section:
+                errors.append("Section cannot contain spaces.")
+            if len(section) > 3:
+                errors.append("Section must be at most 3 characters.")
+            if not section.isalnum():
+                errors.append("Section must be alphanumeric.")
+            letter_count = sum(1 for c in section if c.isalpha())
+            number_count = sum(1 for c in section if c.isdigit())
+            if letter_count != 1 or number_count < 1:
+                errors.append("Section must contain exactly one letter and at least one number.")
+
+        # Academic Year validations
+        if not academic_year:
+            errors.append("Academic year is required.")
+        else:
+            import re
+            if not re.match(r'^\d{4}[-–]\d{4}$', academic_year):
+                errors.append("Academic year must be in the format YYYY-YYYY or YYYY–YYYY.")
+            else:
+                years = academic_year.replace('–', '-').split('-')
+                try:
+                    year1 = int(years[0])
+                    year2 = int(years[1])
+                    if year1 >= year2:
+                        errors.append("First year must be less than the second year.")
+                    current_year = timezone.now().year
+                    if year1 < current_year - 1 or year1 > current_year + 5:
+                        errors.append("Academic year must be current or future (within 5 years).")
+                except ValueError:
+                    errors.append("Invalid academic year format.")
+
+        # Semester required
+        if not semester:
+            errors.append("Semester is required.")
+
+        # Schedule validations
+        if not days:
+            errors.append("At least one schedule is required.")
+        else:
+            if len(days) != len(start_times) or len(days) != len(end_times):
+                errors.append("Invalid schedule input.")
+            else:
+                seen_days = set()
+                for day, start, end in zip(days, start_times, end_times):
+                    if not day or not start or not end:
+                        errors.append("All schedule fields are required.")
+                        break
+                    if day in seen_days:
+                        errors.append("Duplicate days in schedule.")
+                        break
+                    seen_days.add(day)
+                    if start >= end:
+                        errors.append(f"Start time must be before end time for {day}.")
+                        break
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
             return redirect('dashboard_teacher:manage_classes')
 
-        if len(days) != len(start_times) or len(days) != len(end_times):
-            messages.error(request, "Invalid schedule input.")
-            return redirect('dashboard_teacher:manage_classes')
-
+        # Check uniqueness
         if Class.objects.filter(
             teacher=teacher_profile,
             code=code,
@@ -197,17 +279,21 @@ def view_class(request, class_id):
     now = timezone.localtime()
     current_day = now.strftime('%A') # e.g., 'Monday'
     current_time = now.time()
-    
+
     can_create_session = False
     matching_schedule = None
-    
-    for schedule in class_obj.schedules.all():
-        if schedule.day_of_week == current_day:
-            # Check if current time is within the schedule window
-            if schedule.start_time <= current_time <= schedule.end_time:
-                can_create_session = True
-                matching_schedule = schedule
-                break
+
+    # Check if there's already an ongoing session
+    has_ongoing_session = ClassSession.objects.filter(class_obj=class_obj, status="ongoing").exists()
+
+    if not has_ongoing_session:
+        for schedule in class_obj.schedules.all():
+            if schedule.day_of_week == current_day:
+                # Check if current time is within the schedule window
+                if schedule.start_time <= current_time <= schedule.end_time:
+                    can_create_session = True
+                    matching_schedule = schedule
+                    break
 
     # Add student to class
     if request.method == "POST" and "add_student" in request.POST:
@@ -237,7 +323,10 @@ def view_class(request, class_id):
     # Create session - with validation
     if request.method == "POST" and "create_session" in request.POST:
         if not can_create_session:
-            messages.error(request, "Cannot create session. Current time does not match any class schedule.")
+            if has_ongoing_session:
+                messages.error(request, "Cannot create session. There is already an ongoing session for this class.")
+            else:
+                messages.error(request, "Cannot create session. Current time does not match any class schedule.")
             return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
             
         session_form = ClassSessionForm(request.POST)
@@ -257,6 +346,14 @@ def view_class(request, class_id):
         else:
             messages.error(request, "Failed to create session. Please check the form.")
 
+    # Determine the reason for not being able to create session
+    session_creation_reason = None
+    if not can_create_session:
+        if has_ongoing_session:
+            session_creation_reason = "ongoing_session"
+        else:
+            session_creation_reason = "not_scheduled_time"
+
     return render(request, 'dashboard_app/teacher/view_class.html', {
         'user_type': 'teacher',
         'class_obj': class_obj,
@@ -266,6 +363,7 @@ def view_class(request, class_id):
         'can_create_session': can_create_session,
         'current_day': current_day,
         'current_time': current_time,
+        'session_creation_reason': session_creation_reason,
     })
 
 # ==============================
@@ -346,6 +444,11 @@ def export_session_attendance(request, class_id, session_id):
 def create_session(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id)
     if request.method == 'POST':
+        # Check if there's already an ongoing session
+        if ClassSession.objects.filter(class_obj=class_obj, status="ongoing").exists():
+            messages.error(request, "Cannot create a new session. There is already an ongoing session for this class.")
+            return redirect('dashboard_teacher:view_class', class_id=class_obj.id)
+
         schedule_day_id = request.POST.get('schedule_day')
         if not schedule_day_id:
             messages.error(request, "Please select a schedule day.")
