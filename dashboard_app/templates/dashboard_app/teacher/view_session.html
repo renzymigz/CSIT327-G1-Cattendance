@@ -229,16 +229,16 @@ Attendance | Cattendance{% endblock %} {% block content %}
               <td class="p-2 font-semibold">
                 <div id="display-status-{{ s.pk }}">
                   {% if a.is_present is True %}
-                  <span class="text-green-700 px-3 py-1 font-medium bg-green-50  border border-green-500 rounded-lg">Present</span>
-                  {% elif a.is_present is False %}
-                  <span class="text-red-700 px-3 py-1 font-medium bg-red-50 border border-red-500 rounded-lg">Absent</span>
-                  {% else %}
-                  <span class="text-gray-500 px-3 py-1 bg-[#F8FAFC] border border-[#BEC6D0] rounded-lg">Not Marked</span>
-                  {% endif %} {% if a.marked_via_qr %}
+                  <span class="text-green-700 px-3 py-1 font-medium bg-green-50  border border-green-500 rounded-lg">Present {% if a.marked_via_qr %}
                   <i
                     class="fa-solid fa-qrcode text-green-600 ml-1"
                     title="Marked via QR"
                   ></i>
+                  {% endif %}</span>
+                  {% elif a.is_present is False %}
+                  <span class="text-red-700 px-3 py-1 font-medium bg-red-50 border border-red-500 rounded-lg">Absent</span>
+                  {% else %}
+                  <span class="text-gray-500 px-3 py-1 bg-[#F8FAFC] border border-[#BEC6D0] rounded-lg">Not Marked</span>
                   {% endif %}
                 </div>
 
