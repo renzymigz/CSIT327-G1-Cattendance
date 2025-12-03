@@ -28,21 +28,29 @@ def register_view(request):
         last_name = request.POST.get('last_name')
         role = request.POST.get('selected_role') or 'student'
 
+        # Prepare context to preserve form data
+        context = {
+            'email': email,
+            'student_id_number': student_id,
+            'first_name': first_name,
+            'last_name': last_name,
+            'selected_role': role
+        }
         
         if User.objects.filter(username=email).exists():
             messages.error(request, "An account with this email already exists.")
-            return render(request, 'auth_app/register.html')
+            return render(request, 'auth_app/register.html', context)
         
         if not all([email, password, confirm_password, first_name, last_name, student_id]):
             messages.error(request, "All fields are required!")
-            return render(request, 'auth_app/register.html')
+            return render(request, 'auth_app/register.html', context)
         
         if not validate_password_strength(request, password, confirm_password):
-            return render(request, 'auth_app/register.html')
+            return render(request, 'auth_app/register.html', context)
         
         if StudentProfile.objects.filter(student_id_number=student_id).exists():
             messages.error(request, "This Student ID is already taken.")
-            return render(request, 'auth_app/register.html')
+            return render(request, 'auth_app/register.html', context)
             
         # Create User
         user = User.objects.create_user(
