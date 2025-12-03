@@ -23,6 +23,7 @@
         type="email"
         name="email"
         placeholder="Enter your email"
+        value="{{ email|default:'' }}"
         class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition"
       />
       <i
@@ -59,6 +60,7 @@
         type="checkbox"
         name="remember_me"
         class="w-4 h-4 text-[#a2314b] border-gray-300 rounded focus:ring-[#a2314b]"
+        {% if email or remember_me %}checked{% endif %}
       />
       <span class="text-gray-600">Remember me</span>
     </label>

@@ -81,12 +81,21 @@ def login_view(request):
         else:
             return redirect('dashboard_teacher:dashboard')
 
+    # Get remembered email from cookie
+    remembered_email = request.COOKIES.get('remembered_email', '')
     
-            
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
         selected_role = request.POST.get('selected_role') or 'student'
+        remember_me = request.POST.get('remember_me')
+
+        # Prepare context to preserve form data on error
+        context = {
+            'email': email,
+            'selected_role': selected_role,
+            'remember_me': remember_me
+        }
 
         user = authenticate(username=email, password=password)
         if user:
@@ -95,22 +104,38 @@ def login_view(request):
                     request,
                     f"This account is registered as a {user.user_type.title()}, not a {selected_role.title()}."
                 )
-                return render(request, 'auth_app/login.html')
+                return render(request, 'auth_app/login.html', context)
 
             auth_login(request, user)
             
-            if request.user.must_change_password:
-                return redirect('auth:change_temp_password')
-    
-            if user.user_type == 'student':
-                return redirect('dashboard_student:dashboard')
+            # Handle Remember Me functionality
+            if remember_me:
+                # Session expires in 30 days
+                request.session.set_expiry(2592000)  # 30 days in seconds
             else:
-                return redirect('dashboard_teacher:dashboard')
+                # Session expires when browser closes
+                request.session.set_expiry(0)
+            
+            if request.user.must_change_password:
+                response = redirect('auth:change_temp_password')
+            elif user.user_type == 'student':
+                response = redirect('dashboard_student:dashboard')
+            else:
+                response = redirect('dashboard_teacher:dashboard')
+            
+            # Set or delete the remember me cookie
+            if remember_me:
+                response.set_cookie('remembered_email', email, max_age=2592000)  # 30 days
+            else:
+                response.delete_cookie('remembered_email')
+            
+            return response
         else:
             messages.error(request, "Invalid email or password!")
+            return render(request, 'auth_app/login.html', context)
     
     
-    return render(request, 'auth_app/login.html')
+    return render(request, 'auth_app/login.html', {'email': remembered_email})
 
 @csrf_exempt
 def change_temp_password(request):
@@ -141,4 +166,7 @@ def change_temp_password(request):
 def logout_view(request):
     auth_logout(request)
     messages.success(request, "You have been logged out successfully!")
-    return redirect('auth:login')
+    response = redirect('auth:login')
+    # Clear remember me cookie on logout
+    response.delete_cookie('remembered_email')
+    return response
