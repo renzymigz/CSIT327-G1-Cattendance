@@ -20,15 +20,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Apply collapsed state
     sidebar.classList.add('collapsed');
     sidebar.classList.remove('md:w-72');
-    sidebar.classList.add('md:w-20');
+    sidebar.classList.add('md:w-[90px]');
     mainContent.classList.remove('md:ml-72');
-    mainContent.classList.add('md:ml-20');
+    mainContent.classList.add('md:ml-[90px]');
     labelEls.forEach(el => el.classList.add('hidden'));
     if (logoText) logoText.classList.add('hidden');
     navLinks.forEach(link => {
       link.classList.add('justify-center');
-      link.classList.add('hover:bg-blue-50');
-      link.classList.remove('hover:bg-gray-100');
+      link.classList.add('hover:bg-gray-100');
+
     });
   }
 
@@ -66,25 +66,25 @@ document.addEventListener('DOMContentLoaded', function () {
     if (collapsed) {
       // shrink sidebar to icons-only
       sidebar.classList.remove('md:w-72');
-      sidebar.classList.add('md:w-20');
+      sidebar.classList.add('md:w-[90px]');
       // adjust main content margin for md and up
       mainContent.classList.remove('md:ml-72');
-      mainContent.classList.add('md:ml-20');
+      mainContent.classList.add('md:ml-[90px]');
       // hide labels and logo text
       labelEls.forEach(el => el.classList.add('hidden'));
       if (logoText) logoText.classList.add('hidden');
       // center nav link icons and adjust hover effects
       navLinks.forEach(link => {
         link.classList.add('justify-center');
-        link.classList.add('hover:bg-blue-50');
+        link.classList.add('hover:bg-gray-100');
         link.classList.remove('hover:bg-gray-100');
       });
       toggleBtn.setAttribute('aria-expanded', 'true');
     } else {
       // expand sidebar
-      sidebar.classList.remove('md:w-20');
+      sidebar.classList.remove('md:w-[90px]');
       sidebar.classList.add('md:w-72');
-      mainContent.classList.remove('md:ml-20');
+      mainContent.classList.remove('md:ml-[90px]');
       mainContent.classList.add('md:ml-72');
       // show labels and logo text
       labelEls.forEach(el => el.classList.remove('hidden'));
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // left-align nav link content and restore hover effects
       navLinks.forEach(link => {
         link.classList.remove('justify-center');
-        link.classList.remove('hover:bg-blue-50');
+        link.classList.remove('hover:bg-gray-100');
         link.classList.add('hover:bg-gray-100');
       });
       toggleBtn.setAttribute('aria-expanded', 'false');
