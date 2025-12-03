@@ -76,13 +76,13 @@
                     {% with ns=request.resolver_match.namespace name=request.resolver_match.url_name %}
                         <a href="{{ student_attendance_url }}" class="flex items-center hover:bg-gray-100 px-4 py-3 rounded-lg {% if ns == 'dashboard_student' and name == 'student_classes' %}bg-[#f3e9ec] text-[#a2314b] font-semibold{% else %}text-gray-700{% endif %}">
                             <i class="fa-regular fa-calendar mr-3"></i>
-                            <span class="sidebar-label">My Attendance</span>
+                            <span class="sidebar-label">Enrolled Classes</span>
                         </a>
                     {% endwith %}
                 {% else %}
                     <a href="{{ student_attendance_url }}" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-lg">
                         <i class="fa-regular fa-calendar mr-3"></i>
-                        <span class="sidebar-label">My Attendance</span>
+                        <span class="sidebar-label">Enrolled Classes</span>
                     </a>
                 {% endif %}
             </div>
