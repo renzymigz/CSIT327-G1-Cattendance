@@ -369,7 +369,7 @@ def view_class(request, class_id):
 
     auto_update_sessions(class_obj)
 
-    enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
+    enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user').order_by('student__user__last_name', 'student__user__first_name')
     sessions = ClassSession.objects.filter(class_obj=class_obj).order_by('-date')
 
     session_form = ClassSessionForm()
@@ -584,12 +584,12 @@ def delete_session(request, session_id):
 def view_session(request, class_id, session_id):
     session = get_object_or_404(ClassSession, id=session_id, class_obj_id=class_id)
     class_obj = session.class_obj
-    enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user')
+    enrollments = Enrollment.objects.filter(class_obj=class_obj).select_related('student__user').order_by('student__user__first_name', 'student__user__last_name')
 
     for enrollment in enrollments:
         SessionAttendance.objects.get_or_create(session=session, student=enrollment.student)
 
-    attendances = SessionAttendance.objects.filter(session=session).select_related('student__user')
+    attendances = SessionAttendance.objects.filter(session=session).select_related('student__user').order_by('student__user__first_name', 'student__user__last_name')
 
     now = timezone.now()
     active_qr = False
