@@ -22,7 +22,7 @@
     <div class="space-y-2 relative">
       <label class="text-[14px] font-semibold">First Name</label>
       <div class="relative">
-        <input type="text" id="first_name" name="first_name" placeholder="Enter your first name"
+        <input type="text" id="first_name" name="first_name" placeholder="Enter your first name" value="{{ first_name|default:'' }}"
                class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
                       focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
         <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
@@ -33,7 +33,7 @@
     <div class="space-y-2 relative">
       <label class="text-[14px] font-semibold">Last Name</label>
       <div class="relative">
-        <input type="text" id="last_name" name="last_name" placeholder="Enter your last name"
+        <input type="text" id="last_name" name="last_name" placeholder="Enter your last name" value="{{ last_name|default:'' }}"
                class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
                       focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
         <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
@@ -42,16 +42,29 @@
     </div>
   </div>
 
-  <div class="space-y-2 relative">
-    <label class="text-[14px] font-semibold">Email</label>
-    <div class="relative">
-      <input type="email" id="email" name="email" placeholder="Enter your email"
-             class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
-                    focus:outline-none focus:ring-2 focus:ring-[#a2314b] focus:border-[#c9c9c9] transition text-[14px]">
-      <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
-                peer-focus:text-[#a2314b] transition-colors"></i>
+  <div class="grid grid-cols-2 gap-4">
+    <div class="space-y-2 relative">
+      <label class="text-[14px] font-semibold">Email</label>
+      <div class="relative">
+        <input type="email" id="email" name="email" placeholder="Enter your email" value="{{ email|default:'' }}"
+               class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
+                      focus:outline-none focus:ring-2 focus:ring-[#a2314b] transition text-[14px]">
+        <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                  peer-focus:text-[#a2314b] transition-colors"></i>
+      </div>
     </div>
-  </div>
+
+    <div class="space-y-2 relative">
+      <label class="text-[14px] font-semibold">Student ID Number</label>
+      <div class="relative">
+        <input type="text" id="student_id_number" name="student_id_number" placeholder="Enter your student ID" value="{{ student_id_number|default:'' }}"
+               class="peer w-full placeholder:text-[14px] bg-[#f6f7f8] pl-10 py-1 border border-gray-300 rounded-lg 
+                      focus:outline-none focus:ring-2 focus:ring-[#a2314b] transition text-[14px]">
+        <i class="fa-solid fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                  peer-focus:text-[#a2314b] transition-colors"></i>
+      </div>
+    </div>
+</div>
 
   <div class="space-y-2 relative">
     <label class="text-[14px] font-semibold">Password</label>

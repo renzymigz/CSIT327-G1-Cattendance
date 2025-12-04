@@ -14,7 +14,6 @@ def register_view(request):
     if request.user.is_authenticated:
         if request.user.must_change_password:
                 return redirect('auth:change_temp_password')
-        
         if request.user.user_type == 'student':
             return redirect('dashboard_student:dashboard')
         else:
@@ -22,19 +21,37 @@ def register_view(request):
 
     if request.method == 'POST':
         email = request.POST.get('email')
+        student_id = request.POST.get('student_id_number')
         password = request.POST.get('password1')
         confirm_password = request.POST.get('password2')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         role = request.POST.get('selected_role') or 'student'
 
-        if not all([email, password, confirm_password, first_name, last_name]):
+        # Prepare context to preserve form data
+        context = {
+            'email': email,
+            'student_id_number': student_id,
+            'first_name': first_name,
+            'last_name': last_name,
+            'selected_role': role
+        }
+        
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "An account with this email already exists.")
+            return render(request, 'auth_app/register.html', context)
+        
+        if not all([email, password, confirm_password, first_name, last_name, student_id]):
             messages.error(request, "All fields are required!")
-            return render(request, 'auth_app/register.html')
+            return render(request, 'auth_app/register.html', context)
         
         if not validate_password_strength(request, password, confirm_password):
-            return render(request, 'auth_app/register.html')
-
+            return render(request, 'auth_app/register.html', context)
+        
+        if StudentProfile.objects.filter(student_id_number=student_id).exists():
+            messages.error(request, "This Student ID is already taken.")
+            return render(request, 'auth_app/register.html', context)
+            
         # Create User
         user = User.objects.create_user(
             username=email,
@@ -45,11 +62,9 @@ def register_view(request):
             user_type=role.lower()
         )
 
-        # Create Profile
-        if role.lower() == 'student':
-            StudentProfile.objects.get_or_create(user=user)
-        else:
-            TeacherProfile.objects.get_or_create(user=user)
+        student_profile, _ = StudentProfile.objects.get_or_create(user=user)
+        student_profile.student_id_number = student_id
+        student_profile.save()
 
         messages.success(request, "Account created successfully!")
         return redirect('auth:login')
@@ -66,12 +81,21 @@ def login_view(request):
         else:
             return redirect('dashboard_teacher:dashboard')
 
+    # Get remembered email from cookie
+    remembered_email = request.COOKIES.get('remembered_email', '')
     
-            
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
         selected_role = request.POST.get('selected_role') or 'student'
+        remember_me = request.POST.get('remember_me')
+
+        # Prepare context to preserve form data on error
+        context = {
+            'email': email,
+            'selected_role': selected_role,
+            'remember_me': remember_me
+        }
 
         user = authenticate(username=email, password=password)
         if user:
@@ -80,22 +104,38 @@ def login_view(request):
                     request,
                     f"This account is registered as a {user.user_type.title()}, not a {selected_role.title()}."
                 )
-                return render(request, 'auth_app/login.html')
+                return render(request, 'auth_app/login.html', context)
 
             auth_login(request, user)
             
-            if request.user.must_change_password:
-                return redirect('auth:change_temp_password')
-    
-            if user.user_type == 'student':
-                return redirect('dashboard_student:dashboard')
+            # Handle Remember Me functionality
+            if remember_me:
+                # Session expires in 30 days
+                request.session.set_expiry(2592000)  # 30 days in seconds
             else:
-                return redirect('dashboard_teacher:dashboard')
+                # Session expires when browser closes
+                request.session.set_expiry(0)
+            
+            if request.user.must_change_password:
+                response = redirect('auth:change_temp_password')
+            elif user.user_type == 'student':
+                response = redirect('dashboard_student:dashboard')
+            else:
+                response = redirect('dashboard_teacher:dashboard')
+            
+            # Set or delete the remember me cookie
+            if remember_me:
+                response.set_cookie('remembered_email', email, max_age=2592000)  # 30 days
+            else:
+                response.delete_cookie('remembered_email')
+            
+            return response
         else:
             messages.error(request, "Invalid email or password!")
+            return render(request, 'auth_app/login.html', context)
     
     
-    return render(request, 'auth_app/login.html')
+    return render(request, 'auth_app/login.html', {'email': remembered_email})
 
 @csrf_exempt
 def change_temp_password(request):
@@ -126,4 +166,7 @@ def change_temp_password(request):
 def logout_view(request):
     auth_logout(request)
     messages.success(request, "You have been logged out successfully!")
-    return redirect('auth:login')
+    response = redirect('auth:login')
+    # Clear remember me cookie on logout
+    response.delete_cookie('remembered_email')
+    return response

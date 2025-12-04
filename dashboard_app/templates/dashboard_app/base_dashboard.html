@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kumbh+Sans:wght@100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    {% comment %} <script defer src="{% static 'js/manage_class.js' %}"></script> {% endcomment %}
     <link rel="stylesheet" href="{% static 'core_app/css/fade.css' %}">
+    <link rel="icon" href="{% static 'core_app/images/logo.png' %}">
     <script defer src="{% static 'core_app/js/fade.js' %}"></script>
     <script>
       tailwind.config = {
@@ -27,44 +27,53 @@
 </head>
 
 <body class="bg-[#f9fafa] font-sans">
-    <div class="flex h-screen">
-    
-    {% include 'dashboard_app/components/sidebar.html' %}
+  <div class="flex min-h-screen">
+
+    <!-- Include the correct sidebar based on user type -->
+  
+      {% include 'dashboard_app/components/sidebar.html' %}
+   
 
     <!-- Main Content -->
-    <div id="mainContent" class="flex-1 md:ml-72 transition-all duration-300">
-            <!-- Top Navigation -->
-            <header class="bg-white  border-b">
-                <div class="flex items-center justify-between px-6 py-4">
-                    <div class="flex items-center justify-center">
-                        <button id="sidebarToggle" aria-controls="sidebar" aria-expanded="false" onclick="if (window.toggleSidebarGlobal) window.toggleSidebarGlobal(event)" class="mr-3 hover:bg-[#a2314b] p-2 hover:text-white transition-all rounded-2xl w-10 h-10" type="button">
-                            <i class="fa-solid fa-bars"></i>
-                        </button>
-                        
-                        <h2 class="text-xl font-semibold text-gray-800">{% block page_title %}Dashboard{% endblock %}</h2>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <!-- User Menu -->
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                <i class="fas fa-user text-gray-600"></i>
-                            </div>
-                            <span class="text-sm font-medium text-gray-700">
-                                Welcome, {{ user.first_name }} {{ user.last_name }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </header>
+    <div id="mainContent" class="flex-1 ml-0 md:ml-72 transition-all duration-300 relative z-0">
+      <!-- Top Navigation -->
+      <header class="bg-white border-b">
+        <div class="flex items-center justify-between px-4 md:px-6 py-4">
+          <div class="flex items-center">
+            <button id="sidebarToggle"
+                    aria-controls="sidebar"
+                    aria-expanded="false"
+                    class="mr-3 hover:bg-[#a2314b] p-2 hover:text-white transition-all rounded-2xl w-10 h-10"
+                    type="button">
+              <i class="fa-solid fa-bars"></i>
+            </button>
 
-            <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto">
-                {% block content %}
-                {% endblock %}
-            </main>
+            <h2 class="text-lg md:text-xl font-semibold text-gray-800 truncate">{% block page_title %}Dashboard{% endblock %}</h2>
+          </div>
+
+          <div class="flex items-center space-x-2 md:space-x-4">
+            <div class="flex items-center space-x-2 md:space-x-3">
+              <div class="w-6 h-6 md:w-8 md:h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-xs md:text-sm text-gray-600"></i>
+              </div>
+              <span class="text-xs md:text-sm font-medium text-gray-700 hidden sm:block">
+                Welcome, {{ user.first_name }} {{ user.last_name }}
+              </span>
+              <span class="text-xs md:text-sm font-medium text-gray-700 sm:hidden">
+                {{ user.first_name }}
+              </span>
+            </div>
+          </div>
         </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="flex-1 overflow-y-auto">
+        {% block content %}{% endblock %}
+      </main>
     </div>
-        <script defer src="{% static 'js/sidebar.js' %}"></script>
+  </div>
+
+  <script defer src="{% static 'js/sidebar.js' %}"></script>
 </body>
 </html>

@@ -1,5 +1,7 @@
-{% extends "dashboard_app/base_dashboard.html" %} {% block title %}Mark
-Attendance | Cattendance{% endblock %} {% block content %}
+{% extends "dashboard_app/base_dashboard.html" %} 
+{% block title %}Mark Attendance{% endblock %} 
+{% block page_title %}My Session{% endblock %}
+{% block content %}
 
 <div class="p-6">
   <!-- Header -->
@@ -14,7 +16,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
   </div>
 
   <div class="mb-6 bg-white p-6 rounded-xl shadow border border-gray-200">
-    <div class="flex flex-row md:flex-col">
+    <div class="flex flex-col">
       <div class="flex flex-col gap-6">
         <div class="text-sm text-gray-700 flex flex-col gap-2">
           <h1 class="text-2xl font-bold text-[#6a1e1e] mb-1">
@@ -52,13 +54,13 @@ Attendance | Cattendance{% endblock %} {% block content %}
         </div>
       </div>
       
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center w-full">
     <!-- Left group of buttons -->
-    <div class="flex gap-3">
+    <div class="flex flex-col gap-3 sm:flex-row">
       <button
         id="btn-generate-qr"
         type="button"
-        class="px-4 py-2 rounded-lg border font-semibold transition bg-[#a2314b] text-white border-gray-300 
+        class="w-full sm:w-auto px-4 py-2 rounded-lg border font-semibold transition bg-[#a2314b] text-white border-gray-300 
         {% if session.status == 'completed' %}
           opacity-40 cursor-not-allowed border-gray-300
         {% else %}
@@ -73,7 +75,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
       <button
         id="btn-mark-all-present"
         type="button"
-        class="px-4 py-2 rounded-lg border transition border-[#E2E8F0] bg-[#F8FAFC] text-gray-600
+        class="w-full sm:w-auto px-4 py-2 rounded-lg border transition border-[#E2E8F0] bg-[#F8FAFC] text-gray-600
         {% if session.status == 'completed' %}
           opacity-70 cursor-not-allowed
         {% else %}
@@ -88,7 +90,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
       <button
         id="btn-clear-all"
         type="button"
-        class="px-4 py-2 rounded-lg border transition border-[#E2E8F0] bg-[#F8FAFC] text-gray-600
+        class="w-full sm:w-auto px-4 py-2 rounded-lg border transition border-[#E2E8F0] bg-[#F8FAFC] text-gray-600
         {% if session.status == 'completed' %}
           opacity-70 cursor-not-allowed
         {% else %}
@@ -103,10 +105,10 @@ Attendance | Cattendance{% endblock %} {% block content %}
 
     <!-- Export button (far right) -->
 
-    <div class = "flex gap-3">
+    <div class = "flex flex-col gap-3 sm:flex-row">
       <a
       href="{% url 'dashboard_teacher:export_session_attendance' class_obj.id session.id %}"
-      class="inline-flex items-center  px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all"
+      class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all"
       role="button"
     >
          <i class="fa-regular fa-download pr-2"></i>Export to CSV
@@ -114,7 +116,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
         <button 
           type="button"
           id="btn-end-session"
-          class="px-4 py-2 rounded-lg border font-semibold transition bg-[#a2314b] text-white 
+          class="w-full sm:w-auto px-4 py-2 rounded-lg border font-semibold transition bg-[#a2314b] text-white 
           {% if session.status == 'completed' %}
             opacity-40 cursor-not-allowed border-gray-300
           {% else %}
@@ -177,11 +179,11 @@ Attendance | Cattendance{% endblock %} {% block content %}
 
   <div id="studentsTab" class="bg-white rounded-xl shadow border border-gray-200  tab-section">
     <form method="POST">
-      <div class ="flex items-center justify-between p-5">
+      <div class ="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 gap-3">
         <h2 class="text-lg font-semibold text-[#6a1e1e] "><i class="fa-regular fa-calendar pr-2"></i>Student Attendance</h2>
         <button
           type="submit"
-          class="px-5 py-2 rounded-lg font-semibold transition bg-[#a2314b] text-white 
+          class="w-full sm:w-auto px-5 py-2 rounded-lg font-semibold transition bg-[#a2314b] text-white 
           {% if session.status == 'completed' %}
             opacity-40  cursor-not-allowed
           {% else %}
@@ -197,7 +199,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
       <hr class = "">
 
       {% csrf_token %}
-      <div class="overflow-hidden rounded-2xl border-gray-200 bg-white">
+      <div class="overflow-x-auto rounded-2xl border-gray-200 bg-white">
         <table class="min-w-full">
           <thead class="bg-gray-50 text-left text-gray-600 font-semibold">
             <tr class="bg-[#f9fafa]">
@@ -215,8 +217,8 @@ Attendance | Cattendance{% endblock %} {% block content %}
               class="attn-row"
               data-student="{{ s.pk }} hover:bg-gray-50 transition"
             >
-              <td class="p-2 text-gray-600">
-                {% if s.student_id %}{{ s.student_id }}{% else %}—{% endif %}
+              <td class="px-5 text-gray-600">
+                {{ s.student_id_number }}
               </td>
 
               <td class="p-2 font-medium text-gray-800">
@@ -229,16 +231,16 @@ Attendance | Cattendance{% endblock %} {% block content %}
               <td class="p-2 font-semibold">
                 <div id="display-status-{{ s.pk }}">
                   {% if a.is_present is True %}
-                  <span class="text-green-700 px-3 py-1 font-medium bg-green-50  border border-green-500 rounded-lg">Present</span>
-                  {% elif a.is_present is False %}
-                  <span class="text-red-700 px-3 py-1 font-medium bg-red-50 border border-red-500 rounded-lg">Absent</span>
-                  {% else %}
-                  <span class="text-gray-500 px-3 py-1 bg-[#F8FAFC] border border-[#BEC6D0] rounded-lg">Not Marked</span>
-                  {% endif %} {% if a.marked_via_qr %}
+                  <span class="text-green-700 px-3 py-1 font-medium bg-green-50  border border-green-500 rounded-lg">Present {% if a.marked_via_qr %}
                   <i
                     class="fa-solid fa-qrcode text-green-600 ml-1"
                     title="Marked via QR"
                   ></i>
+                  {% endif %}</span>
+                  {% elif a.is_present is False %}
+                  <span class="text-red-700 px-3 py-1 font-medium bg-red-50 border border-red-500 rounded-lg">Absent</span>
+                  {% else %}
+                  <span class="text-gray-500 px-3 py-1 bg-[#F8FAFC] border border-[#BEC6D0] rounded-lg">Not Marked</span>
                   {% endif %}
                 </div>
 
@@ -252,7 +254,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
 
               <td class="p-2 ">
                 {% if a.timestamp %}
-                  {{ a.timestamp|date:"F j, Y, h:i A" }}
+                  {{ a.timestamp|time:"h:i A" }}
                 {% else %}
                   —
                 {% endif %}
@@ -307,7 +309,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50"
       >
         <div
-          class="bg-white rounded-2xl p-5 min-w-[550px] max-w-sm relative shadow-xl"
+          class="bg-white rounded-2xl p-5 min-w-[300px] sm:min-w-[550px] max-w-2xl relative shadow-xl"
         >
           <button
             id="close-qr-modal"
@@ -327,7 +329,7 @@ Attendance | Cattendance{% endblock %} {% block content %}
             <img
               id="qr-image"
               alt="Session QR Code"
-              class="w-[500px] h-[500px] p-2 my-8 rounded-lg"
+              class="w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] p-2 my-8 rounded-lg object-contain"
             />
           </div>
 
@@ -345,6 +347,36 @@ Attendance | Cattendance{% endblock %} {% block content %}
           <p class="text-gray-600 text-sm text-center mb-5">
             Will automatically regenerate when expired
           </p>
+          <div class="flex justify-center mt-2">
+            <button id="btn-end-qr" type="button" class="px-4 py-2 rounded-lg border border-red-300 text-red-600 bg-white hover:bg-red-50 hidden">
+              <i class="fa-regular fa-xmark mr-2"></i>End QR
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Options Modal -->
+      <div id="qrOptionsModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 text-center fade-in transition-all">
+          <h2 class="text-lg font-semibold text-[#6a1e1e] mb-2">Generate QR Code</h2>
+          <p class="text-gray-600 mb-4">Choose how long the QR code should remain active:</p>
+
+          <form id="qrOptionsForm" class="space-y-3">
+            <div class="flex flex-col text-left">
+              <label class="inline-flex items-center"><input type="radio" name="qr_minutes" value="5" checked class="mr-2">5 minutes</label>
+              <label class="inline-flex items-center"><input type="radio" name="qr_minutes" value="10" class="mr-2">10 minutes</label>
+              <label class="inline-flex items-center"><input type="radio" name="qr_minutes" value="15" class="mr-2">15 minutes</label>
+              <label class="inline-flex items-center"><input type="radio" name="qr_minutes" value="30" class="mr-2">30 minutes</label>
+              <label class="inline-flex items-center"><input type="radio" name="qr_minutes" value="60" class="mr-2">60 minutes</label>
+              <label class="inline-flex items-center"><input type="radio" name="qr_minutes" value="custom" class="mr-2">Custom (minutes)</label>
+              <input type="number" id="qrCustomMinutes" min="1" placeholder="Enter minutes" class="mt-2 p-2 border rounded w-full" disabled />
+            </div>
+
+            <div class="flex justify-center gap-3 mt-4">
+              <button type="button" id="qrOptionsCancel" class="px-4 py-2 border border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100">Cancel <i class="fa-solid fa-arrow-turn-down-left pl-1"></i></button>
+              <button type="button" id="qrOptionsGenerate" class="px-4 py-2 bg-[#8f2b43] hover:bg-[#a2314b] text-white rounded-lg">Generate QR <i class="fa-solid fa-qrcode pl-1"></i></button>
+            </div>
+          </form>
         </div>
       </div>
     </form>
@@ -366,19 +398,29 @@ Attendance | Cattendance{% endblock %} {% block content %}
 
     // Check if session is completed
     const isCompleted = "{{ session.status|lower }}" === "completed";
+    // Server-provided initial QR active flag (mutable client-side state)
+    let qrIsActive = {{ qr_active|yesno:"true,false" }};
 
     let qrInterval = null;
 
-    async function fetchAndShowQR() {
+    if (qrIsActive) {
+      if (qrModal) qrModal.classList.remove('hidden');
+      fetchAndShowQR();
+    }
+
+    async function fetchAndShowQR(minutes = 5) {
       // Call server to generate QR
       try {
+        const body = new URLSearchParams();
+        body.append('minutes', String(minutes));
+
         const resp = await fetch(window.location.pathname + "generate-qr/", {
           method: "POST",
           headers: {
             "X-Requested-With": "XMLHttpRequest",
-            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
-              .value,
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
           },
+          body: body,
         });
         if (!resp.ok) throw new Error("Failed to generate QR");
         const data = await resp.json();
@@ -391,7 +433,8 @@ Attendance | Cattendance{% endblock %} {% block content %}
           qrImage.alt = data.scan_url;
         }
 
-        // start countdown
+        // mark active on client and start countdown
+        qrIsActive = true;
         const expiresAt = new Date(data.expires_at);
         startCountdown(expiresAt);
       } catch (err) {
@@ -402,8 +445,16 @@ Attendance | Cattendance{% endblock %} {% block content %}
 
     if (qrBtn && !isCompleted) {
       qrBtn.addEventListener("click", () => {
-        qrModal.classList.remove("hidden");
-        fetchAndShowQR();
+        // If server reports QR already active, open QR modal instead of options
+        if (qrIsActive || !qrModal.classList.contains('hidden') || qrInterval) {
+          qrModal.classList.remove('hidden');
+          // If there is no active timer/image loaded, fetch the active QR now
+          if (!qrInterval) fetchAndShowQR();
+          return;
+        }
+        // open options modal
+        const opts = document.getElementById('qrOptionsModal');
+        if (opts) opts.classList.remove('hidden');
       });
     }
 
@@ -414,6 +465,8 @@ Attendance | Cattendance{% endblock %} {% block content %}
           clearInterval(qrInterval);
           qrInterval = null;
         }
+        const endQrBtn = document.getElementById('btn-end-qr');
+        if (endQrBtn) endQrBtn.classList.add('hidden');
       });
     }
 
@@ -425,6 +478,8 @@ Attendance | Cattendance{% endblock %} {% block content %}
             clearInterval(qrInterval);
             qrInterval = null;
           }
+          const endQrBtn = document.getElementById('btn-end-qr');
+          if (endQrBtn) endQrBtn.classList.add('hidden');
         }
       });
     }
@@ -446,6 +501,85 @@ Attendance | Cattendance{% endblock %} {% block content %}
       }
       update();
       qrInterval = setInterval(update, 1000);
+      // show End QR button when active
+      const endQrBtn = document.getElementById('btn-end-qr');
+      if (endQrBtn) endQrBtn.classList.remove('hidden');
+    }
+
+    // End QR action
+    async function endActiveQR(){
+      try{
+        const resp = await fetch('{% url "dashboard_teacher:end_qr" class_obj.id session.id %}', {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          }
+        });
+        const data = await resp.json();
+        if(resp.ok && data.ok){
+          if(qrInterval){ clearInterval(qrInterval); qrInterval = null; }
+          // clear client-side active flag so reopening shows options modal
+          qrIsActive = false;
+          // hide qr modal and end button
+          qrModal.classList.add('hidden');
+          const endQrBtn = document.getElementById('btn-end-qr');
+          if (endQrBtn) endQrBtn.classList.add('hidden');
+          // clear image and reset timer display
+          qrImage.src = '';
+          qrTimer.textContent = '00:00';
+          alert('QR ended.');
+        } else {
+          alert(data.message || 'Failed to end QR');
+        }
+      }catch(err){
+        console.error(err);
+        alert('Failed to end QR');
+      }
+    }
+
+    // wire end QR button
+    const endQrBtn = document.getElementById('btn-end-qr');
+    if(endQrBtn){ endQrBtn.addEventListener('click', ()=>{ if(confirm('End active QR now?')) endActiveQR(); }); }
+
+    // QR Options modal handlers
+    const qrOptionsModal = document.getElementById('qrOptionsModal');
+    const qrOptionsCancel = document.getElementById('qrOptionsCancel');
+    const qrOptionsGenerate = document.getElementById('qrOptionsGenerate');
+    const qrCustomMinutes = document.getElementById('qrCustomMinutes');
+
+    if(qrOptionsModal){
+      // enable/disable custom input depending on selected radio
+      qrOptionsModal.addEventListener('change', (e)=>{
+        const target = e.target;
+        if(target.name === 'qr_minutes'){
+          const custom = qrOptionsModal.querySelector('input[name="qr_minutes"][value="custom"]');
+          if(custom && custom.checked){ qrCustomMinutes.disabled = false; qrCustomMinutes.focus(); }
+          else { qrCustomMinutes.disabled = true; qrCustomMinutes.value = ''; }
+        }
+      });
+
+      if(qrOptionsCancel) qrOptionsCancel.addEventListener('click', ()=>{ qrOptionsModal.classList.add('hidden'); });
+
+      if(qrOptionsGenerate) qrOptionsGenerate.addEventListener('click', ()=>{
+        // determine minutes
+        const chosen = qrOptionsModal.querySelector('input[name="qr_minutes"]:checked');
+        if(!chosen){ alert('Please choose a duration.'); return; }
+        let minutes = chosen.value;
+        if(minutes === 'custom'){
+          const v = parseInt(qrCustomMinutes.value, 10);
+          if(!v || v <= 0){ alert('Please enter a valid number of minutes.'); return; }
+          minutes = v;
+        } else {
+          minutes = parseInt(minutes, 10);
+        }
+
+        // close options and open QR modal
+        qrOptionsModal.classList.add('hidden');
+        qrModal.classList.remove('hidden');
+        // generate QR with specified minutes
+        fetchAndShowQR(minutes);
+      });
     }
 
     function paintRow(row, value) {

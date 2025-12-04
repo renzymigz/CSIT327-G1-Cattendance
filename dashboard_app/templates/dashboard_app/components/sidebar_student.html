@@ -1,51 +1,72 @@
 {% load static %}
-<div class="bg-white shadow-lg w-72 fixed h-full">
-  <div class="flex items-center mx-auto gap-3 p-6 text-[#a2314b]">
+
+{% url 'dashboard_student:dashboard' as dashboard_url %}
+{% url 'dashboard_student:student_classes' as classes_url %}
+{% url 'dashboard_student:profile' as profile_url %}
+
+{% with p=request.path %}
+<aside id="sidebar"
+  class="bg-white shadow-lg md:w-72 fixed left-0 top-0 h-screen z-[9999] border-r border-gray-100 transition-all duration-300">
+
+  <div class="flex items-center mx-auto gap-3 p-6 text-[#a2314b] border-b border-gray-100">
     <img src="{% static 'core_app/images/logo.png' %}" class="w-[30px] h-[30px]" alt="Logo">
-    <h1 class="text-xl font-bold">CATTENDANCE</h1>
+    <div class="leading-tight">
+      <h1 class="text-xl font-bold sidebar-label">Cattendance</h1>
+      <p class="text-xs text-gray-500 font-semibold sidebar-label">Student Portal</p>
+    </div>
   </div>
 
-  <nav>
-    <div class="px-6 py-3">
-      <a href="{% url 'dashboard_student:dashboard' %}" 
-         class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'dashboard' %}bg-[#f6e8eb] text-[#a2314b]{% endif %}">
-        <i class="fas fa-home mr-3"></i>
-        Dashboard
+  <nav class="py-2">
+    <!-- Dashboard -->
+    <div class="px-6 py-2">
+      <a href="{{ dashboard_url }}"
+         class="flex items-center px-4 py-2 rounded-lg transition
+         {% if p == dashboard_url %}bg-[#f6e8eb] text-[#a2314b]{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+        <i class="fas fa-border-all mr-3"></i>
+        <span class="sidebar-label">Dashboard</span>
       </a>
     </div>
 
-    <div class="px-6 py-3">
-      <a href="{% url 'dashboard_student:student_classes' %}" 
-         class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'student_classes' %}bg-[#f6e8eb] text-[#a2314b]{% endif %}">
+    <!-- My Attendance (goes to classes; highlights on classes + view_attendance) -->
+    <div class="px-6 py-2">
+      <a href="{{ classes_url }}"
+         class="flex items-center px-4 py-2 rounded-lg transition
+         {% if classes_url in p %}bg-[#f6e8eb] text-[#a2314b]{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
         <i class="fas fa-calendar-check mr-3"></i>
-        My Classes
+        <span class="sidebar-label">My Attendance</span>
       </a>
     </div>
 
-    <div class="px-6 py-3">
-      <a href="{% url 'dashboard_student:profile' %}" 
-         class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'profile' %}bg-[#f6e8eb] text-[#a2314b]{% endif %}">
+    <!-- Profile -->
+    <div class="px-6 py-2">
+      <a href="{{ profile_url }}"
+         class="flex items-center px-4 py-2 rounded-lg transition
+         {% if p == profile_url %}bg-[#f6e8eb] text-[#a2314b]{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
         <i class="fas fa-user mr-3"></i>
-        Profile
+        <span class="sidebar-label">Profile</span>
       </a>
     </div>
 
-    <div class="px-6 py-3">
-      <a href="#" class="flex items-center text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg">
+    <!-- Settings (placeholder) -->
+    <div class="px-6 py-2">
+      <a href="#"
+         class="flex items-center px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-100">
         <i class="fas fa-cog mr-3"></i>
-        Settings
+        <span class="sidebar-label">Settings</span>
       </a>
     </div>
 
-    <div class="px-6 py-3">
+    <!-- Logout -->
+    <div class="px-6 py-2 mt-2">
       <form action="{% url 'auth:logout' %}" method="post">
         {% csrf_token %}
-        <button type="submit" 
-          class="flex items-center text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg w-full">
+        <button type="submit"
+                class="flex items-center px-4 py-2 rounded-lg w-full transition text-red-600 hover:bg-red-50">
           <i class="fas fa-sign-out-alt mr-3"></i>
-          Logout
+          <span class="sidebar-label">Logout</span>
         </button>
       </form>
     </div>
   </nav>
-</div>
+</aside>
+{% endwith %}

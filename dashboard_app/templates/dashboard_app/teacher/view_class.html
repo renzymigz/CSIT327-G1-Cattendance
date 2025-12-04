@@ -1,6 +1,6 @@
 {% extends "dashboard_app/base_dashboard.html" %}
 {% block title %}View Class | Cattendance{% endblock %} 
-
+{% block page_title %}My Class{% endblock %}
 {% block content %}
 <div class="p-6">
   <!-- Header -->
@@ -68,11 +68,10 @@
   </div>
 
   <div class = "flex flex-col md:flex-row md:space-x-4 space-y-6 md:space-y-0 mb-4">
-    <button id="studentsTabBtn" class = "bg-[#8f2b43] text-white px-5 py-2 rounded-md shadow-md transition ">
+    <button id="studentsTabBtn" class = "w-full md:w-auto bg-[#8f2b43] text-white px-5 py-2 rounded-md shadow-md transition ">
         <i class="fa-regular fa-user-group pr-2"></i>Enrolled Students
     </button>
-
-    <button id="sessionsTabBtn" class = "border border-gray-400 bg-[#F8FAFC] text-gray-600 px-5 py-2 rounded-md transition ">
+    <button id="sessionsTabBtn" class = "w-full md:w-auto border border-gray-400 bg-[#F8FAFC] text-gray-600 px-5 py-2 rounded-md transition ">
         <i class="fa-regular fa-calendar pr-2"></i>Class Sessions 
     </button>
   </div>
@@ -93,67 +92,135 @@
 
   <!-- Enrolled Students -->
   <div id="studentsTab" class="bg-white rounded-xl shadow border border-gray-200 mb-8 tab-section">
-    <div class="flex items-center justify-between p-5 text-center">
-      <h2 class="text-lg font-semibold text-[#6a1e1e] text-center justify-center items-center"><i class="fa-regular fa-user-group pr-2"></i>Enrolled Students</h2>
-  
-  <!-- Export button (far right) -->
-      <div class = "flex gap-4 text-base">
-      <a
-         href="{% url 'dashboard_teacher:export_enrolled_students_csv' class_obj.id %}"
-        role="button"
-        class = "border px-4 py-2  border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all "
-        >
-        <i class="fa-regular fa-download mr-2"></i>Export to CSV
-      </a>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 text-center sm:text-left gap-4">
 
-      <button id="addStudentBtn"  class="inline-flex items-center px-5 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white rounded-md shadow"> 
-          <i class="fa-solid fa-plus mr-2"></i>Add Student
-      </button>
-      </div>
-    </div>
+  <!-- Title -->
+  <h2 class="text-lg font-semibold text-[#6a1e1e] flex justify-center sm:justify-start items-center">
+    <i class="fa-regular fa-user-group pr-2"></i>Enrolled Students
+  </h2>
+
+  <!-- Buttons -->
+  <div class="flex flex-col sm:flex-row gap-3 text-base sm:text-right">
+      
+    <a
+      href="{% url 'dashboard_teacher:export_enrolled_students_csv' class_obj.id %}"
+      role="button"
+      class="border px-4 py-2 border-[#E2E8F0] bg-[#F8FAFC] text-gray-600 rounded-md hover:bg-gray-100 transition-all w-full sm:w-auto"
+    >
+      <i class="fa-regular fa-download mr-2"></i>Export to CSV
+    </a>
+
+    <button
+      id="addStudentBtn"
+      class="inline-flex items-center px-5 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white rounded-md shadow w-full sm:w-auto justify-center"
+    >
+      <i class="fa-solid fa-plus mr-2"></i>Add Student
+    </button>
+
+    <button
+      id="uploadCsvBtn"
+      class="inline-flex items-center px-5 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white rounded-md shadow w-full sm:w-auto justify-center"
+    >
+      <i class="fa-solid fa-upload mr-2"></i>Upload CSV
+    </button>
+
+  </div>
+</div>
+
 
     <hr class = "">
 
-    <div class = "p-6 space-y-4 border-b border-gray-200 transition-all duration-300 hidden" id="addStudentSection" >
-      <h1 class = "text-base font-semibold">Enroll New Student</h1>
+    <div class="p-6 space-y-4 border-b border-gray-200 transition-all duration-300 hidden f" id="addStudentSection">
+      <h1 class="text-base font-semibold">Enroll New Student</h1>
 
-      <form method="POST" class="flex flex-row sm:flex-row gap-3">
-      {% csrf_token %}
-      <input type="hidden" name="add_student" value="1" />
+      <form method="POST" class="flex flex-col sm:flex-row gap-3">
+        {% csrf_token %}
+        <input type="hidden" name="add_student" value="1" />
+
+        <input
+          type="email"
+          name="student_email"
+          class="flex-grow bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
+          placeholder="Enter student email"
+          required
+        />
+
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            type="submit"
+            class="bg-[#a2314b] hover:bg-[#8f2b43] text-white px-5 py-2 rounded-lg shadow-md transition"
+          >
+            Add
+          </button>
+
+          <button
+            type="button"
+            class="bg-[#F8FAFC] cancel-btn border border-[#E2E8F0] px-5 py-2 rounded-lg transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+
+
+    <div
+  id="uploadCsvSection"
+  class="p-6 space-y-4 border-b border-gray-200 transition-all duration-300 hidden"
+>
+  <h1 class="text-base font-semibold">Add Students via CSV</h1>
+
+  <p class="text-sm text-gray-600">
+    CSV format: any columns, emails extracted from cells containing '@'
+  </p>
+
+  <form
+    method="POST"
+    enctype="multipart/form-data"
+    action="{% url 'dashboard_teacher:upload_students_csv' class_obj.id %}"
+  >
+    {% csrf_token %}
+
+    <!-- FLEX wrapper for input + buttons -->
+    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <!-- File input -->
       <input
-        type="email"
-        name="student_email"
-        class="flex-grow bg-[#f6f7f8] border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#a2314b]"
-        placeholder="Enter student email"
+        type="file"
+        name="csv_file"
+        accept=".csv"
+        class="bg-[#f6f7f8] border-gray-300 border text-gray-600 px-3 py-2 rounded-md w-full sm:w-auto"
         required
       />
 
-      <div class = "">
+      <!-- Buttons wrapper -->
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
         <button
-        type="submit"
-        class="bg-[#a2314b] hover:bg-[#8f2b43] text-white px-5 py-2 rounded-lg shadow-md transition"
+          type="submit"
+          name="upload_csv"
+          class="px-5 py-2 bg-[#a2314b] hover:bg-[#8f2b43] text-white rounded-md transition w-full sm:w-auto"
         >
-        Add
-      </button>
+          Upload
+        </button>
 
-      <button
-        type="button"
-        class="bg-[#F8FAFC] cancel-btn  border border-[#E2E8F0]  px-5 py-2 rounded-lg transition"
+        <button
+          type="button"
+          class="csv-cancel-btn px-5 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md hover:bg-gray-100 transition w-full sm:w-auto"
         >
-        Cancel
-      </button>
+          Cancel
+        </button>
       </div>
-      
-    </form>
-    
     </div>
+  </form>
+</div>
+
+
 
     {% if enrollments %}
     <div class="overflow-x-auto">
       <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
         <thead class="bg-[#f9fafa]">
           <tr class = "text-gray-700">
-            <th class="text-left p-2 font-semibold">Student ID</th>
+            <th class="text-left px-5 p-2 font-semibold">Student ID</th>
             <th class="text-left p-2 font-semibold">Name</th>
             <th class="text-left p-2 font-semibold">Email</th>
             <th class="text-left p-2 font-semibold">Actions</th>
@@ -162,7 +229,7 @@
         <tbody>
           {% for enrollment in enrollments %}
           <tr class="border-t hover:bg-gray-50 transition">
-            <td class="p-2">{{ forloop.counter }}</td>
+            <td class="px-5 p-2">{{ enrollment.student.student_id_number }}</td>
             <td class="p-2">
              {{ enrollment.student.user.first_name }} {{ enrollment.student.user.last_name }}
             </td>
@@ -212,18 +279,23 @@
           {% endif %}"
           {% if not can_create_session %}disabled{% endif %}
           title="{% if not can_create_session %}Session can only be created during scheduled class time ({{ current_day }}, {{ current_time|time:'h:i A' }}){% endif %}">
-          Create Session
+          <i class="fa-solid fa-calendar-circle-plus pr-2"></i>Create Session
         </button>
       </form>
-    </div>
 
+      </div>
     <!-- Schedule Notice -->
     {% if not can_create_session %}
     <div class="px-5 pb-3">
       <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg text-sm">
         <i class="fa-solid fa-circle-info mr-2"></i>
-        <strong>Note:</strong> You can only create a session during scheduled class time. 
-        Current: <strong>{{ current_day }}, {{ current_time|time:"h:i A" }}</strong>
+        <strong>Note:</strong>
+        {% if session_creation_reason == "ongoing_session" %}
+          There is already an ongoing session for this class. Complete the current session before creating a new one.
+        {% else %}
+          You can only create a session during scheduled class time.
+          Current: <strong>{{ current_day }}, {{ current_time|time:"h:i A" }}</strong>
+        {% endif %}
       </div>
     </div>
     {% endif %}
@@ -235,7 +307,7 @@
       <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
         <thead class="bg-[#f9fafa]">
           <tr class = "text-gray-700 font-semibold">
-            <th class="text-left p-2">Date</th>
+            <th class="text-left p-2 px-5">Date</th>
             <th class="text-left p-2">Schedule</th>
             <th class="text-left p-2">Status</th>
             <th class="text-left p-2">Actions</th>
@@ -244,7 +316,7 @@
         <tbody>
           {% for session in sessions %}
           <tr class="border-t hover:bg-gray-50 transition">
-            <td class="p-2">{{ session.date|date:"M d, Y" }}</td>
+            <td class="p-2 px-5">{{ session.date|date:"M d, Y" }}</td>
             <td class="p-2"><i class="fa-regular fa-clock pr-2"></i>{{ session.schedule_day.day_of_week }} — {{ session.schedule_day.start_time|time:"h:i A" }} to {{ session.schedule_day.end_time|time:"h:i A" }}</td>
             <td class="p-2">
               <span
@@ -365,21 +437,44 @@
     const addStudentButton = document.querySelector("#addStudentBtn");
     const cancelButton = addStudentSection.querySelector(".cancel-btn");
 
+    const uploadCsvSection = document.getElementById("uploadCsvSection");
+    const uploadCsvButton = document.querySelector("#uploadCsvBtn");
+    const csvCancelButton = uploadCsvSection.querySelector(".csv-cancel-btn");
+
     // Hide by default
     addStudentSection.style.display = "none";
+    uploadCsvSection.style.display = "none";
 
-    // Show section
+    // Function to hide both sections
+    function hideBothSections() {
+      addStudentSection.style.display = "none";
+      uploadCsvSection.style.display = "none";
+    }
+
+    // Show add student section
     addStudentButton.addEventListener("click", (e) => {
       e.preventDefault();
+      hideBothSections();
       addStudentSection.style.display = "block";
-      addStudentButton.style.display = "block";
     });
 
-    // Cancel button hides section
+    // Cancel add student hides section
     cancelButton.addEventListener("click", (e) => {
       e.preventDefault();
       addStudentSection.style.display = "none";
-      addStudentButton.style.display = "inline-flex";
+    });
+
+    // Show upload CSV section
+    uploadCsvButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      hideBothSections();
+      uploadCsvSection.style.display = "block";
+    });
+
+    // Cancel upload CSV hides section
+    csvCancelButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      uploadCsvSection.style.display = "none";
     });
   });
 

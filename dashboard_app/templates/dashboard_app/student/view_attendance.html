@@ -16,8 +16,8 @@
 <div class="p-6">
    <div class="mb-5">
     <a href="{% url 'dashboard_student:student_classes' %}" 
-       class="inline-flex items-center gap-2 bg-[#a2314b] hover:bg-[#8e2942] text-white px-5 py-2.5 rounded-lg transition">
-      <i class="fa-solid fa-arrow-left"></i> Back to My Classes
+      class="text-[#a2314b] hover:underline">
+      ← Back to My Classes
     </a>
   </div>
 
@@ -51,7 +51,7 @@
           <p id="count-total-absent" class="text-4xl font-bold text-red-700 mt-1">{{ total_absent }}</p>
           <p class = "text-gray-500">Classes missed</p>
         </div>
-        <div class="rounded-xl border border-gray-200 bg-[#E0E7FF] p-5 text-center space-y-3">
+        <div class="rounded-xl border border-violet-300 bg-[#E0E7FF] p-5 text-center space-y-3">
           <p class="text-[#3730A3] font-semibold">Attendance Rate</p>
           <p id="attendance-rate" class="text-4xl font-bold text-[#3730A3] mt-1">{{ attendance_rate }}%</p>
           <p class = "text-gray-500">Overall performnce</p>
@@ -70,8 +70,8 @@
     {% if attendance_data %}
       <table class="w-full border-collapse">
         <thead>
-          <tr class="bg-[#F8FAFC] text-left text-gray-700">
-            <th class="py-3 px-4 rounded-tl-xl">Date</th>
+          <tr class="bg-[#F8FAFC] text-left text-gray-700 border-b">
+            <th class="py-3 px-4 ">Date</th>
             <th class="py-3 px-4">Time</th>
             <th class="py-3 px-4">Status</th>
             <th class="py-3 px-4">Scan Time</th>
@@ -114,7 +114,7 @@
         </tbody>
       </table>
     {% else %}
-      <p class="text-gray-600">No attendance records found for this class.</p>
+      <p class="text-gray-600 p-5 text-center">No attendance records found for this class.</p>
     {% endif %}
   </div>
 
@@ -218,9 +218,13 @@
         } else {
           const msg = data.message || 'Attendance marked successfully.';
           alert(msg);
-          // Close modal and refresh to show updated attendance status
+          // Close modal and redirect to the correct attendance view
           qrModal.classList.add('hidden');
-          window.location.reload();
+          if (data.class_id) {
+            window.location.href = '/dashboard/student/classes/' + data.class_id + '/attendance/';
+          } else {
+            window.location.reload();
+          }
           return;
         }
       } catch (err) {
